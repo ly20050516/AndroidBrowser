@@ -34,8 +34,8 @@ public class Browser extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (LOGV_ENABLED)
-            Log.v(LOGTAG, "Browser.onCreate: this=" + this);
+        if (LOGD_ENABLED)
+            Log.v(LOGTAG, "Browser.onCreate: this = " + this);
 
         // create CookieSyncManager with current Context
         CookieSyncManager.createInstance(this);
