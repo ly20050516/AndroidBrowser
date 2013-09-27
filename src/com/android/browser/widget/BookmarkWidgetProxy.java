@@ -25,29 +25,27 @@ import android.util.Log;
 
 public class BookmarkWidgetProxy extends BroadcastReceiver {
 
-    private static final String TAG = "BookmarkWidgetProxy";
+	private static final String TAG = "BookmarkWidgetProxy";
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (BookmarkThumbnailWidgetService.ACTION_CHANGE_FOLDER.equals(intent.getAction())) {
-            BookmarkThumbnailWidgetService.changeFolder(context, intent);
-        } else if (BrowserActivity.ACTION_SHOW_BROWSER.equals(intent.getAction())) {
-            startActivity(context,
-                    new Intent(BrowserActivity.ACTION_SHOW_BROWSER,
-                    null, context, BrowserActivity.class));
-        } else {
-            Intent view = new Intent(intent);
-            view.setComponent(null);
-            startActivity(context, view);
-        }
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if (BookmarkThumbnailWidgetService.ACTION_CHANGE_FOLDER.equals(intent.getAction())) {
+			BookmarkThumbnailWidgetService.changeFolder(context, intent);
+		} else if (BrowserActivity.ACTION_SHOW_BROWSER.equals(intent.getAction())) {
+			startActivity(context, new Intent(BrowserActivity.ACTION_SHOW_BROWSER, null, context, BrowserActivity.class));
+		} else {
+			Intent view = new Intent(intent);
+			view.setComponent(null);
+			startActivity(context, view);
+		}
+	}
 
-    void startActivity(Context context, Intent intent) {
-        try {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to start intent activity", e);
-        }
-    }
+	void startActivity(Context context, Intent intent) {
+		try {
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);
+		} catch (Exception e) {
+			Log.w(TAG, "Failed to start intent activity", e);
+		}
+	}
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!--
+     Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,54 +15,54 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/error_console_view_group_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#000000">
+    android:background="#000000"
+    android:orientation="vertical" >
 
-    <TextView android:id="@+id/error_console_header_id"
-        android:text="@string/error_console_header_text_minimized"
+    <TextView
+        android:id="@+id/error_console_header_id"
+        style="?android:attr/listSeparatorTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="2dip"
         android:paddingBottom="2dip"
         android:paddingLeft="5dip"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:visibility="gone"
-    />
+        android:paddingTop="2dip"
+        android:text="@string/error_console_header_text_minimized"
+        android:visibility="gone" />
 
-    <view class="com.android.browser.ErrorConsoleView$ErrorConsoleListView"
+    <view
         android:id="@+id/error_console_list_id"
         android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:visibility="gone"
+        android:layout_height="0dp"
         android:layout_weight="1"
+        class="com.android.browser.ErrorConsoleView$ErrorConsoleListView"
         android:cacheColorHint="#000000"
-    />
+        android:visibility="gone" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/error_console_eval_view_group_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:visibility="gone" >
 
-        <EditText android:id="@+id/error_console_eval_text_id"
-            android:hint="@string/error_console_eval_text_hint"
-            android:layout_height="wrap_content"
-            android:scrollHorizontally="true"
-            android:inputType="text"
+        <EditText
+            android:id="@+id/error_console_eval_text_id"
             android:layout_width="0dip"
+            android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:layout_weight="1.0"
-        />
+            android:hint="@string/error_console_eval_text_hint"
+            android:inputType="text"
+            android:scrollHorizontally="true" />
 
-        <Button android:id="@+id/error_console_eval_button_id"
-            android:text="@string/error_console_eval_button_text"
+        <Button
+            android:id="@+id/error_console_eval_button_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-        />
+            android:text="@string/error_console_eval_button_text" />
     </LinearLayout>
+
 </LinearLayout>

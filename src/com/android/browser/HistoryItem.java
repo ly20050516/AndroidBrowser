@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
- 
 package com.android.browser;
 
 import android.content.Context;
@@ -24,67 +23,67 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 /**
- *  Layout representing a history item in the classic history viewer.
+ * Layout representing a history item in the classic history viewer.
  */
-/* package */ class HistoryItem extends BookmarkItem
-        implements OnCheckedChangeListener {
+/* package */class HistoryItem extends BookmarkItem implements OnCheckedChangeListener {
 
-    private CompoundButton  mStar;      // Star for bookmarking
-    /**
-     *  Create a new HistoryItem.
-     *  @param context  Context for this HistoryItem.
-     */
-    /* package */ HistoryItem(Context context) {
-        this(context, true);
-    }
+	private CompoundButton mStar; // Star for bookmarking
 
-    /* package */ HistoryItem(Context context, boolean showStar) {
-        super(context);
+	/**
+	 * Create a new HistoryItem.
+	 * 
+	 * @param context
+	 *            Context for this HistoryItem.
+	 */
+	/* package */HistoryItem(Context context) {
+		this(context, true);
+	}
 
-        mStar = (CompoundButton) findViewById(R.id.star);
-        mStar.setOnCheckedChangeListener(this);
-        if (showStar) {
-            mStar.setVisibility(View.VISIBLE);
-        } else {
-            mStar.setVisibility(View.GONE);
-        }
-    }
-    
-    /* package */ void copyTo(HistoryItem item) {
-        item.mTextView.setText(mTextView.getText());
-        item.mUrlText.setText(mUrlText.getText());
-        item.setIsBookmark(mStar.isChecked());
-        item.mImageView.setImageDrawable(mImageView.getDrawable());
-    }
+	/* package */HistoryItem(Context context, boolean showStar) {
+		super(context);
 
-    /**
-     * Whether or not this item represents a bookmarked site
-     */
-    /* package */ boolean isBookmark() {
-        return mStar.isChecked();
-    }
+		mStar = (CompoundButton) findViewById(R.id.star);
+		mStar.setOnCheckedChangeListener(this);
+		if (showStar) {
+			mStar.setVisibility(View.VISIBLE);
+		} else {
+			mStar.setVisibility(View.GONE);
+		}
+	}
 
-    /**
-     *  Set whether or not this represents a bookmark, and make sure the star
-     *  behaves appropriately.
-     */
-    /* package */ void setIsBookmark(boolean isBookmark) {
-        mStar.setOnCheckedChangeListener(null);
-        mStar.setChecked(isBookmark);
-        mStar.setOnCheckedChangeListener(this);
-    }
+	/* package */void copyTo(HistoryItem item) {
+		item.mTextView.setText(mTextView.getText());
+		item.mUrlText.setText(mUrlText.getText());
+		item.setIsBookmark(mStar.isChecked());
+		item.mImageView.setImageDrawable(mImageView.getDrawable());
+	}
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView,
-            boolean isChecked) {
-        if (isChecked) {
-            // Uncheck ourseves. When the bookmark is actually added,
-            // we will be notified
-            setIsBookmark(false);
-            Browser.saveBookmark(getContext(), getName(), mUrl);
-        } else {
-            Bookmarks.removeFromBookmarks(getContext(),
-                    getContext().getContentResolver(), mUrl, getName());
-        }
-    }
+	/**
+	 * Whether or not this item represents a bookmarked site
+	 */
+	/* package */boolean isBookmark() {
+		return mStar.isChecked();
+	}
+
+	/**
+	 * Set whether or not this represents a bookmark, and make sure the star
+	 * behaves appropriately.
+	 */
+	/* package */void setIsBookmark(boolean isBookmark) {
+		mStar.setOnCheckedChangeListener(null);
+		mStar.setChecked(isBookmark);
+		mStar.setOnCheckedChangeListener(this);
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if (isChecked) {
+			// Uncheck ourseves. When the bookmark is actually added,
+			// we will be notified
+			setIsBookmark(false);
+			Browser.saveBookmark(getContext(), getName(), mUrl);
+		} else {
+			Bookmarks.removeFromBookmarks(getContext(), getContext().getContentResolver(), mUrl, getName());
+		}
+	}
 }

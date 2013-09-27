@@ -28,77 +28,76 @@ import android.widget.RelativeLayout;
 
 public class BookmarkContainer extends RelativeLayout implements OnClickListener {
 
-    private OnClickListener mClickListener;
-    private boolean mIgnoreRequestLayout = false;
+	private OnClickListener mClickListener;
+	private boolean mIgnoreRequestLayout = false;
 
-    public BookmarkContainer(Context context) {
-        super(context);
-        init();
-    }
+	public BookmarkContainer(Context context) {
+		super(context);
+		init();
+	}
 
-    public BookmarkContainer(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
+	public BookmarkContainer(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init();
+	}
 
-    public BookmarkContainer(
-            Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init();
-    }
+	public BookmarkContainer(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		init();
+	}
 
-    void init() {
-        setFocusable(true);
-        super.setOnClickListener(this);
-    }
+	void init() {
+		setFocusable(true);
+		super.setOnClickListener(this);
+	}
 
-    @Override
-    public void setBackgroundDrawable(Drawable d) {
-        super.setBackgroundDrawable(d);
-    }
+	@Override
+	public void setBackgroundDrawable(Drawable d) {
+		super.setBackgroundDrawable(d);
+	}
 
-    @Override
-    public void setOnClickListener(OnClickListener l) {
-        mClickListener = l;
-    }
+	@Override
+	public void setOnClickListener(OnClickListener l) {
+		mClickListener = l;
+	}
 
-    @Override
-    protected void drawableStateChanged() {
-        super.drawableStateChanged();
-        updateTransitionDrawable(isPressed());
-    }
+	@Override
+	protected void drawableStateChanged() {
+		super.drawableStateChanged();
+		updateTransitionDrawable(isPressed());
+	}
 
-    void updateTransitionDrawable(boolean pressed) {
-        final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
-        Drawable selector = getBackground();
-        if (selector != null && selector instanceof StateListDrawable) {
-            Drawable d = ((StateListDrawable)selector).getCurrent();
-            if (d != null && d instanceof TransitionDrawable) {
-                if (pressed && isLongClickable()) {
-                    ((TransitionDrawable) d).startTransition(longPressTimeout);
-                } else {
-                    ((TransitionDrawable) d).resetTransition();
-                }
-            }
-        }
-    }
+	void updateTransitionDrawable(boolean pressed) {
+		final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+		Drawable selector = getBackground();
+		if (selector != null && selector instanceof StateListDrawable) {
+			Drawable d = ((StateListDrawable) selector).getCurrent();
+			if (d != null && d instanceof TransitionDrawable) {
+				if (pressed && isLongClickable()) {
+					((TransitionDrawable) d).startTransition(longPressTimeout);
+				} else {
+					((TransitionDrawable) d).resetTransition();
+				}
+			}
+		}
+	}
 
-    @Override
-    public void onClick(View view) {
-        updateTransitionDrawable(false);
-        if (mClickListener != null) {
-            mClickListener.onClick(view);
-        }
-    }
+	@Override
+	public void onClick(View view) {
+		updateTransitionDrawable(false);
+		if (mClickListener != null) {
+			mClickListener.onClick(view);
+		}
+	}
 
-    public void setIgnoreRequestLayout(boolean ignore) {
-        mIgnoreRequestLayout = ignore;
-    }
+	public void setIgnoreRequestLayout(boolean ignore) {
+		mIgnoreRequestLayout = ignore;
+	}
 
-    @Override
-    public void requestLayout() {
-        if (!mIgnoreRequestLayout) {
-            super.requestLayout();
-        }
-    }
+	@Override
+	public void requestLayout() {
+		if (!mIgnoreRequestLayout) {
+			super.requestLayout();
+		}
+	}
 }

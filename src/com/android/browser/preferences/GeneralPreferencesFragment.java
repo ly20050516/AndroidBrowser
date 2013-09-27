@@ -42,173 +42,162 @@ import com.android.browser.R;
 import com.android.browser.UrlUtils;
 import com.android.browser.homepages.HomeProvider;
 
-public class GeneralPreferencesFragment extends PreferenceFragment
-        implements Preference.OnPreferenceChangeListener {
+public class GeneralPreferencesFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
 
-    static final String TAG = "PersonalPreferencesFragment";
+	static final String TAG = "PersonalPreferencesFragment";
 
-    static final String BLANK_URL = "about:blank";
-    static final String CURRENT = "current";
-    static final String BLANK = "blank";
-    static final String DEFAULT = "default";
-    static final String MOST_VISITED = "most_visited";
-    static final String OTHER = "other";
+	static final String BLANK_URL = "about:blank";
+	static final String CURRENT = "current";
+	static final String BLANK = "blank";
+	static final String DEFAULT = "default";
+	static final String MOST_VISITED = "most_visited";
+	static final String OTHER = "other";
 
-    static final String PREF_HOMEPAGE_PICKER = "homepage_picker";
+	static final String PREF_HOMEPAGE_PICKER = "homepage_picker";
 
-    String[] mChoices, mValues;
-    String mCurrentPage;
+	String[] mChoices, mValues;
+	String mCurrentPage;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Resources res = getActivity().getResources();
-        mChoices = res.getStringArray(R.array.pref_homepage_choices);
-        mValues = res.getStringArray(R.array.pref_homepage_values);
-        mCurrentPage = getActivity().getIntent()
-                .getStringExtra(BrowserPreferencesPage.CURRENT_PAGE);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Resources res = getActivity().getResources();
+		mChoices = res.getStringArray(R.array.pref_homepage_choices);
+		mValues = res.getStringArray(R.array.pref_homepage_values);
+		mCurrentPage = getActivity().getIntent().getStringExtra(BrowserPreferencesPage.CURRENT_PAGE);
 
-        // Load the XML preferences file
-        addPreferencesFromResource(R.xml.general_preferences);
+		// Load the XML preferences file
+		addPreferencesFromResource(R.xml.general_preferences);
 
-        ListPreference pref = (ListPreference) findPreference(PREF_HOMEPAGE_PICKER);
-        pref.setSummary(getHomepageSummary());
-        pref.setPersistent(false);
-        pref.setValue(getHomepageValue());
-        pref.setOnPreferenceChangeListener(this);
-    }
+		ListPreference pref = (ListPreference) findPreference(PREF_HOMEPAGE_PICKER);
+		pref.setSummary(getHomepageSummary());
+		pref.setPersistent(false);
+		pref.setValue(getHomepageValue());
+		pref.setOnPreferenceChangeListener(this);
+	}
 
-    @Override
-    public boolean onPreferenceChange(Preference pref, Object objValue) {
-        if (getActivity() == null) {
-            // We aren't attached, so don't accept preferences changes from the
-            // invisible UI.
-            Log.w("PageContentPreferencesFragment", "onPreferenceChange called from detached fragment!");
-            return false;
-        }
+	@Override
+	public boolean onPreferenceChange(Preference pref, Object objValue) {
+		if (getActivity() == null) {
+			// We aren't attached, so don't accept preferences changes from the
+			// invisible UI.
+			Log.w("PageContentPreferencesFragment", "onPreferenceChange called from detached fragment!");
+			return false;
+		}
 
-        if (pref.getKey().equals(PREF_HOMEPAGE_PICKER)) {
-            BrowserSettings settings = BrowserSettings.getInstance();
-            if (CURRENT.equals(objValue)) {
-                settings.setHomePage(mCurrentPage);
-            }
-            if (BLANK.equals(objValue)) {
-                settings.setHomePage(BLANK_URL);
-            }
-            if (DEFAULT.equals(objValue)) {
-                settings.setHomePage(BrowserSettings.getFactoryResetHomeUrl(
-                        getActivity()));
-            }
-            if (MOST_VISITED.equals(objValue)) {
-                settings.setHomePage(HomeProvider.MOST_VISITED);
-            }
-            if (OTHER.equals(objValue)) {
-                promptForHomepage((ListPreference) pref);
-                return false;
-            }
-            pref.setSummary(getHomepageSummary());
-            ((ListPreference)pref).setValue(getHomepageValue());
-            return false;
-        }
+		if (pref.getKey().equals(PREF_HOMEPAGE_PICKER)) {
+			BrowserSettings settings = BrowserSettings.getInstance();
+			if (CURRENT.equals(objValue)) {
+				settings.setHomePage(mCurrentPage);
+			}
+			if (BLANK.equals(objValue)) {
+				settings.setHomePage(BLANK_URL);
+			}
+			if (DEFAULT.equals(objValue)) {
+				settings.setHomePage(BrowserSettings.getFactoryResetHomeUrl(getActivity()));
+			}
+			if (MOST_VISITED.equals(objValue)) {
+				settings.setHomePage(HomeProvider.MOST_VISITED);
+			}
+			if (OTHER.equals(objValue)) {
+				promptForHomepage((ListPreference) pref);
+				return false;
+			}
+			pref.setSummary(getHomepageSummary());
+			((ListPreference) pref).setValue(getHomepageValue());
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    void promptForHomepage(final ListPreference pref) {
-        final BrowserSettings settings = BrowserSettings.getInstance();
-        final EditText editText = new EditText(getActivity());
-        editText.setInputType(InputType.TYPE_CLASS_TEXT
-                | InputType.TYPE_TEXT_VARIATION_URI);
-        editText.setText(settings.getHomePage());
-        editText.setSelectAllOnFocus(true);
-        editText.setSingleLine(true);
-        editText.setImeActionLabel(null, EditorInfo.IME_ACTION_DONE);
-        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setView(editText)
-                .setPositiveButton(android.R.string.ok, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String homepage = editText.getText().toString().trim();
-                        homepage = UrlUtils.smartUrlFilter(homepage);
-                        settings.setHomePage(homepage);
-                        pref.setValue(getHomepageValue());
-                        pref.setSummary(getHomepageSummary());
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setTitle(R.string.pref_set_homepage_to)
-                .create();
-        editText.setOnEditorActionListener(new OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
-                    return true;
-                }
-                return false;
-            }
-        });
-        dialog.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        dialog.show();
-    }
+	void promptForHomepage(final ListPreference pref) {
+		final BrowserSettings settings = BrowserSettings.getInstance();
+		final EditText editText = new EditText(getActivity());
+		editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+		editText.setText(settings.getHomePage());
+		editText.setSelectAllOnFocus(true);
+		editText.setSingleLine(true);
+		editText.setImeActionLabel(null, EditorInfo.IME_ACTION_DONE);
+		final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(editText)
+				.setPositiveButton(android.R.string.ok, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String homepage = editText.getText().toString().trim();
+						homepage = UrlUtils.smartUrlFilter(homepage);
+						settings.setHomePage(homepage);
+						pref.setValue(getHomepageValue());
+						pref.setSummary(getHomepageSummary());
+					}
+				}).setNegativeButton(android.R.string.cancel, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				}).setTitle(R.string.pref_set_homepage_to).create();
+		editText.setOnEditorActionListener(new OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+					return true;
+				}
+				return false;
+			}
+		});
+		dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		dialog.show();
+	}
 
-    String getHomepageValue() {
-        BrowserSettings settings = BrowserSettings.getInstance();
-        String homepage = settings.getHomePage();
-        if (TextUtils.isEmpty(homepage) || BLANK_URL.endsWith(homepage)) {
-            return BLANK;
-        }
-        if (HomeProvider.MOST_VISITED.equals(homepage)) {
-            return MOST_VISITED;
-        }
-        String defaultHomepage = BrowserSettings.getFactoryResetHomeUrl(
-                getActivity());
-        if (TextUtils.equals(defaultHomepage, homepage)) {
-            return DEFAULT;
-        }
-        if (TextUtils.equals(mCurrentPage, homepage)) {
-            return CURRENT;
-        }
-        return OTHER;
-    }
+	String getHomepageValue() {
+		BrowserSettings settings = BrowserSettings.getInstance();
+		String homepage = settings.getHomePage();
+		if (TextUtils.isEmpty(homepage) || BLANK_URL.endsWith(homepage)) {
+			return BLANK;
+		}
+		if (HomeProvider.MOST_VISITED.equals(homepage)) {
+			return MOST_VISITED;
+		}
+		String defaultHomepage = BrowserSettings.getFactoryResetHomeUrl(getActivity());
+		if (TextUtils.equals(defaultHomepage, homepage)) {
+			return DEFAULT;
+		}
+		if (TextUtils.equals(mCurrentPage, homepage)) {
+			return CURRENT;
+		}
+		return OTHER;
+	}
 
-    String getHomepageSummary() {
-        BrowserSettings settings = BrowserSettings.getInstance();
-        if (settings.useMostVisitedHomepage()) {
-            return getHomepageLabel(MOST_VISITED);
-        }
-        String homepage = settings.getHomePage();
-        if (TextUtils.isEmpty(homepage) || BLANK_URL.equals(homepage)) {
-            return getHomepageLabel(BLANK);
-        }
-        return homepage;
-    }
+	String getHomepageSummary() {
+		BrowserSettings settings = BrowserSettings.getInstance();
+		if (settings.useMostVisitedHomepage()) {
+			return getHomepageLabel(MOST_VISITED);
+		}
+		String homepage = settings.getHomePage();
+		if (TextUtils.isEmpty(homepage) || BLANK_URL.equals(homepage)) {
+			return getHomepageLabel(BLANK);
+		}
+		return homepage;
+	}
 
-    String getHomepageLabel(String value) {
-        for (int i = 0; i < mValues.length; i++) {
-            if (value.equals(mValues[i])) {
-                return mChoices[i];
-            }
-        }
-        return null;
-    }
+	String getHomepageLabel(String value) {
+		for (int i = 0; i < mValues.length; i++) {
+			if (value.equals(mValues[i])) {
+				return mChoices[i];
+			}
+		}
+		return null;
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
+	@Override
+	public void onResume() {
+		super.onResume();
 
-        refreshUi();
-    }
+		refreshUi();
+	}
 
-    void refreshUi() {
-        PreferenceScreen autoFillSettings =
-                (PreferenceScreen)findPreference(PreferenceKeys.PREF_AUTOFILL_PROFILE);
-        autoFillSettings.setDependency(PreferenceKeys.PREF_AUTOFILL_ENABLED);
-    }
+	void refreshUi() {
+		PreferenceScreen autoFillSettings = (PreferenceScreen) findPreference(PreferenceKeys.PREF_AUTOFILL_PROFILE);
+		autoFillSettings.setDependency(PreferenceKeys.PREF_AUTOFILL_ENABLED);
+	}
 }

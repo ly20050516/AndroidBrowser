@@ -27,83 +27,83 @@ import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
 
-/** This class implements sharing the URL of the currently
-  * shown browser page over NFC. Sharing is only active
-  * when the activity is in the foreground and resumed.
-  * Incognito tabs will not be shared over NFC.
-  */
+/**
+ * This class implements sharing the URL of the currently shown browser page
+ * over NFC. Sharing is only active when the activity is in the foreground and
+ * resumed. Incognito tabs will not be shared over NFC.
+ */
 public class NfcHandler implements NfcAdapter.CreateNdefMessageCallback {
-    static final String TAG = "BrowserNfcHandler";
-    static final int GET_PRIVATE_BROWSING_STATE_MSG = 100;
+	static final String TAG = "BrowserNfcHandler";
+	static final int GET_PRIVATE_BROWSING_STATE_MSG = 100;
 
-    final Controller mController;
+	final Controller mController;
 
-    Tab mCurrentTab;
-    boolean mIsPrivate;
-    CountDownLatch mPrivateBrowsingSignal;
+	Tab mCurrentTab;
+	boolean mIsPrivate;
+	CountDownLatch mPrivateBrowsingSignal;
 
-    public static void register(Activity activity, Controller controller) {
-        NfcAdapter adapter = NfcAdapter.getDefaultAdapter(activity.getApplicationContext());
-        if (adapter == null) {
-            return;  // NFC not available on this device
-        }
-        NfcHandler handler = null;
-        if (controller != null) {
-            handler = new NfcHandler(controller);
-        }
+	public static void register(Activity activity, Controller controller) {
+		NfcAdapter adapter = NfcAdapter.getDefaultAdapter(activity.getApplicationContext());
+		if (adapter == null) {
+			return; // NFC not available on this device
+		}
+		NfcHandler handler = null;
+		if (controller != null) {
+			handler = new NfcHandler(controller);
+		}
 
-        adapter.setNdefPushMessageCallback(handler, activity);
-    }
+		adapter.setNdefPushMessageCallback(handler, activity);
+	}
 
-    public static void unregister(Activity activity) {
-        // Passing a null controller causes us to disable
-        // the callback and release the ref to out activity.
-        register(activity, null);
-    }
+	public static void unregister(Activity activity) {
+		// Passing a null controller causes us to disable
+		// the callback and release the ref to out activity.
+		register(activity, null);
+	}
 
-    public NfcHandler(Controller controller) {
-        mController = controller;
-    }
+	public NfcHandler(Controller controller) {
+		mController = controller;
+	}
 
-    final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == GET_PRIVATE_BROWSING_STATE_MSG) {
-                mIsPrivate = mCurrentTab.getWebView().isPrivateBrowsingEnabled();
-                mPrivateBrowsingSignal.countDown();
-            }
-        }
-    };
+	final Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg.what == GET_PRIVATE_BROWSING_STATE_MSG) {
+				mIsPrivate = mCurrentTab.getWebView().isPrivateBrowsingEnabled();
+				mPrivateBrowsingSignal.countDown();
+			}
+		}
+	};
 
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
-        mCurrentTab = mController.getCurrentTab();
-        if ((mCurrentTab != null) && (mCurrentTab.getWebView() != null)) {
-            // We can only read the WebView state on the UI thread, so post
-            // a message and wait.
-            mPrivateBrowsingSignal = new CountDownLatch(1);
-            mHandler.sendMessage(mHandler.obtainMessage(GET_PRIVATE_BROWSING_STATE_MSG));
-            try {
-                mPrivateBrowsingSignal.await();
-            } catch (InterruptedException e) {
-                return null;
-            }
-        }
+	@Override
+	public NdefMessage createNdefMessage(NfcEvent event) {
+		mCurrentTab = mController.getCurrentTab();
+		if ((mCurrentTab != null) && (mCurrentTab.getWebView() != null)) {
+			// We can only read the WebView state on the UI thread, so post
+			// a message and wait.
+			mPrivateBrowsingSignal = new CountDownLatch(1);
+			mHandler.sendMessage(mHandler.obtainMessage(GET_PRIVATE_BROWSING_STATE_MSG));
+			try {
+				mPrivateBrowsingSignal.await();
+			} catch (InterruptedException e) {
+				return null;
+			}
+		}
 
-        if ((mCurrentTab == null) || mIsPrivate) {
-            return null;
-        }
+		if ((mCurrentTab == null) || mIsPrivate) {
+			return null;
+		}
 
-        String currentUrl = mCurrentTab.getUrl();
-        if (currentUrl != null) {
-            try {
-                return new NdefMessage(NdefRecord.createUri(currentUrl));
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "IllegalArgumentException creating URI NdefRecord", e);
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
+		String currentUrl = mCurrentTab.getUrl();
+		if (currentUrl != null) {
+			try {
+				return new NdefMessage(NdefRecord.createUri(currentUrl));
+			} catch (IllegalArgumentException e) {
+				Log.e(TAG, "IllegalArgumentException creating URI NdefRecord", e);
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
 }

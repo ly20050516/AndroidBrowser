@@ -25,50 +25,49 @@ import android.widget.FrameLayout;
 
 public class EventRedirectingFrameLayout extends FrameLayout {
 
-    private int mTargetChild;
+	private int mTargetChild;
 
-    public EventRedirectingFrameLayout(Context context) {
-        super(context);
-    }
+	public EventRedirectingFrameLayout(Context context) {
+		super(context);
+	}
 
-    public EventRedirectingFrameLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public EventRedirectingFrameLayout(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    public EventRedirectingFrameLayout(
-            Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
+	public EventRedirectingFrameLayout(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+	}
 
-    public void setTargetChild(int index) {
-        if (index >= 0 && index < getChildCount()) {
-            mTargetChild = index;
-            getChildAt(mTargetChild).requestFocus();
-        }
-    }
+	public void setTargetChild(int index) {
+		if (index >= 0 && index < getChildCount()) {
+			mTargetChild = index;
+			getChildAt(mTargetChild).requestFocus();
+		}
+	}
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        View child = getChildAt(mTargetChild);
-        if (child != null)
-            return child.dispatchTouchEvent(ev);
-        return false;
-    }
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		View child = getChildAt(mTargetChild);
+		if (child != null)
+			return child.dispatchTouchEvent(ev);
+		return false;
+	}
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        View child = getChildAt(mTargetChild);
-        if (child != null)
-            return child.dispatchKeyEvent(event);
-        return false;
-    }
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		View child = getChildAt(mTargetChild);
+		if (child != null)
+			return child.dispatchKeyEvent(event);
+		return false;
+	}
 
-    @Override
-    public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        View child = getChildAt(mTargetChild);
-        if (child != null)
-            return child.dispatchKeyEventPreIme(event);
-        return false;
-    }
+	@Override
+	public boolean dispatchKeyEventPreIme(KeyEvent event) {
+		View child = getChildAt(mTargetChild);
+		if (child != null)
+			return child.dispatchKeyEventPreIme(event);
+		return false;
+	}
 
 }

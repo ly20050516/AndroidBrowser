@@ -39,253 +39,233 @@ import android.widget.Toast;
 
 public class AutoFillSettingsFragment extends Fragment {
 
-    private static final String LOGTAG = "AutoFillSettingsFragment";
+	private static final String LOGTAG = "AutoFillSettingsFragment";
 
-    private EditText mFullNameEdit;
-    private EditText mEmailEdit;
-    private EditText mCompanyEdit;
-    private EditText mAddressLine1Edit;
-    private EditText mAddressLine2Edit;
-    private EditText mCityEdit;
-    private EditText mStateEdit;
-    private EditText mZipEdit;
-    private EditText mCountryEdit;
-    private EditText mPhoneEdit;
+	private EditText mFullNameEdit;
+	private EditText mEmailEdit;
+	private EditText mCompanyEdit;
+	private EditText mAddressLine1Edit;
+	private EditText mAddressLine2Edit;
+	private EditText mCityEdit;
+	private EditText mStateEdit;
+	private EditText mZipEdit;
+	private EditText mCountryEdit;
+	private EditText mPhoneEdit;
 
-    private MenuItem mSaveMenuItem;
+	private MenuItem mSaveMenuItem;
 
-    private boolean mInitialised;
+	private boolean mInitialised;
 
-    // Used to display toast after DB interactions complete.
-    private Handler mHandler;
-    private BrowserSettings mSettings;
+	// Used to display toast after DB interactions complete.
+	private Handler mHandler;
+	private BrowserSettings mSettings;
 
-    private final static int PROFILE_SAVED_MSG = 100;
-    private final static int PROFILE_DELETED_MSG = 101;
+	private final static int PROFILE_SAVED_MSG = 100;
+	private final static int PROFILE_DELETED_MSG = 101;
 
-    // For now we support just one profile so it's safe to hardcode the
-    // id to 1 here. In the future this unique identifier will be set
-    // dynamically.
-    private int mUniqueId = 1;
+	// For now we support just one profile so it's safe to hardcode the
+	// id to 1 here. In the future this unique identifier will be set
+	// dynamically.
+	private int mUniqueId = 1;
 
-    private class PhoneNumberValidator implements TextWatcher {
-        // Keep in sync with kPhoneNumberLength in chrome/browser/autofill/phone_number.cc
-        private static final int PHONE_NUMBER_LENGTH = 7;
-        private static final String PHONE_NUMBER_SEPARATORS_REGEX = "[\\s\\.\\(\\)-]";
+	private class PhoneNumberValidator implements TextWatcher {
+		// Keep in sync with kPhoneNumberLength in
+		// chrome/browser/autofill/phone_number.cc
+		private static final int PHONE_NUMBER_LENGTH = 7;
+		private static final String PHONE_NUMBER_SEPARATORS_REGEX = "[\\s\\.\\(\\)-]";
 
-        public void afterTextChanged(Editable s) {
-            String phoneNumber = s.toString();
-            int phoneNumberLength = phoneNumber.length();
+		public void afterTextChanged(Editable s) {
+			String phoneNumber = s.toString();
+			int phoneNumberLength = phoneNumber.length();
 
-            // Strip out any phone number separators.
-            phoneNumber = phoneNumber.replaceAll(PHONE_NUMBER_SEPARATORS_REGEX, "");
+			// Strip out any phone number separators.
+			phoneNumber = phoneNumber.replaceAll(PHONE_NUMBER_SEPARATORS_REGEX, "");
 
-            int strippedPhoneNumberLength = phoneNumber.length();
+			int strippedPhoneNumberLength = phoneNumber.length();
 
-            if (phoneNumberLength > 0 && strippedPhoneNumberLength < PHONE_NUMBER_LENGTH) {
-                mPhoneEdit.setError(getResources().getText(
-                        R.string.autofill_profile_editor_phone_number_invalid));
-            } else {
-                mPhoneEdit.setError(null);
-            }
+			if (phoneNumberLength > 0 && strippedPhoneNumberLength < PHONE_NUMBER_LENGTH) {
+				mPhoneEdit.setError(getResources().getText(R.string.autofill_profile_editor_phone_number_invalid));
+			} else {
+				mPhoneEdit.setError(null);
+			}
 
-            updateSaveMenuItemState();
-        }
+			updateSaveMenuItemState();
+		}
 
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		}
 
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-    }
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+		}
+	}
 
-    private class FieldChangedListener implements TextWatcher {
-        public void afterTextChanged(Editable s) {
-            updateSaveMenuItemState();
-        }
+	private class FieldChangedListener implements TextWatcher {
+		public void afterTextChanged(Editable s) {
+			updateSaveMenuItemState();
+		}
 
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		}
 
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+		}
 
-    }
+	}
 
-    private TextWatcher mFieldChangedListener = new FieldChangedListener();
+	private TextWatcher mFieldChangedListener = new FieldChangedListener();
 
-    public AutoFillSettingsFragment() {
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                Context c = getActivity();
-                switch (msg.what) {
-                case PROFILE_SAVED_MSG:
-                    if (c != null) {
-                        Toast.makeText(c, R.string.autofill_profile_successful_save,
-                                Toast.LENGTH_SHORT).show();
-                        closeEditor();
-                    }
-                    break;
+	public AutoFillSettingsFragment() {
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				Context c = getActivity();
+				switch (msg.what) {
+				case PROFILE_SAVED_MSG:
+					if (c != null) {
+						Toast.makeText(c, R.string.autofill_profile_successful_save, Toast.LENGTH_SHORT).show();
+						closeEditor();
+					}
+					break;
 
-                case PROFILE_DELETED_MSG:
-                    if (c != null) {
-                        Toast.makeText(c, R.string.autofill_profile_successful_delete,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                }
-            }
-        };
-    }
+				case PROFILE_DELETED_MSG:
+					if (c != null) {
+						Toast.makeText(c, R.string.autofill_profile_successful_delete, Toast.LENGTH_SHORT).show();
+					}
+					break;
+				}
+			}
+		};
+	}
 
-    @Override
-    public void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
-        setHasOptionsMenu(true);
-        mSettings = BrowserSettings.getInstance();
-    }
+	@Override
+	public void onCreate(Bundle savedState) {
+		super.onCreate(savedState);
+		setHasOptionsMenu(true);
+		mSettings = BrowserSettings.getInstance();
+	}
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.autofill_profile_editor, menu);
-        mSaveMenuItem = menu.findItem(R.id.autofill_profile_editor_save_profile_menu_id);
-        updateSaveMenuItemState();
-    }
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.autofill_profile_editor, menu);
+		mSaveMenuItem = menu.findItem(R.id.autofill_profile_editor_save_profile_menu_id);
+		updateSaveMenuItemState();
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.autofill_profile_editor_delete_profile_menu_id:
-            // Clear the UI.
-            mFullNameEdit.setText("");
-            mEmailEdit.setText("");
-            mCompanyEdit.setText("");
-            mAddressLine1Edit.setText("");
-            mAddressLine2Edit.setText("");
-            mCityEdit.setText("");
-            mStateEdit.setText("");
-            mZipEdit.setText("");
-            mCountryEdit.setText("");
-            mPhoneEdit.setText("");
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.autofill_profile_editor_delete_profile_menu_id:
+			// Clear the UI.
+			mFullNameEdit.setText("");
+			mEmailEdit.setText("");
+			mCompanyEdit.setText("");
+			mAddressLine1Edit.setText("");
+			mAddressLine2Edit.setText("");
+			mCityEdit.setText("");
+			mStateEdit.setText("");
+			mZipEdit.setText("");
+			mCountryEdit.setText("");
+			mPhoneEdit.setText("");
 
-            // Update browser settings and native with a null profile. This will
-            // trigger the current profile to get deleted from the DB.
-            mSettings.setAutoFillProfile(null,
-                    mHandler.obtainMessage(PROFILE_DELETED_MSG));
-            updateSaveMenuItemState();
-            return true;
+			// Update browser settings and native with a null profile. This will
+			// trigger the current profile to get deleted from the DB.
+			mSettings.setAutoFillProfile(null, mHandler.obtainMessage(PROFILE_DELETED_MSG));
+			updateSaveMenuItemState();
+			return true;
 
-        case R.id.autofill_profile_editor_save_profile_menu_id:
-            AutoFillProfile newProfile = new AutoFillProfile(
-                    mUniqueId,
-                    mFullNameEdit.getText().toString(),
-                    mEmailEdit.getText().toString(),
-                    mCompanyEdit.getText().toString(),
-                    mAddressLine1Edit.getText().toString(),
-                    mAddressLine2Edit.getText().toString(),
-                    mCityEdit.getText().toString(),
-                    mStateEdit.getText().toString(),
-                    mZipEdit.getText().toString(),
-                    mCountryEdit.getText().toString(),
-                    mPhoneEdit.getText().toString());
+		case R.id.autofill_profile_editor_save_profile_menu_id:
+			AutoFillProfile newProfile = new AutoFillProfile(mUniqueId, mFullNameEdit.getText().toString(),
+					mEmailEdit.getText().toString(), mCompanyEdit.getText().toString(), mAddressLine1Edit.getText().toString(),
+					mAddressLine2Edit.getText().toString(), mCityEdit.getText().toString(), mStateEdit.getText().toString(), mZipEdit
+							.getText().toString(), mCountryEdit.getText().toString(), mPhoneEdit.getText().toString());
 
-            mSettings.setAutoFillProfile(newProfile,
-                    mHandler.obtainMessage(PROFILE_SAVED_MSG));
-            return true;
+			mSettings.setAutoFillProfile(newProfile, mHandler.obtainMessage(PROFILE_SAVED_MSG));
+			return true;
 
-        default:
-            return false;
-        }
-    }
+		default:
+			return false;
+		}
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.autofill_settings_fragment, container, false);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.autofill_settings_fragment, container, false);
 
-        mFullNameEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_name_edit);
-        mEmailEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_email_address_edit);
-        mCompanyEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_company_name_edit);
-        mAddressLine1Edit = (EditText)v.findViewById(
-                R.id.autofill_profile_editor_address_line_1_edit);
-        mAddressLine2Edit = (EditText)v.findViewById(
-                R.id.autofill_profile_editor_address_line_2_edit);
-        mCityEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_city_edit);
-        mStateEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_state_edit);
-        mZipEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_zip_code_edit);
-        mCountryEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_country_edit);
-        mPhoneEdit = (EditText)v.findViewById(R.id.autofill_profile_editor_phone_number_edit);
+		mFullNameEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_name_edit);
+		mEmailEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_email_address_edit);
+		mCompanyEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_company_name_edit);
+		mAddressLine1Edit = (EditText) v.findViewById(R.id.autofill_profile_editor_address_line_1_edit);
+		mAddressLine2Edit = (EditText) v.findViewById(R.id.autofill_profile_editor_address_line_2_edit);
+		mCityEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_city_edit);
+		mStateEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_state_edit);
+		mZipEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_zip_code_edit);
+		mCountryEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_country_edit);
+		mPhoneEdit = (EditText) v.findViewById(R.id.autofill_profile_editor_phone_number_edit);
 
-        mFullNameEdit.addTextChangedListener(mFieldChangedListener);
-        mEmailEdit.addTextChangedListener(mFieldChangedListener);
-        mCompanyEdit.addTextChangedListener(mFieldChangedListener);
-        mAddressLine1Edit.addTextChangedListener(mFieldChangedListener);
-        mAddressLine2Edit.addTextChangedListener(mFieldChangedListener);
-        mCityEdit.addTextChangedListener(mFieldChangedListener);
-        mStateEdit.addTextChangedListener(mFieldChangedListener);
-        mZipEdit.addTextChangedListener(mFieldChangedListener);
-        mCountryEdit.addTextChangedListener(mFieldChangedListener);
-        mPhoneEdit.addTextChangedListener(new PhoneNumberValidator());
+		mFullNameEdit.addTextChangedListener(mFieldChangedListener);
+		mEmailEdit.addTextChangedListener(mFieldChangedListener);
+		mCompanyEdit.addTextChangedListener(mFieldChangedListener);
+		mAddressLine1Edit.addTextChangedListener(mFieldChangedListener);
+		mAddressLine2Edit.addTextChangedListener(mFieldChangedListener);
+		mCityEdit.addTextChangedListener(mFieldChangedListener);
+		mStateEdit.addTextChangedListener(mFieldChangedListener);
+		mZipEdit.addTextChangedListener(mFieldChangedListener);
+		mCountryEdit.addTextChangedListener(mFieldChangedListener);
+		mPhoneEdit.addTextChangedListener(new PhoneNumberValidator());
 
-        // Populate the text boxes with any pre existing AutoFill data.
-        AutoFillProfile activeProfile = mSettings.getAutoFillProfile();
-        if (activeProfile != null) {
-            mFullNameEdit.setText(activeProfile.getFullName());
-            mEmailEdit.setText(activeProfile.getEmailAddress());
-            mCompanyEdit.setText(activeProfile.getCompanyName());
-            mAddressLine1Edit.setText(activeProfile.getAddressLine1());
-            mAddressLine2Edit.setText(activeProfile.getAddressLine2());
-            mCityEdit.setText(activeProfile.getCity());
-            mStateEdit.setText(activeProfile.getState());
-            mZipEdit.setText(activeProfile.getZipCode());
-            mCountryEdit.setText(activeProfile.getCountry());
-            mPhoneEdit.setText(activeProfile.getPhoneNumber());
-        }
+		// Populate the text boxes with any pre existing AutoFill data.
+		AutoFillProfile activeProfile = mSettings.getAutoFillProfile();
+		if (activeProfile != null) {
+			mFullNameEdit.setText(activeProfile.getFullName());
+			mEmailEdit.setText(activeProfile.getEmailAddress());
+			mCompanyEdit.setText(activeProfile.getCompanyName());
+			mAddressLine1Edit.setText(activeProfile.getAddressLine1());
+			mAddressLine2Edit.setText(activeProfile.getAddressLine2());
+			mCityEdit.setText(activeProfile.getCity());
+			mStateEdit.setText(activeProfile.getState());
+			mZipEdit.setText(activeProfile.getZipCode());
+			mCountryEdit.setText(activeProfile.getCountry());
+			mPhoneEdit.setText(activeProfile.getPhoneNumber());
+		}
 
-        mInitialised = true;
+		mInitialised = true;
 
-        updateSaveMenuItemState();
+		updateSaveMenuItemState();
 
-        return v;
-    }
+		return v;
+	}
 
-    private void updateSaveMenuItemState() {
-        if (mSaveMenuItem == null) {
-            return;
-        }
+	private void updateSaveMenuItemState() {
+		if (mSaveMenuItem == null) {
+			return;
+		}
 
-        if (!mInitialised) {
-            mSaveMenuItem.setEnabled(false);
-            return;
-        }
+		if (!mInitialised) {
+			mSaveMenuItem.setEnabled(false);
+			return;
+		}
 
-        boolean currentState = mSaveMenuItem.isEnabled();
-        boolean newState = (mFullNameEdit.getText().toString().length() > 0 ||
-            mEmailEdit.getText().toString().length() > 0 ||
-            mCompanyEdit.getText().toString().length() > 0 ||
-            mAddressLine1Edit.getText().toString().length() > 0 ||
-            mAddressLine2Edit.getText().toString().length() > 0 ||
-            mCityEdit.getText().toString().length() > 0 ||
-            mStateEdit.getText().toString().length() > 0 ||
-            mZipEdit.getText().toString().length() > 0 ||
-            mCountryEdit.getText().toString().length() > 0) &&
-            mPhoneEdit.getError() == null;
+		boolean currentState = mSaveMenuItem.isEnabled();
+		boolean newState = (mFullNameEdit.getText().toString().length() > 0 || mEmailEdit.getText().toString().length() > 0
+				|| mCompanyEdit.getText().toString().length() > 0 || mAddressLine1Edit.getText().toString().length() > 0
+				|| mAddressLine2Edit.getText().toString().length() > 0 || mCityEdit.getText().toString().length() > 0
+				|| mStateEdit.getText().toString().length() > 0 || mZipEdit.getText().toString().length() > 0 || mCountryEdit.getText()
+				.toString().length() > 0)
+				&& mPhoneEdit.getError() == null;
 
-        if (currentState != newState) {
-            mSaveMenuItem.setEnabled(newState);
-        }
-    }
+		if (currentState != newState) {
+			mSaveMenuItem.setEnabled(newState);
+		}
+	}
 
-    private void closeEditor() {
-        // Hide the IME if the user wants to close while an EditText has focus
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStack();
-        } else {
-            getActivity().finish();
-        }
-    }
+	private void closeEditor() {
+		// Hide the IME if the user wants to close while an EditText has focus
+		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+		if (getFragmentManager().getBackStackEntryCount() > 0) {
+			getFragmentManager().popBackStack();
+		} else {
+			getActivity().finish();
+		}
+	}
 }

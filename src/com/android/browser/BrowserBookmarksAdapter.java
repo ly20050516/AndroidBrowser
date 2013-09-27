@@ -31,100 +31,95 @@ import android.widget.TextView;
 import com.android.browser.util.ThreadedCursorAdapter;
 import com.android.browser.view.BookmarkContainer;
 
-public class BrowserBookmarksAdapter extends
-        ThreadedCursorAdapter<BrowserBookmarksAdapterItem> {
+public class BrowserBookmarksAdapter extends ThreadedCursorAdapter<BrowserBookmarksAdapterItem> {
 
-    LayoutInflater mInflater;
-    Context mContext;
+	LayoutInflater mInflater;
+	Context mContext;
 
-    /**
-     *  Create a new BrowserBookmarksAdapter.
-     */
-    public BrowserBookmarksAdapter(Context context) {
-        // Make sure to tell the CursorAdapter to avoid the observer and auto-requery
-        // since the Loader will do that for us.
-        super(context, null);
-        mInflater = LayoutInflater.from(context);
-        mContext = context;
-    }
+	/**
+	 * Create a new BrowserBookmarksAdapter.
+	 */
+	public BrowserBookmarksAdapter(Context context) {
+		// Make sure to tell the CursorAdapter to avoid the observer and
+		// auto-requery
+		// since the Loader will do that for us.
+		super(context, null);
+		mInflater = LayoutInflater.from(context);
+		mContext = context;
+	}
 
-    @Override
-    protected long getItemId(Cursor c) {
-        return c.getLong(BookmarksLoader.COLUMN_INDEX_ID);
-    }
+	@Override
+	protected long getItemId(Cursor c) {
+		return c.getLong(BookmarksLoader.COLUMN_INDEX_ID);
+	}
 
-    @Override
-    public View newView(Context context, ViewGroup parent) {
-        return mInflater.inflate(R.layout.bookmark_thumbnail, parent, false);
-    }
+	@Override
+	public View newView(Context context, ViewGroup parent) {
+		return mInflater.inflate(R.layout.bookmark_thumbnail, parent, false);
+	}
 
-    @Override
-    public void bindView(View view, BrowserBookmarksAdapterItem object) {
-        BookmarkContainer container = (BookmarkContainer) view;
-        container.setIgnoreRequestLayout(true);
-        bindGridView(view, mContext, object);
-        container.setIgnoreRequestLayout(false);
-    }
+	@Override
+	public void bindView(View view, BrowserBookmarksAdapterItem object) {
+		BookmarkContainer container = (BookmarkContainer) view;
+		container.setIgnoreRequestLayout(true);
+		bindGridView(view, mContext, object);
+		container.setIgnoreRequestLayout(false);
+	}
 
-    CharSequence getTitle(Cursor cursor) {
-        int type = cursor.getInt(BookmarksLoader.COLUMN_INDEX_TYPE);
-        switch (type) {
-        case Bookmarks.BOOKMARK_TYPE_OTHER_FOLDER:
-            return mContext.getText(R.string.other_bookmarks);
-        }
-        return cursor.getString(BookmarksLoader.COLUMN_INDEX_TITLE);
-    }
+	CharSequence getTitle(Cursor cursor) {
+		int type = cursor.getInt(BookmarksLoader.COLUMN_INDEX_TYPE);
+		switch (type) {
+		case Bookmarks.BOOKMARK_TYPE_OTHER_FOLDER:
+			return mContext.getText(R.string.other_bookmarks);
+		}
+		return cursor.getString(BookmarksLoader.COLUMN_INDEX_TITLE);
+	}
 
-    void bindGridView(View view, Context context, BrowserBookmarksAdapterItem item) {
-        // We need to set this to handle rotation and other configuration change
-        // events. If the padding didn't change, this is a no op.
-        int padding = context.getResources()
-                .getDimensionPixelSize(R.dimen.combo_horizontalSpacing);
-        view.setPadding(padding, view.getPaddingTop(),
-                padding, view.getPaddingBottom());
-        ImageView thumb = (ImageView) view.findViewById(R.id.thumb);
-        TextView tv = (TextView) view.findViewById(R.id.label);
+	void bindGridView(View view, Context context, BrowserBookmarksAdapterItem item) {
+		// We need to set this to handle rotation and other configuration change
+		// events. If the padding didn't change, this is a no op.
+		int padding = context.getResources().getDimensionPixelSize(R.dimen.combo_horizontalSpacing);
+		view.setPadding(padding, view.getPaddingTop(), padding, view.getPaddingBottom());
+		ImageView thumb = (ImageView) view.findViewById(R.id.thumb);
+		TextView tv = (TextView) view.findViewById(R.id.label);
 
-        tv.setText(item.title);
-        if (item.is_folder) {
-            // folder
-            thumb.setImageResource(R.drawable.thumb_bookmark_widget_folder_holo);
-            thumb.setScaleType(ScaleType.FIT_END);
-            thumb.setBackground(null);
-        } else {
-            thumb.setScaleType(ScaleType.CENTER_CROP);
-            if (item.thumbnail == null || !item.has_thumbnail) {
-                thumb.setImageResource(R.drawable.browser_thumbnail);
-            } else {
-                thumb.setImageDrawable(item.thumbnail);
-            }
-            thumb.setBackgroundResource(R.drawable.border_thumb_bookmarks_widget_holo);
-        }
-    }
+		tv.setText(item.title);
+		if (item.is_folder) {
+			// folder
+			thumb.setImageResource(R.drawable.thumb_bookmark_widget_folder_holo);
+			thumb.setScaleType(ScaleType.FIT_END);
+			thumb.setBackground(null);
+		} else {
+			thumb.setScaleType(ScaleType.CENTER_CROP);
+			if (item.thumbnail == null || !item.has_thumbnail) {
+				thumb.setImageResource(R.drawable.browser_thumbnail);
+			} else {
+				thumb.setImageDrawable(item.thumbnail);
+			}
+			thumb.setBackgroundResource(R.drawable.border_thumb_bookmarks_widget_holo);
+		}
+	}
 
-    @Override
-    public BrowserBookmarksAdapterItem getRowObject(Cursor c,
-            BrowserBookmarksAdapterItem item) {
-        if (item == null) {
-            item = new BrowserBookmarksAdapterItem();
-        }
-        Bitmap thumbnail = item.thumbnail != null ? item.thumbnail.getBitmap() : null;
-        thumbnail = BrowserBookmarksPage.getBitmap(c,
-                BookmarksLoader.COLUMN_INDEX_THUMBNAIL, thumbnail);
-        item.has_thumbnail = thumbnail != null;
-        if (thumbnail != null
-                && (item.thumbnail == null || item.thumbnail.getBitmap() != thumbnail)) {
-            item.thumbnail = new BitmapDrawable(mContext.getResources(), thumbnail);
-        }
-        item.is_folder = c.getInt(BookmarksLoader.COLUMN_INDEX_IS_FOLDER) != 0;
-        item.title = getTitle(c);
-        item.url = c.getString(BookmarksLoader.COLUMN_INDEX_URL);
-        return item;
-    }
+	@Override
+	public BrowserBookmarksAdapterItem getRowObject(Cursor c, BrowserBookmarksAdapterItem item) {
+		if (item == null) {
+			item = new BrowserBookmarksAdapterItem();
+		}
+		Bitmap thumbnail = item.thumbnail != null ? item.thumbnail.getBitmap() : null;
+		thumbnail = BrowserBookmarksPage.getBitmap(c, BookmarksLoader.COLUMN_INDEX_THUMBNAIL, thumbnail);
+		item.has_thumbnail = thumbnail != null;
+		if (thumbnail != null && (item.thumbnail == null || item.thumbnail.getBitmap() != thumbnail)) {
+			item.thumbnail = new BitmapDrawable(mContext.getResources(), thumbnail);
+		}
+		item.is_folder = c.getInt(BookmarksLoader.COLUMN_INDEX_IS_FOLDER) != 0;
+		item.title = getTitle(c);
+		item.url = c.getString(BookmarksLoader.COLUMN_INDEX_URL);
+		return item;
+	}
 
-    @Override
-    public BrowserBookmarksAdapterItem getLoadingObject() {
-        BrowserBookmarksAdapterItem item = new BrowserBookmarksAdapterItem();
-        return item;
-    }
+	@Override
+	public BrowserBookmarksAdapterItem getLoadingObject() {
+		BrowserBookmarksAdapterItem item = new BrowserBookmarksAdapterItem();
+		return item;
+	}
 }

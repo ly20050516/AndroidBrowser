@@ -33,89 +33,84 @@ import com.android.browser.BrowserSettings;
  */
 public class NetworkStateHandler {
 
-    Activity mActivity;
-    Controller mController;
+	Activity mActivity;
+	Controller mController;
 
-    // monitor platform changes
-    private IntentFilter mNetworkStateChangedFilter;
-    private BroadcastReceiver mNetworkStateIntentReceiver;
-    private boolean mIsNetworkUp;
+	// monitor platform changes
+	private IntentFilter mNetworkStateChangedFilter;
+	private BroadcastReceiver mNetworkStateIntentReceiver;
+	private boolean mIsNetworkUp;
 
-    public NetworkStateHandler(Activity activity, Controller controller) {
-        mActivity = activity;
-        mController = controller;
-        // Find out if the network is currently up.
-        ConnectivityManager cm = (ConnectivityManager) mActivity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info != null) {
-            mIsNetworkUp = info.isAvailable();
-        }
+	public NetworkStateHandler(Activity activity, Controller controller) {
+		mActivity = activity;
+		mController = controller;
+		// Find out if the network is currently up.
+		ConnectivityManager cm = (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (info != null) {
+			mIsNetworkUp = info.isAvailable();
+		}
 
-        /*
-         * enables registration for changes in network status from http stack
-         */
-        mNetworkStateChangedFilter = new IntentFilter();
-        mNetworkStateChangedFilter.addAction(
-                ConnectivityManager.CONNECTIVITY_ACTION);
-        mNetworkStateIntentReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(
-                        ConnectivityManager.CONNECTIVITY_ACTION)) {
+		/*
+		 * enables registration for changes in network status from http stack
+		 */
+		mNetworkStateChangedFilter = new IntentFilter();
+		mNetworkStateChangedFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		mNetworkStateIntentReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 
-                    NetworkInfo info = intent.getParcelableExtra(
-                            ConnectivityManager.EXTRA_NETWORK_INFO);
-                    String typeName = info.getTypeName();
-                    String subtypeName = info.getSubtypeName();
-                    sendNetworkType(typeName.toLowerCase(),
-                            (subtypeName != null ? subtypeName.toLowerCase() : ""));
-                    BrowserSettings.getInstance().updateConnectionType();
+					NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+					String typeName = info.getTypeName();
+					String subtypeName = info.getSubtypeName();
+					sendNetworkType(typeName.toLowerCase(), (subtypeName != null ? subtypeName.toLowerCase() : ""));
+					BrowserSettings.getInstance().updateConnectionType();
 
-                    boolean noConnection = intent.getBooleanExtra(
-                            ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+					boolean noConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 
-                    onNetworkToggle(!noConnection);
-                }
-            }
-        };
+					onNetworkToggle(!noConnection);
+				}
+			}
+		};
 
-    }
+	}
 
-    void onPause() {
-        // unregister network state listener
-        mActivity.unregisterReceiver(mNetworkStateIntentReceiver);
-    }
+	void onPause() {
+		// unregister network state listener
+		mActivity.unregisterReceiver(mNetworkStateIntentReceiver);
+	}
 
-    void onResume() {
-        mActivity.registerReceiver(mNetworkStateIntentReceiver,
-                mNetworkStateChangedFilter);
-        BrowserSettings.getInstance().updateConnectionType();
-    }
+	void onResume() {
+		mActivity.registerReceiver(mNetworkStateIntentReceiver, mNetworkStateChangedFilter);
+		BrowserSettings.getInstance().updateConnectionType();
+	}
 
-    /**
-     * connectivity manager says net has come or gone... inform the user
-     * @param up true if net has come up, false if net has gone down
-     */
-    void onNetworkToggle(boolean up) {
-        if (up == mIsNetworkUp) {
-            return;
-        }
-        mIsNetworkUp = up;
-        WebView w = mController.getCurrentWebView();
-        if (w != null) {
-            w.setNetworkAvailable(up);
-        }
-    }
+	/**
+	 * connectivity manager says net has come or gone... inform the user
+	 * 
+	 * @param up
+	 *            true if net has come up, false if net has gone down
+	 */
+	void onNetworkToggle(boolean up) {
+		if (up == mIsNetworkUp) {
+			return;
+		}
+		mIsNetworkUp = up;
+		WebView w = mController.getCurrentWebView();
+		if (w != null) {
+			w.setNetworkAvailable(up);
+		}
+	}
 
-    boolean isNetworkUp() {
-        return mIsNetworkUp;
-    }
+	boolean isNetworkUp() {
+		return mIsNetworkUp;
+	}
 
-    private void sendNetworkType(String type, String subtype) {
-        WebView w = mController.getCurrentWebView();
-        if (w != null) {
-            WebViewClassic.fromWebView(w).setNetworkType(type, subtype);
-        }
-    }
+	private void sendNetworkType(String type, String subtype) {
+		WebView w = mController.getCurrentWebView();
+		if (w != null) {
+			WebViewClassic.fromWebView(w).setNetworkType(type, subtype);
+		}
+	}
 }

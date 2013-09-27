@@ -32,87 +32,79 @@ import com.android.browser.R;
  * Widget that shows a preview of the user's bookmarks.
  */
 public class BookmarkThumbnailWidgetProvider extends AppWidgetProvider {
-    public static final String ACTION_BOOKMARK_APPWIDGET_UPDATE =
-        "com.android.browser.BOOKMARK_APPWIDGET_UPDATE";
+	public static final String ACTION_BOOKMARK_APPWIDGET_UPDATE = "com.android.browser.BOOKMARK_APPWIDGET_UPDATE";
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        // Handle bookmark-specific updates ourselves because they might be
-        // coming in without extras, which AppWidgetProvider then blocks.
-        final String action = intent.getAction();
-        if (ACTION_BOOKMARK_APPWIDGET_UPDATE.equals(action)) {
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            performUpdate(context, appWidgetManager,
-                    appWidgetManager.getAppWidgetIds(getComponentName(context)));
-        } else {
-            super.onReceive(context, intent);
-        }
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		// Handle bookmark-specific updates ourselves because they might be
+		// coming in without extras, which AppWidgetProvider then blocks.
+		final String action = intent.getAction();
+		if (ACTION_BOOKMARK_APPWIDGET_UPDATE.equals(action)) {
+			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+			performUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(getComponentName(context)));
+		} else {
+			super.onReceive(context, intent);
+		}
+	}
 
-    @Override
-    public void onUpdate(Context context, AppWidgetManager mngr, int[] ids) {
-        performUpdate(context, mngr, ids);
-    }
+	@Override
+	public void onUpdate(Context context, AppWidgetManager mngr, int[] ids) {
+		performUpdate(context, mngr, ids);
+	}
 
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
-        for (int widgetId : appWidgetIds) {
-            BookmarkThumbnailWidgetService.deleteWidgetState(context, widgetId);
-        }
-        removeOrphanedFiles(context);
-    }
+	@Override
+	public void onDeleted(Context context, int[] appWidgetIds) {
+		super.onDeleted(context, appWidgetIds);
+		for (int widgetId : appWidgetIds) {
+			BookmarkThumbnailWidgetService.deleteWidgetState(context, widgetId);
+		}
+		removeOrphanedFiles(context);
+	}
 
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
-        removeOrphanedFiles(context);
-    }
+	@Override
+	public void onDisabled(Context context) {
+		super.onDisabled(context);
+		removeOrphanedFiles(context);
+	}
 
-    /**
-     *  Checks for any state files that may have not received onDeleted
-     */
-    void removeOrphanedFiles(Context context) {
-        AppWidgetManager wm = AppWidgetManager.getInstance(context);
-        int[] ids = wm.getAppWidgetIds(getComponentName(context));
-        BookmarkThumbnailWidgetService.removeOrphanedStates(context, ids);
-    }
+	/**
+	 * Checks for any state files that may have not received onDeleted
+	 */
+	void removeOrphanedFiles(Context context) {
+		AppWidgetManager wm = AppWidgetManager.getInstance(context);
+		int[] ids = wm.getAppWidgetIds(getComponentName(context));
+		BookmarkThumbnailWidgetService.removeOrphanedStates(context, ids);
+	}
 
-    private void performUpdate(Context context,
-            AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        PendingIntent launchBrowser = PendingIntent.getActivity(context, 0,
-                new Intent(BrowserActivity.ACTION_SHOW_BROWSER, null, context,
-                    BrowserActivity.class),
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        for (int appWidgetId : appWidgetIds) {
-            Intent updateIntent = new Intent(context, BookmarkThumbnailWidgetService.class);
-            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            updateIntent.setData(Uri.parse(updateIntent.toUri(Intent.URI_INTENT_SCHEME)));
-            RemoteViews views = new RemoteViews(context.getPackageName(),
-                    R.layout.bookmarkthumbnailwidget);
-            views.setOnClickPendingIntent(R.id.app_shortcut, launchBrowser);
-            views.setRemoteAdapter(R.id.bookmarks_list, updateIntent);
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.bookmarks_list);
-            Intent ic = new Intent(context, BookmarkWidgetProxy.class);
-            views.setPendingIntentTemplate(R.id.bookmarks_list,
-                    PendingIntent.getBroadcast(context, 0, ic,
-                    PendingIntent.FLAG_UPDATE_CURRENT));
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
-    }
+	private void performUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+		PendingIntent launchBrowser = PendingIntent.getActivity(context, 0, new Intent(BrowserActivity.ACTION_SHOW_BROWSER, null, context,
+				BrowserActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		for (int appWidgetId : appWidgetIds) {
+			Intent updateIntent = new Intent(context, BookmarkThumbnailWidgetService.class);
+			updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+			updateIntent.setData(Uri.parse(updateIntent.toUri(Intent.URI_INTENT_SCHEME)));
+			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bookmarkthumbnailwidget);
+			views.setOnClickPendingIntent(R.id.app_shortcut, launchBrowser);
+			views.setRemoteAdapter(R.id.bookmarks_list, updateIntent);
+			appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.bookmarks_list);
+			Intent ic = new Intent(context, BookmarkWidgetProxy.class);
+			views.setPendingIntentTemplate(R.id.bookmarks_list,
+					PendingIntent.getBroadcast(context, 0, ic, PendingIntent.FLAG_UPDATE_CURRENT));
+			appWidgetManager.updateAppWidget(appWidgetId, views);
+		}
+	}
 
-    /**
-     * Build {@link ComponentName} describing this specific
-     * {@link AppWidgetProvider}
-     */
-    static ComponentName getComponentName(Context context) {
-        return new ComponentName(context, BookmarkThumbnailWidgetProvider.class);
-    }
+	/**
+	 * Build {@link ComponentName} describing this specific
+	 * {@link AppWidgetProvider}
+	 */
+	static ComponentName getComponentName(Context context) {
+		return new ComponentName(context, BookmarkThumbnailWidgetProvider.class);
+	}
 
-    public static void refreshWidgets(Context context) {
-        context.sendBroadcast(new Intent(
-                BookmarkThumbnailWidgetProvider.ACTION_BOOKMARK_APPWIDGET_UPDATE,
-                null, context, BookmarkThumbnailWidgetProvider.class));
-    }
+	public static void refreshWidgets(Context context) {
+		context.sendBroadcast(new Intent(BookmarkThumbnailWidgetProvider.ACTION_BOOKMARK_APPWIDGET_UPDATE, null, context,
+				BookmarkThumbnailWidgetProvider.class));
+	}
 
 }

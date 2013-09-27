@@ -30,61 +30,54 @@ import android.text.TextUtils;
 
 public class AccountsChangedReceiver extends BroadcastReceiver {
 
-    private static final String[] PROJECTION = new String[] {
-        Accounts.ACCOUNT_NAME,
-        Accounts.ACCOUNT_TYPE,
-    };
-    private static final String SELECTION = Accounts.ACCOUNT_NAME + " IS NOT NULL";
-    private static final String DELETE_SELECTION = Accounts.ACCOUNT_NAME + "=? AND "
-            + Accounts.ACCOUNT_TYPE + "=?";
+	private static final String[] PROJECTION = new String[] { Accounts.ACCOUNT_NAME, Accounts.ACCOUNT_TYPE, };
+	private static final String SELECTION = Accounts.ACCOUNT_NAME + " IS NOT NULL";
+	private static final String DELETE_SELECTION = Accounts.ACCOUNT_NAME + "=? AND " + Accounts.ACCOUNT_TYPE + "=?";
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        new DeleteRemovedAccounts(context).start();
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		new DeleteRemovedAccounts(context).start();
+	}
 
-    static class DeleteRemovedAccounts extends Thread {
-        Context mContext;
-        public DeleteRemovedAccounts(Context context) {
-            mContext = context.getApplicationContext();
-        }
+	static class DeleteRemovedAccounts extends Thread {
+		Context mContext;
 
-        @Override
-        public void run() {
-            Account[] accounts = AccountManager.get(mContext).getAccounts();
-            ContentResolver cr = mContext.getContentResolver();
-            Cursor c = cr.query(Accounts.CONTENT_URI, PROJECTION,
-                    SELECTION, null, null);
-            while (c.moveToNext()) {
-                String name = c.getString(0);
-                String type = c.getString(1);
-                if (!contains(accounts, name, type)) {
-                    delete(cr, name, type);
-                }
-            }
-            cr.update(Accounts.CONTENT_URI, null, null, null);
-            c.close();
-        }
+		public DeleteRemovedAccounts(Context context) {
+			mContext = context.getApplicationContext();
+		}
 
-        void delete(ContentResolver cr, String name, String type) {
-            // Pretend to be a sync adapter to delete the data and not mark
-            // it for deletion. Without this, the bookmarks will be marked to
-            // be deleted, which will propagate to the server if the account
-            // is added back.
-            Uri uri = Bookmarks.CONTENT_URI.buildUpon()
-                    .appendQueryParameter(BrowserContract.CALLER_IS_SYNCADAPTER, "true")
-                    .build();
-            cr.delete(uri, DELETE_SELECTION, new String[] { name, type });
-        }
+		@Override
+		public void run() {
+			Account[] accounts = AccountManager.get(mContext).getAccounts();
+			ContentResolver cr = mContext.getContentResolver();
+			Cursor c = cr.query(Accounts.CONTENT_URI, PROJECTION, SELECTION, null, null);
+			while (c.moveToNext()) {
+				String name = c.getString(0);
+				String type = c.getString(1);
+				if (!contains(accounts, name, type)) {
+					delete(cr, name, type);
+				}
+			}
+			cr.update(Accounts.CONTENT_URI, null, null, null);
+			c.close();
+		}
 
-        boolean contains(Account[] accounts, String name, String type) {
-            for (Account a : accounts) {
-                if (TextUtils.equals(a.name, name)
-                        && TextUtils.equals(a.type, type)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+		void delete(ContentResolver cr, String name, String type) {
+			// Pretend to be a sync adapter to delete the data and not mark
+			// it for deletion. Without this, the bookmarks will be marked to
+			// be deleted, which will propagate to the server if the account
+			// is added back.
+			Uri uri = Bookmarks.CONTENT_URI.buildUpon().appendQueryParameter(BrowserContract.CALLER_IS_SYNCADAPTER, "true").build();
+			cr.delete(uri, DELETE_SELECTION, new String[] { name, type });
+		}
+
+		boolean contains(Account[] accounts, String name, String type) {
+			for (Account a : accounts) {
+				if (TextUtils.equals(a.name, name) && TextUtils.equals(a.type, type)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }

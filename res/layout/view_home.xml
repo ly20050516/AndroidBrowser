@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/homeRelativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/homeBottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="15dip"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip"
+        android:background="@drawable/navigation_background" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerVertical="true" >
+
+            <Button
+                android:id="@+id/btn_mysites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:background="#00000000"
+                android:text="@string/my_navigation"
+                android:textColor="#4CA0EA"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/btn_allsites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dip"
+                android:background="#00000000"
+                android:text="@string/site_navigation"
+                android:textColor="#7E7E7E"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+       
+
+        <ImageView
+            android:id="@+id/line_bottom_scroll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/line_bottom_scroll"
+            android:contentDescription="@string/app_name" />
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/btn_nexts"
+            android:contentDescription="@string/app_name" />
+    </RelativeLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/homeFrameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/homeBottomLayout" >
+    </android.support.v4.view.ViewPager>
+
+</RelativeLayout>

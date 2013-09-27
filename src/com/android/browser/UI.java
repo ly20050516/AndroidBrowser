@@ -34,119 +34,117 @@ import java.util.List;
  */
 public interface UI {
 
-    public static enum ComboViews {
-        History,
-        Bookmarks,
-        Snapshots,
-    }
+	public static enum ComboViews {
+		History, Bookmarks, Snapshots,
+	}
 
-    public void onPause();
+	public void onPause();
 
-    public void onResume();
+	public void onResume();
 
-    public void onDestroy();
+	public void onDestroy();
 
-    public void onConfigurationChanged(Configuration config);
+	public void onConfigurationChanged(Configuration config);
 
-    public boolean onBackKey();
+	public boolean onBackKey();
 
-    public boolean onMenuKey();
+	public boolean onMenuKey();
 
-    public boolean needsRestoreAllTabs();
+	public boolean needsRestoreAllTabs();
 
-    public void addTab(Tab tab);
+	public void addTab(Tab tab);
 
-    public void removeTab(Tab tab);
+	public void removeTab(Tab tab);
 
-    public void setActiveTab(Tab tab);
+	public void setActiveTab(Tab tab);
 
-    public void updateTabs(List<Tab> tabs);
+	public void updateTabs(List<Tab> tabs);
 
-    public void detachTab(Tab tab);
+	public void detachTab(Tab tab);
 
-    public void attachTab(Tab tab);
+	public void attachTab(Tab tab);
 
-    public void onSetWebView(Tab tab, WebView view);
+	public void onSetWebView(Tab tab, WebView view);
 
-    public void createSubWindow(Tab tab, WebView subWebView);
+	public void createSubWindow(Tab tab, WebView subWebView);
 
-    public void attachSubWindow(View subContainer);
+	public void attachSubWindow(View subContainer);
 
-    public void removeSubWindow(View subContainer);
+	public void removeSubWindow(View subContainer);
 
-    public void onTabDataChanged(Tab tab);
+	public void onTabDataChanged(Tab tab);
 
-    public void onPageStopped(Tab tab);
+	public void onPageStopped(Tab tab);
 
-    public void onProgressChanged(Tab tab);
+	public void onProgressChanged(Tab tab);
 
-    public void showActiveTabsPage();
+	public void showActiveTabsPage();
 
-    public void removeActiveTabsPage();
+	public void removeActiveTabsPage();
 
-    public void showComboView(ComboViews startingView, Bundle extra);
+	public void showComboView(ComboViews startingView, Bundle extra);
 
-    public void showCustomView(View view, int requestedOrientation,
-            CustomViewCallback callback);
+	public void showCustomView(View view, int requestedOrientation, CustomViewCallback callback);
 
-    public void onHideCustomView();
+	public void onHideCustomView();
 
-    public boolean isCustomViewShowing();
+	public boolean isCustomViewShowing();
 
-    public boolean onPrepareOptionsMenu(Menu menu);
+	public boolean onPrepareOptionsMenu(Menu menu);
 
-    public void updateMenuState(Tab tab, Menu menu);
+	public void updateMenuState(Tab tab, Menu menu);
 
-    public void onOptionsMenuOpened();
+	public void onOptionsMenuOpened();
 
-    public void onExtendedMenuOpened();
+	public void onExtendedMenuOpened();
 
-    public boolean onOptionsItemSelected(MenuItem item);
+	public boolean onOptionsItemSelected(MenuItem item);
 
-    public void onOptionsMenuClosed(boolean inLoad);
+	public void onOptionsMenuClosed(boolean inLoad);
 
-    public void onExtendedMenuClosed(boolean inLoad);
+	public void onExtendedMenuClosed(boolean inLoad);
 
-    public void onContextMenuCreated(Menu menu);
+	public void onContextMenuCreated(Menu menu);
 
-    public void onContextMenuClosed(Menu menu, boolean inLoad);
+	public void onContextMenuClosed(Menu menu, boolean inLoad);
 
-    public void onActionModeStarted(ActionMode mode);
+	public void onActionModeStarted(ActionMode mode);
 
-    public void onActionModeFinished(boolean inLoad);
+	public void onActionModeFinished(boolean inLoad);
 
-    public void setShouldShowErrorConsole(Tab tab, boolean show);
+	public void setShouldShowErrorConsole(Tab tab, boolean show);
 
-    // returns if the web page is clear of any overlays (not including sub windows)
-    public boolean isWebShowing();
+	// returns if the web page is clear of any overlays (not including sub
+	// windows)
+	public boolean isWebShowing();
 
-    public void showWeb(boolean animate);
+	public void showWeb(boolean animate);
 
-    Bitmap getDefaultVideoPoster();
+	Bitmap getDefaultVideoPoster();
 
-    View getVideoLoadingProgressView();
+	View getVideoLoadingProgressView();
 
-    void bookmarkedStatusHasChanged(Tab tab);
+	void bookmarkedStatusHasChanged(Tab tab);
 
-    void showMaxTabsWarning();
+	void showMaxTabsWarning();
 
-    void editUrl(boolean clearInput, boolean forceIME);
+	void editUrl(boolean clearInput, boolean forceIME);
 
-    boolean isEditingUrl();
+	boolean isEditingUrl();
 
-    boolean dispatchKey(int code, KeyEvent event);
+	boolean dispatchKey(int code, KeyEvent event);
 
-    void showAutoLogin(Tab tab);
+	void showAutoLogin(Tab tab);
 
-    void hideAutoLogin(Tab tab);
+	void hideAutoLogin(Tab tab);
 
-    void setFullscreen(boolean enabled);
+	void setFullscreen(boolean enabled);
 
-    void setUseQuickControls(boolean enabled);
+	void setUseQuickControls(boolean enabled);
 
-    public boolean shouldCaptureThumbnails();
+	public boolean shouldCaptureThumbnails();
 
-    boolean blockFocusAnimations();
+	boolean blockFocusAnimations();
 
-    void onVoiceResult(String result);
+	void onVoiceResult(String result);
 }

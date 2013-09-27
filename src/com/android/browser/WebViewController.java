@@ -37,87 +37,81 @@ import java.util.List;
  */
 public interface WebViewController {
 
-    Context getContext();
+	Context getContext();
 
-    Activity getActivity();
+	Activity getActivity();
 
-    TabControl getTabControl();
+	TabControl getTabControl();
 
-    WebViewFactory getWebViewFactory();
+	WebViewFactory getWebViewFactory();
 
-    void onSetWebView(Tab tab, WebView view);
+	void onSetWebView(Tab tab, WebView view);
 
-    void createSubWindow(Tab tab);
+	void createSubWindow(Tab tab);
 
-    void onPageStarted(Tab tab, WebView view, Bitmap favicon);
+	void onPageStarted(Tab tab, WebView view, Bitmap favicon);
 
-    void onPageFinished(Tab tab);
+	void onPageFinished(Tab tab);
 
-    void onProgressChanged(Tab tab);
+	void onProgressChanged(Tab tab);
 
-    void onReceivedTitle(Tab tab, final String title);
+	void onReceivedTitle(Tab tab, final String title);
 
-    void onFavicon(Tab tab, WebView view, Bitmap icon);
+	void onFavicon(Tab tab, WebView view, Bitmap icon);
 
-    boolean shouldOverrideUrlLoading(Tab tab, WebView view, String url);
+	boolean shouldOverrideUrlLoading(Tab tab, WebView view, String url);
 
-    boolean shouldOverrideKeyEvent(KeyEvent event);
+	boolean shouldOverrideKeyEvent(KeyEvent event);
 
-    boolean onUnhandledKeyEvent(KeyEvent event);
+	boolean onUnhandledKeyEvent(KeyEvent event);
 
-    void doUpdateVisitedHistory(Tab tab, boolean isReload);
+	void doUpdateVisitedHistory(Tab tab, boolean isReload);
 
-    void getVisitedHistory(final ValueCallback<String[]> callback);
+	void getVisitedHistory(final ValueCallback<String[]> callback);
 
-    void onReceivedHttpAuthRequest(Tab tab, WebView view, final HttpAuthHandler handler,
-            final String host, final String realm);
+	void onReceivedHttpAuthRequest(Tab tab, WebView view, final HttpAuthHandler handler, final String host, final String realm);
 
-    void onDownloadStart(Tab tab, String url, String useragent, String contentDisposition,
-            String mimeType, long contentLength);
+	void onDownloadStart(Tab tab, String url, String useragent, String contentDisposition, String mimeType, long contentLength);
 
-    void showCustomView(Tab tab, View view, int requestedOrientation,
-            WebChromeClient.CustomViewCallback callback);
+	void showCustomView(Tab tab, View view, int requestedOrientation, WebChromeClient.CustomViewCallback callback);
 
-    void hideCustomView();
+	void hideCustomView();
 
-    Bitmap getDefaultVideoPoster();
+	Bitmap getDefaultVideoPoster();
 
-    View getVideoLoadingProgressView();
+	View getVideoLoadingProgressView();
 
-    void showSslCertificateOnError(WebView view, SslErrorHandler handler,
-            SslError error);
+	void showSslCertificateOnError(WebView view, SslErrorHandler handler, SslError error);
 
-    void onUserCanceledSsl(Tab tab);
+	void onUserCanceledSsl(Tab tab);
 
-    boolean shouldShowErrorConsole();
+	boolean shouldShowErrorConsole();
 
-    void onUpdatedSecurityState(Tab tab);
+	void onUpdatedSecurityState(Tab tab);
 
-    void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture);
+	void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture);
 
-    void endActionMode();
+	void endActionMode();
 
-    void attachSubWindow(Tab tab);
+	void attachSubWindow(Tab tab);
 
-    void dismissSubWindow(Tab tab);
+	void dismissSubWindow(Tab tab);
 
-    Tab openTab(String url, boolean incognito, boolean setActive,
-            boolean useCurrent);
+	Tab openTab(String url, boolean incognito, boolean setActive, boolean useCurrent);
 
-    Tab openTab(String url, Tab parent, boolean setActive,
-            boolean useCurrent);
+	Tab openTab(String url, Tab parent, boolean setActive, boolean useCurrent);
 
-    boolean switchToTab(Tab tab);
+	boolean switchToTab(Tab tab);
 
-    void closeTab(Tab tab);
+	void closeTab(Tab tab);
 
-    void setupAutoFill(Message message);
+	void setupAutoFill(Message message);
 
-    void bookmarkedStatusHasChanged(Tab tab);
+	void bookmarkedStatusHasChanged(Tab tab);
 
-    void showAutoLogin(Tab tab);
+	void showAutoLogin(Tab tab);
 
-    void hideAutoLogin(Tab tab);
+	void hideAutoLogin(Tab tab);
 
-    boolean shouldCaptureThumbnails();
+	boolean shouldCaptureThumbnails();
 }

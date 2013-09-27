@@ -27,10 +27,10 @@ import com.android.browser.search.SearchEngine;
 
 public class LabPreferencesFragment extends PreferenceFragment {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Load the XML preferences file
-        addPreferencesFromResource(R.xml.lab_preferences);
-    }
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// Load the XML preferences file
+		addPreferencesFromResource(R.xml.lab_preferences);
+	}
 }

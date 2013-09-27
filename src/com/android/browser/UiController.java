@@ -26,89 +26,87 @@ import com.android.browser.UI.ComboViews;
 
 import java.util.List;
 
-
 /**
  * UI aspect of the controller
  */
 public interface UiController {
 
-    UI getUi();
+	UI getUi();
 
-    WebView getCurrentWebView();
+	WebView getCurrentWebView();
 
-    WebView getCurrentTopWebView();
+	WebView getCurrentTopWebView();
 
-    Tab getCurrentTab();
+	Tab getCurrentTab();
 
-    TabControl getTabControl();
+	TabControl getTabControl();
 
-    List<Tab> getTabs();
+	List<Tab> getTabs();
 
-    Tab openTabToHomePage();
+	Tab openTabToHomePage();
 
-    Tab openIncognitoTab();
+	Tab openIncognitoTab();
 
-    Tab openTab(String url, boolean incognito, boolean setActive,
-            boolean useCurrent);
+	Tab openTab(String url, boolean incognito, boolean setActive, boolean useCurrent);
 
-    void setActiveTab(Tab tab);
+	void setActiveTab(Tab tab);
 
-    boolean switchToTab(Tab tab);
+	boolean switchToTab(Tab tab);
 
-    void closeCurrentTab();
+	void closeCurrentTab();
 
-    void closeTab(Tab tab);
+	void closeTab(Tab tab);
 
-    void stopLoading();
+	void stopLoading();
 
-    Intent createBookmarkCurrentPageIntent(boolean canBeAnEdit);
+	Intent createBookmarkCurrentPageIntent(boolean canBeAnEdit);
 
-    void bookmarksOrHistoryPicker(ComboViews startView);
+	void bookmarksOrHistoryPicker(ComboViews startView);
 
-    void bookmarkCurrentPage();
+	void bookmarkCurrentPage();
 
-    void editUrl();
+	void editUrl();
 
-    void handleNewIntent(Intent intent);
+	void handleNewIntent(Intent intent);
 
-    boolean shouldShowErrorConsole();
+	boolean shouldShowErrorConsole();
 
-    void hideCustomView();
+	void hideCustomView();
 
-    void attachSubWindow(Tab tab);
+	void attachSubWindow(Tab tab);
 
-    void removeSubWindow(Tab tab);
+	void removeSubWindow(Tab tab);
 
-    boolean isInCustomActionMode();
+	boolean isInCustomActionMode();
 
-    void endActionMode();
+	void endActionMode();
 
-    void shareCurrentPage();
+	void shareCurrentPage();
 
-    void updateMenuState(Tab tab, Menu menu);
+	void updateMenuState(Tab tab, Menu menu);
 
-    boolean onOptionsItemSelected(MenuItem item);
+	boolean onOptionsItemSelected(MenuItem item);
 
-    SnapshotTab createNewSnapshotTab(long snapshotId, boolean setActive);
+	SnapshotTab createNewSnapshotTab(long snapshotId, boolean setActive);
 
-    void loadUrl(Tab tab, String url);
+	void loadUrl(Tab tab, String url);
 
-    void setBlockEvents(boolean block);
+	void setBlockEvents(boolean block);
 
-    Activity getActivity();
+	Activity getActivity();
 
-    void showPageInfo();
+	void showPageInfo();
 
-    void openPreferences();
+	void openPreferences();
 
-    void findOnPage();
+	void findOnPage();
 
-    void toggleUserAgent();
+	void toggleUserAgent();
 
-    BrowserSettings getSettings();
+	BrowserSettings getSettings();
 
-    boolean supportsVoice();
+	boolean supportsVoice();
 
-    void startVoiceRecognizer();
+	void startVoiceRecognizer();
 
 }

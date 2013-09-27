@@ -119,6 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:scaleType="center"
+        android:visibility="gone"
         style="@style/HoloButton"
         android:contentDescription="@string/accessibility_button_bookmarks"
         android:src="@drawable/ic_bookmarks_history_holo_dark" />

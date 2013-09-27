@@ -28,46 +28,46 @@ import com.android.browser.R;
 
 public class FontSizePreview extends WebViewPreview {
 
-    static final String HTML_FORMAT = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><style type=\"text/css\">p { margin: 2px auto;}</style><body><p style=\"font-size: 4pt\">%s</p><p style=\"font-size: 8pt\">%s</p><p style=\"font-size: 10pt\">%s</p><p style=\"font-size: 14pt\">%s</p><p style=\"font-size: 18pt\">%s</p></body></html>";
+	static final String HTML_FORMAT = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><style type=\"text/css\">p { margin: 2px auto;}</style><body><p style=\"font-size: 4pt\">%s</p><p style=\"font-size: 8pt\">%s</p><p style=\"font-size: 10pt\">%s</p><p style=\"font-size: 14pt\">%s</p><p style=\"font-size: 18pt\">%s</p></body></html>";
 
-    String mHtml;
+	String mHtml;
 
-    public FontSizePreview(
-            Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
+	public FontSizePreview(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+	}
 
-    public FontSizePreview(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public FontSizePreview(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    public FontSizePreview(Context context) {
-        super(context);
-    }
+	public FontSizePreview(Context context) {
+		super(context);
+	}
 
-    @Override
-    protected void init(Context context) {
-        super.init(context);
-        Resources res = context.getResources();
-        Object[] visualNames = res.getStringArray(R.array.pref_text_size_choices);
-        mHtml = String.format(HTML_FORMAT, visualNames);
-    }
+	@Override
+	protected void init(Context context) {
+		super.init(context);
+		Resources res = context.getResources();
+		Object[] visualNames = res.getStringArray(R.array.pref_text_size_choices);
+		mHtml = String.format(HTML_FORMAT, visualNames);
+	}
 
-    @Override
-    protected void updatePreview(boolean forceReload) {
-        if (mWebView == null) return;
+	@Override
+	protected void updatePreview(boolean forceReload) {
+		if (mWebView == null)
+			return;
 
-        WebSettings ws = mWebView.getSettings();
-        BrowserSettings bs = BrowserSettings.getInstance();
-        ws.setMinimumFontSize(bs.getMinimumFontSize());
-        ws.setTextZoom(bs.getTextZoom());
-        mWebView.loadDataWithBaseURL(null, mHtml, "text/html", "utf-8", null);
-    }
+		WebSettings ws = mWebView.getSettings();
+		BrowserSettings bs = BrowserSettings.getInstance();
+		ws.setMinimumFontSize(bs.getMinimumFontSize());
+		ws.setTextZoom(bs.getTextZoom());
+		mWebView.loadDataWithBaseURL(null, mHtml, "text/html", "utf-8", null);
+	}
 
-    @Override
-    protected void setupWebView(WebView view) {
-        super.setupWebView(view);
-        view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-    }
+	@Override
+	protected void setupWebView(WebView view) {
+		super.setupWebView(view);
+		view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+	}
 
 }

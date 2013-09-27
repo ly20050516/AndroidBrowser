@@ -25,37 +25,34 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
-public class PrivacySecurityPreferencesFragment extends PreferenceFragment
-        implements Preference.OnPreferenceChangeListener {
+public class PrivacySecurityPreferencesFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Load the preferences from an XML resource
-        addPreferencesFromResource(R.xml.privacy_security_preferences);
+		// Load the preferences from an XML resource
+		addPreferencesFromResource(R.xml.privacy_security_preferences);
 
-        Preference e = findPreference(PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY);
-        e.setOnPreferenceChangeListener(this);
-    }
+		Preference e = findPreference(PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY);
+		e.setOnPreferenceChangeListener(this);
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
+	}
 
-    @Override
-    public boolean onPreferenceChange(Preference pref, Object objValue) {
-        if (pref.getKey().equals(PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY)
-                && ((Boolean) objValue).booleanValue() == true) {
-            // Need to tell the browser to remove the parent/child relationship
-            // between tabs
-            getActivity().setResult(Activity.RESULT_OK, (new Intent()).putExtra(Intent.EXTRA_TEXT,
-                    pref.getKey()));
-            return true;
-        }
+	@Override
+	public boolean onPreferenceChange(Preference pref, Object objValue) {
+		if (pref.getKey().equals(PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY) && ((Boolean) objValue).booleanValue() == true) {
+			// Need to tell the browser to remove the parent/child relationship
+			// between tabs
+			getActivity().setResult(Activity.RESULT_OK, (new Intent()).putExtra(Intent.EXTRA_TEXT, pref.getKey()));
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
 }

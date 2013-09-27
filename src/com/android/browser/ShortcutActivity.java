@@ -23,50 +23,48 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class ShortcutActivity extends Activity
-    implements BookmarksPageCallbacks, OnClickListener {
+public class ShortcutActivity extends Activity implements BookmarksPageCallbacks, OnClickListener {
 
-    private BrowserBookmarksPage mBookmarks;
+	private BrowserBookmarksPage mBookmarks;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setTitle(R.string.shortcut_bookmark_title);
-        setContentView(R.layout.pick_bookmark);
-        mBookmarks = (BrowserBookmarksPage) getFragmentManager()
-                .findFragmentById(R.id.bookmarks);
-        mBookmarks.setEnableContextMenu(false);
-        mBookmarks.setCallbackListener(this);
-        View cancel = findViewById(R.id.cancel);
-        if (cancel != null) {
-            cancel.setOnClickListener(this);
-        }
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setTitle(R.string.shortcut_bookmark_title);
+		setContentView(R.layout.pick_bookmark);
+		mBookmarks = (BrowserBookmarksPage) getFragmentManager().findFragmentById(R.id.bookmarks);
+		mBookmarks.setEnableContextMenu(false);
+		mBookmarks.setCallbackListener(this);
+		View cancel = findViewById(R.id.cancel);
+		if (cancel != null) {
+			cancel.setOnClickListener(this);
+		}
+	}
 
-    // BookmarksPageCallbacks
+	// BookmarksPageCallbacks
 
-    @Override
-    public boolean onBookmarkSelected(Cursor c, boolean isFolder) {
-        if (isFolder) {
-            return false;
-        }
-        Intent intent = BrowserBookmarksPage.createShortcutIntent(this, c);
-        setResult(RESULT_OK, intent);
-        finish();
-        return true;
-    }
+	@Override
+	public boolean onBookmarkSelected(Cursor c, boolean isFolder) {
+		if (isFolder) {
+			return false;
+		}
+		Intent intent = BrowserBookmarksPage.createShortcutIntent(this, c);
+		setResult(RESULT_OK, intent);
+		finish();
+		return true;
+	}
 
-    @Override
-    public boolean onOpenInNewWindow(String... urls) {
-        return false;
-    }
+	@Override
+	public boolean onOpenInNewWindow(String... urls) {
+		return false;
+	}
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-        case R.id.cancel:
-            finish();
-            break;
-        }
-    }
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.cancel:
+			finish();
+			break;
+		}
+	}
 }

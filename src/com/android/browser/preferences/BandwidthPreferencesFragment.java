@@ -28,36 +28,34 @@ import com.android.browser.R;
 
 public class BandwidthPreferencesFragment extends PreferenceFragment {
 
-    static final String TAG = "BandwidthPreferencesFragment";
+	static final String TAG = "BandwidthPreferencesFragment";
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Load the XML preferences file
-        addPreferencesFromResource(R.xml.bandwidth_preferences);
-    }
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// Load the XML preferences file
+		addPreferencesFromResource(R.xml.bandwidth_preferences);
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        PreferenceScreen prefScreen = getPreferenceScreen();
-        SharedPreferences sharedPrefs = prefScreen.getSharedPreferences();
-        if (!sharedPrefs.contains(PreferenceKeys.PREF_DATA_PRELOAD)) {
-            // set default value for preload setting
-            ListPreference preload = (ListPreference) prefScreen.findPreference(
-                    PreferenceKeys.PREF_DATA_PRELOAD);
-            if (preload != null) {
-                preload.setValue(BrowserSettings.getInstance().getDefaultPreloadSetting());
-            }
-        }
-        if (!sharedPrefs.contains(PreferenceKeys.PREF_LINK_PREFETCH)) {
-            // set default value for link prefetch setting
-            ListPreference prefetch = (ListPreference) prefScreen.findPreference(
-                    PreferenceKeys.PREF_LINK_PREFETCH);
-            if (prefetch != null) {
-                prefetch.setValue(BrowserSettings.getInstance().getDefaultLinkPrefetchSetting());
-            }
-        }
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
+		PreferenceScreen prefScreen = getPreferenceScreen();
+		SharedPreferences sharedPrefs = prefScreen.getSharedPreferences();
+		if (!sharedPrefs.contains(PreferenceKeys.PREF_DATA_PRELOAD)) {
+			// set default value for preload setting
+			ListPreference preload = (ListPreference) prefScreen.findPreference(PreferenceKeys.PREF_DATA_PRELOAD);
+			if (preload != null) {
+				preload.setValue(BrowserSettings.getInstance().getDefaultPreloadSetting());
+			}
+		}
+		if (!sharedPrefs.contains(PreferenceKeys.PREF_LINK_PREFETCH)) {
+			// set default value for link prefetch setting
+			ListPreference prefetch = (ListPreference) prefScreen.findPreference(PreferenceKeys.PREF_LINK_PREFETCH);
+			if (prefetch != null) {
+				prefetch.setValue(BrowserSettings.getInstance().getDefaultLinkPrefetchSetting());
+			}
+		}
+	}
 
 }

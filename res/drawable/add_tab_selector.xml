@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!--
+     Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,11 +15,11 @@
      limitations under the License.
 -->
 
+
 <!-- Custom background for the new tab button -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_focused="false"
-        android:drawable="@drawable/browsertab_add" />
-    <item android:state_focused="true"
-         android:drawable="@drawable/browsertab_add_focused" />
+    <item android:drawable="@drawable/browsertab_add" android:state_focused="false"/>
+    <item android:drawable="@drawable/browsertab_add_focused" android:state_focused="true"/>
+
 </selector>

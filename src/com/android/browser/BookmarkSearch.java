@@ -21,24 +21,24 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * This activity is never started from the browser. Its purpose is to provide bookmark suggestions
- * to global search (through its searchable meta-data), and to handle the intents produced
- * by clicking such suggestions.
+ * This activity is never started from the browser. Its purpose is to provide
+ * bookmark suggestions to global search (through its searchable meta-data), and
+ * to handle the intents produced by clicking such suggestions.
  */
 public class BookmarkSearch extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        if (intent != null) {
-            String action = intent.getAction();
-            if (Intent.ACTION_VIEW.equals(action)) {
-                intent.setClass(this, BrowserActivity.class);
-                startActivity(intent);
-            }
-        }
-        finish();
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Intent intent = getIntent();
+		if (intent != null) {
+			String action = intent.getAction();
+			if (Intent.ACTION_VIEW.equals(action)) {
+				intent.setClass(this, BrowserActivity.class);
+				startActivity(intent);
+			}
+		}
+		finish();
+	}
 
 }

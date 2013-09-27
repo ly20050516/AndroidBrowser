@@ -30,110 +30,109 @@ import java.util.Map;
  */
 public class BrowserWebView extends WebView implements WebViewClassic.TitleBarDelegate {
 
-    public interface OnScrollChangedListener {
-        void onScrollChanged(int l, int t, int oldl, int oldt);
-    }
+	public interface OnScrollChangedListener {
+		void onScrollChanged(int l, int t, int oldl, int oldt);
+	}
 
-    private boolean mBackgroundRemoved = false;
-    private TitleBar mTitleBar;
-    private OnScrollChangedListener mOnScrollChangedListener;
+	private boolean mBackgroundRemoved = false;
+	private TitleBar mTitleBar;
+	private OnScrollChangedListener mOnScrollChangedListener;
 
-    /**
-     * @param context
-     * @param attrs
-     * @param defStyle
-     * @param javascriptInterfaces
-     */
-    public BrowserWebView(Context context, AttributeSet attrs, int defStyle,
-            Map<String, Object> javascriptInterfaces, boolean privateBrowsing) {
-        super(context, attrs, defStyle, javascriptInterfaces, privateBrowsing);
-    }
+	/**
+	 * @param context
+	 * @param attrs
+	 * @param defStyle
+	 * @param javascriptInterfaces
+	 */
+	public BrowserWebView(Context context, AttributeSet attrs, int defStyle, Map<String, Object> javascriptInterfaces,
+			boolean privateBrowsing) {
+		super(context, attrs, defStyle, javascriptInterfaces, privateBrowsing);
+	}
 
-    /**
-     * @param context
-     * @param attrs
-     * @param defStyle
-     */
-    public BrowserWebView(
-            Context context, AttributeSet attrs, int defStyle, boolean privateBrowsing) {
-        super(context, attrs, defStyle, privateBrowsing);
-    }
+	/**
+	 * @param context
+	 * @param attrs
+	 * @param defStyle
+	 */
+	public BrowserWebView(Context context, AttributeSet attrs, int defStyle, boolean privateBrowsing) {
+		super(context, attrs, defStyle, privateBrowsing);
+	}
 
-    /**
-     * @param context
-     * @param attrs
-     */
-    public BrowserWebView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	/**
+	 * @param context
+	 * @param attrs
+	 */
+	public BrowserWebView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    /**
-     * @param context
-     */
-    public BrowserWebView(Context context) {
-        super(context);
-    }
+	/**
+	 * @param context
+	 */
+	public BrowserWebView(Context context) {
+		super(context);
+	}
 
-    public void setTitleBar(TitleBar title) {
-        mTitleBar = title;
-    }
+	public void setTitleBar(TitleBar title) {
+		mTitleBar = title;
+	}
 
-    // From TitleBarDelegate
-    @Override
-    public int getTitleHeight() {
-        return (mTitleBar != null) ? mTitleBar.getEmbeddedHeight() : 0;
-    }
+	// From TitleBarDelegate
+	@Override
+	public int getTitleHeight() {
+		return (mTitleBar != null) ? mTitleBar.getEmbeddedHeight() : 0;
+	}
 
-    // From TitleBarDelegate
-    @Override
-    public void onSetEmbeddedTitleBar(final View title) {
-    }
+	// From TitleBarDelegate
+	@Override
+	public void onSetEmbeddedTitleBar(final View title) {
+	}
 
-    public boolean hasTitleBar() {
-        return (mTitleBar != null);
-    }
+	public boolean hasTitleBar() {
+		return (mTitleBar != null);
+	}
 
-    @Override
-    protected void onDraw(Canvas c) {
-        super.onDraw(c);
-        if (!mBackgroundRemoved && getRootView().getBackground() != null) {
-            mBackgroundRemoved = true;
-            post(new Runnable() {
-                public void run() {
-                    getRootView().setBackgroundDrawable(null);
-                }
-            });
-        }
-    }
+	@Override
+	protected void onDraw(Canvas c) {
+		super.onDraw(c);
+		if (!mBackgroundRemoved && getRootView().getBackground() != null) {
+			mBackgroundRemoved = true;
+			post(new Runnable() {
+				public void run() {
+					getRootView().setBackgroundDrawable(null);
+				}
+			});
+		}
+	}
 
-    public void drawContent(Canvas c) {
-        onDraw(c);
-    }
+	public void drawContent(Canvas c) {
+		onDraw(c);
+	}
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        if (mTitleBar != null) {
-            mTitleBar.onScrollChanged();
-        }
-        if (mOnScrollChangedListener != null) {
-            mOnScrollChangedListener.onScrollChanged(l, t, oldl, oldt);
-        }
-    }
+	@Override
+	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+		super.onScrollChanged(l, t, oldl, oldt);
+		if (mTitleBar != null) {
+			mTitleBar.onScrollChanged();
+		}
+		if (mOnScrollChangedListener != null) {
+			mOnScrollChangedListener.onScrollChanged(l, t, oldl, oldt);
+		}
+	}
 
-    public void setOnScrollChangedListener(OnScrollChangedListener listener) {
-        mOnScrollChangedListener = listener;
-    }
+	public void setOnScrollChangedListener(OnScrollChangedListener listener) {
+		mOnScrollChangedListener = listener;
+	}
 
-    @Override
-    public boolean showContextMenuForChild(View originalView) {
-        return false;
-    }
+	@Override
+	public boolean showContextMenuForChild(View originalView) {
+		return false;
+	}
 
-    @Override
-    public void destroy() {
-        BrowserSettings.getInstance().stopManagingSettings(getSettings());
-        super.destroy();
-    }
+	@Override
+	public void destroy() {
+		BrowserSettings.getInstance().stopManagingSettings(getSettings());
+		super.destroy();
+	}
 
 }

@@ -74,4 +74,12 @@
     <dimen name="nav_tab_text_small">14sp</dimen>
     <dimen name="suggest_item_padding">8dp</dimen>
     <dimen name="progress_bar_margin">-11dip</dimen>
+    
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">8dp</dimen>
+    <dimen name="padding_large">16dp</dimen>
+    <dimen name="margins_allsitesview_spline">60dp</dimen>
+    <dimen name="margins_allsitesview_itemleft">60dp</dimen>
+    <dimen name="margins_allsitesview_itemtop">30dp</dimen>
+    
 </resources>

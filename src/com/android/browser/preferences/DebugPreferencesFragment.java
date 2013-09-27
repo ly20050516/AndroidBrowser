@@ -26,27 +26,24 @@ import com.android.browser.GoogleAccountLogin;
 import com.android.browser.PreferenceKeys;
 import com.android.browser.R;
 
-public class DebugPreferencesFragment extends PreferenceFragment
-        implements OnPreferenceClickListener {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+public class DebugPreferencesFragment extends PreferenceFragment implements OnPreferenceClickListener {
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Load the XML preferences file
-        addPreferencesFromResource(R.xml.debug_preferences);
+		// Load the XML preferences file
+		addPreferencesFromResource(R.xml.debug_preferences);
 
-        Preference e = findPreference(PreferenceKeys.PREF_RESET_PRELOGIN);
-        e.setOnPreferenceClickListener(this);
-    }
+		Preference e = findPreference(PreferenceKeys.PREF_RESET_PRELOGIN);
+		e.setOnPreferenceClickListener(this);
+	}
 
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        if (PreferenceKeys.PREF_RESET_PRELOGIN.equals(preference.getKey())) {
-            BrowserSettings.getInstance().getPreferences().edit()
-                    .remove(GoogleAccountLogin.PREF_AUTOLOGIN_TIME)
-                    .apply();
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public boolean onPreferenceClick(Preference preference) {
+		if (PreferenceKeys.PREF_RESET_PRELOGIN.equals(preference.getKey())) {
+			BrowserSettings.getInstance().getPreferences().edit().remove(GoogleAccountLogin.PREF_AUTOLOGIN_TIME).apply();
+			return true;
+		}
+		return false;
+	}
 }

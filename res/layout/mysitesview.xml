@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/mysitesview_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dip"
+            android:layout_marginTop="10dp"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/mysitesview_button"
+            style="@style/MyNavigationButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="18dip"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/btn_myrecommends"
+            android:contentDescription="@string/app_name"
+            android:text="@string/btn_recommend"
+            android:textColor="@android:color/white"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <GridLayout
+        android:id="@+id/mysitesview_gridlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="10dip"
+        android:alignmentMode="alignBounds"
+        android:columnOrderPreserved="false"
+        android:useDefaultMargins="false" >
+    </GridLayout>
+
+</merge>

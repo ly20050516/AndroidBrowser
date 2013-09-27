@@ -33,131 +33,131 @@ import android.widget.TextView;
  */
 public class FolderSpinnerAdapter extends BaseAdapter {
 
-    public static final int HOME_SCREEN = 0;
-    public static final int ROOT_FOLDER = 1;
-    public static final int OTHER_FOLDER = 2;
-    public static final int RECENT_FOLDER = 3;
+	public static final int HOME_SCREEN = 0;
+	public static final int ROOT_FOLDER = 1;
+	public static final int OTHER_FOLDER = 2;
+	public static final int RECENT_FOLDER = 3;
 
-    private boolean mIncludeHomeScreen;
-    private boolean mIncludesRecentFolder;
-    private long mRecentFolderId;
-    private String mRecentFolderName;
-    private LayoutInflater mInflater;
-    private Context mContext;
-    private String mOtherFolderDisplayText;
+	private boolean mIncludeHomeScreen;
+	private boolean mIncludesRecentFolder;
+	private long mRecentFolderId;
+	private String mRecentFolderName;
+	private LayoutInflater mInflater;
+	private Context mContext;
+	private String mOtherFolderDisplayText;
 
-    public FolderSpinnerAdapter(Context context, boolean includeHomeScreen) {
-        mIncludeHomeScreen = includeHomeScreen;
-        mContext = context;
-        mInflater = LayoutInflater.from(mContext);
-    }
+	public FolderSpinnerAdapter(Context context, boolean includeHomeScreen) {
+		mIncludeHomeScreen = includeHomeScreen;
+		mContext = context;
+		mInflater = LayoutInflater.from(mContext);
+	}
 
-    public void addRecentFolder(long folderId, String folderName) {
-        mIncludesRecentFolder = true;
-        mRecentFolderId = folderId;
-        mRecentFolderName = folderName;
-    }
+	public void addRecentFolder(long folderId, String folderName) {
+		mIncludesRecentFolder = true;
+		mRecentFolderId = folderId;
+		mRecentFolderName = folderName;
+	}
 
-    public long recentFolderId() { return mRecentFolderId; }
+	public long recentFolderId() {
+		return mRecentFolderId;
+	}
 
-    private void bindView(int position, View view, boolean isDropDown) {
-        int labelResource;
-        int drawableResource;
-        if (!mIncludeHomeScreen) {
-            position++;
-        }
-        switch (position) {
-            case HOME_SCREEN:
-                labelResource = R.string.add_to_homescreen_menu_option;
-                drawableResource = R.drawable.ic_home_holo_dark;
-                break;
-            case ROOT_FOLDER:
-                labelResource = R.string.add_to_bookmarks_menu_option;
-                drawableResource = R.drawable.ic_bookmarks_holo_dark;
-                break;
-            case RECENT_FOLDER:
-                // Fall through and use the same icon resource
-            case OTHER_FOLDER:
-                labelResource = R.string.add_to_other_folder_menu_option;
-                drawableResource = R.drawable.ic_folder_holo_dark;
-                break;
-            default:
-                labelResource = 0;
-                drawableResource = 0;
-                // assert
-                break;
-        }
-        TextView textView = (TextView) view;
-        if (position == RECENT_FOLDER) {
-            textView.setText(mRecentFolderName);
-        } else if (position == OTHER_FOLDER && !isDropDown
-                && mOtherFolderDisplayText != null) {
-            textView.setText(mOtherFolderDisplayText);
-        } else {
-            textView.setText(labelResource);
-        }
-        textView.setGravity(Gravity.CENTER_VERTICAL);
-        Drawable drawable = mContext.getResources().getDrawable(drawableResource);
-        textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null,
-                null, null);
-    }
+	private void bindView(int position, View view, boolean isDropDown) {
+		int labelResource;
+		int drawableResource;
+		if (!mIncludeHomeScreen) {
+			position++;
+		}
+		switch (position) {
+		case HOME_SCREEN:
+			labelResource = R.string.add_to_homescreen_menu_option;
+			drawableResource = R.drawable.ic_home_holo_dark;
+			break;
+		case ROOT_FOLDER:
+			labelResource = R.string.add_to_bookmarks_menu_option;
+			drawableResource = R.drawable.ic_bookmarks_holo_dark;
+			break;
+		case RECENT_FOLDER:
+			// Fall through and use the same icon resource
+		case OTHER_FOLDER:
+			labelResource = R.string.add_to_other_folder_menu_option;
+			drawableResource = R.drawable.ic_folder_holo_dark;
+			break;
+		default:
+			labelResource = 0;
+			drawableResource = 0;
+			// assert
+			break;
+		}
+		TextView textView = (TextView) view;
+		if (position == RECENT_FOLDER) {
+			textView.setText(mRecentFolderName);
+		} else if (position == OTHER_FOLDER && !isDropDown && mOtherFolderDisplayText != null) {
+			textView.setText(mOtherFolderDisplayText);
+		} else {
+			textView.setText(labelResource);
+		}
+		textView.setGravity(Gravity.CENTER_VERTICAL);
+		Drawable drawable = mContext.getResources().getDrawable(drawableResource);
+		textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+	}
 
-    @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = mInflater.inflate(
-                    android.R.layout.simple_spinner_dropdown_item, parent, false);
-        }
-        bindView(position, convertView, true);
-        return convertView;
-    }
+	@Override
+	public View getDropDownView(int position, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			convertView = mInflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
+		}
+		bindView(position, convertView, true);
+		return convertView;
+	}
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = mInflater.inflate(android.R.layout.simple_spinner_item,
-                    parent, false);
-        }
-        bindView(position, convertView, false);
-        return convertView;
-    }
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			convertView = mInflater.inflate(android.R.layout.simple_spinner_item, parent, false);
+		}
+		bindView(position, convertView, false);
+		return convertView;
+	}
 
-    @Override
-    public int getCount() {
-        int count = 2;
-        if (mIncludeHomeScreen) count++;
-        if (mIncludesRecentFolder) count++;
-        return count;
-    }
+	@Override
+	public int getCount() {
+		int count = 2;
+		if (mIncludeHomeScreen)
+			count++;
+		if (mIncludesRecentFolder)
+			count++;
+		return count;
+	}
 
-    @Override
-    public Object getItem(int position) {
-        return null;
-    }
+	@Override
+	public Object getItem(int position) {
+		return null;
+	}
 
-    @Override
-    public long getItemId(int position) {
-        long id = position;
-        if (!mIncludeHomeScreen) {
-            id++;
-        }
-        return id;
-    }
+	@Override
+	public long getItemId(int position) {
+		long id = position;
+		if (!mIncludeHomeScreen) {
+			id++;
+		}
+		return id;
+	}
 
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
+	@Override
+	public boolean hasStableIds() {
+		return true;
+	}
 
-    public void setOtherFolderDisplayText(String parentTitle) {
-        mOtherFolderDisplayText = parentTitle;
-        notifyDataSetChanged();
-    }
+	public void setOtherFolderDisplayText(String parentTitle) {
+		mOtherFolderDisplayText = parentTitle;
+		notifyDataSetChanged();
+	}
 
-    public void clearRecentFolder() {
-        if (mIncludesRecentFolder) {
-            mIncludesRecentFolder = false;
-            notifyDataSetChanged();
-        }
-    }
+	public void clearRecentFolder() {
+		if (mIncludesRecentFolder) {
+			mIncludesRecentFolder = false;
+			notifyDataSetChanged();
+		}
+	}
 }

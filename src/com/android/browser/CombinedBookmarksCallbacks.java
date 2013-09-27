@@ -16,8 +16,11 @@
 package com.android.browser;
 
 public interface CombinedBookmarksCallbacks {
-    void openUrl(String url);
-    void openInNewTab(String... urls);
-    void openSnapshot(long id);
-    void close();
+	void openUrl(String url);
+
+	void openInNewTab(String... urls);
+
+	void openSnapshot(long id);
+
+	void close();
 }

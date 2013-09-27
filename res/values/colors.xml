@@ -38,4 +38,40 @@
     <color name="qc_tab_nr">#F033B5E5</color>
     <color name="tabViewTitleBackground">#D0000000</color>
     <color name="navtab_bg">#80606060</color>
+    
+    <!-- TabItem 未选中字体颜色 -->
+    <color name="tabitemunselected">#FFFFFF</color>
+    <!-- TabItem 选中时字体颜色 -->
+    <color name="tabitemselected">#F0E68C</color>
+   
+    <!-- 黄色 -->
+    <color name="yellow">#FFFF00</color>
+    <color name="gold">#FFD700</color>
+    <!-- 金色 -->
+    <color name="pink">#FFC0CB</color>
+    <!-- 粉红色 -->
+    <color name="orange">#FFA500</color>
+    <!-- 橙色 -->
+    <color name="red">#FF0000</color>
+    <!-- 红色 -->
+    <color name="beige">#F5F5DC</color>
+    <!-- 米色 -->
+    <color name="wheat">#F5DEB3</color>
+    <!-- 浅黄色 -->
+    <color name="sandybrown">#F4A460</color>
+    <!-- 沙褐色 -->
+    <color name="azure">#F0FFFF</color>
+    <!-- 天蓝色 -->
+    <color name="khaki">#F0E68C</color>
+    <!-- 灰色 -->
+    <color name="grey">#808080</color>
+    <!-- 橄榄色 -->
+    <color name="olive">#808000</color>
+    <!-- 紫色 -->
+    <color name="purple">#800080</color>
+    <!-- 绿色 -->
+    <color name="green">#008000</color>
+    <!-- 蓝色 -->
+    <color name="blue">#0000FF</color>
+    
 </resources>

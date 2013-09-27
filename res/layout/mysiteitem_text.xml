@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:contentDescription="@string/accessibility_button_addbookmark"
+        android:src="@drawable/ic_deletes"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/imageView" >
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#4d4d4d"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/layerTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/logo_selected"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</RelativeLayout>
