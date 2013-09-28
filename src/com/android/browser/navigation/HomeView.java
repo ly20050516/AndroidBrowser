@@ -594,7 +594,7 @@ public class HomeView extends RelativeLayout {
 			}
 			
 			if (maxFrequentsites == 6) {
-				mFrequentSitesSitesItem.addViews(true, mDataManager.getNextTwoFrequentSite(maxFrequentsites));
+				mFrequentSitesSitesItem.addViews(true, mDataManager.getNextCountFrequentSite(4,maxFrequentsites));
 				maxFrequentsites = 10;
 			}
 		}
@@ -605,7 +605,7 @@ public class HomeView extends RelativeLayout {
 			}
 			
 			if (maxFrequentsites == 10) {
-				mFrequentSitesSitesItem.removeViewsInLayout(maxFrequentsites - 2, 2);
+				mFrequentSitesSitesItem.removeViewsInLayout(maxFrequentsites - 4, 4);
 				maxFrequentsites = 6;
 			}
 		}

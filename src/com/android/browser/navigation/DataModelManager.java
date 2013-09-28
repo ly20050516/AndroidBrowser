@@ -200,11 +200,11 @@ public class DataModelManager {
 	 * @param maxFrequentsites
 	 * @return List<BaseObject>
 	 */
-	public List<BaseObject> getNextTwoFrequentSite(int maxFrequentsites) {
+	public List<BaseObject> getNextCountFrequentSite(int count , int maxFrequentsites) {
 		List<BaseObject> mList = getVisitDescSort();
 		
-		if (mList.size() > maxFrequentsites + 2) {
-			return mList.subList(maxFrequentsites, maxFrequentsites + 2);
+		if (mList.size() > maxFrequentsites + count) {
+			return mList.subList(maxFrequentsites, maxFrequentsites + count);
 		}
 		return null;
 	}
