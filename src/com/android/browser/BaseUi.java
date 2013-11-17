@@ -119,7 +119,7 @@ public abstract class BaseUi implements UI {
 	protected PieControl mPieControl;
 	private boolean mBlockFocusAnimations;
 
-	private HomeView homeView = null;
+	private HomeView mHomeView = null;
 
 	public BaseUi(Activity browser, UiController controller) {
 		mActivity = browser;
@@ -135,8 +135,8 @@ public abstract class BaseUi implements UI {
 		mContentView = (FrameLayout) frameLayout.findViewById(R.id.main_content);
 		mCustomViewContainer = (FrameLayout) frameLayout.findViewById(R.id.fullscreen_custom_content);
 		mErrorConsoleContainer = (LinearLayout) frameLayout.findViewById(R.id.error_console);
-		homeView = new HomeView(mActivity);
-		homeView.setOnSiteNavigationListener(new HomeViewOnSiteNavigationListener());
+		mHomeView = new HomeView(mActivity);
+		mHomeView.setOnSiteNavigationListener(new HomeViewOnSiteNavigationListener());
 		setFullscreen(BrowserSettings.getInstance().useFullscreen());
 		mGenericFavicon = res.getDrawable(R.drawable.app_web_browser_sm);
 		mTitleBar = new TitleBar(mActivity, mUiController, this, mContentView);
@@ -170,6 +170,10 @@ public abstract class BaseUi implements UI {
 		final Tab ct = mTabControl.getCurrentTab();
 		if (ct != null) {
 			setActiveTab(ct);
+		}
+		if(mHomeView != null){
+			
+			mHomeView.resume();
 		}
 	}
 
@@ -371,7 +375,7 @@ public abstract class BaseUi implements UI {
 			Log.d("Liu Test", getClass().getSimpleName() + " attachTabToContentView(Tab tab) parent = (ViewGroup) mainView.getParent();");
 		} else {
 
-			parent = (ViewGroup) homeView.getParent();
+			parent = (ViewGroup) mHomeView.getParent();
 			Log.d("Liu Test", getClass().getSimpleName() + " attachTabToContentView(Tab tab) parent = (ViewGroup) homeView.getParent();");
 		}
 		if (parent != wrapper) {
@@ -382,7 +386,7 @@ public abstract class BaseUi implements UI {
 					parent.removeView(mainView);
 					Log.d("Liu Test", getClass().getSimpleName() + " attachTabToContentView(Tab tab) parent.removeView(mainView);");
 				} else {
-					parent.removeView(homeView);
+					parent.removeView(mHomeView);
 					Log.d("Liu Test", getClass().getSimpleName() + " attachTabToContentView(Tab tab) parent.removeView(homeView);");
 				}
 			}
@@ -392,7 +396,7 @@ public abstract class BaseUi implements UI {
 
 			} else {
 
-				wrapper.addView(homeView);
+				wrapper.addView(mHomeView);
 			}
 		}
 		parent = (ViewGroup) container.getParent();
@@ -406,22 +410,7 @@ public abstract class BaseUi implements UI {
 			mContentView.addView(container, COVER_SCREEN_PARAMS);
 		}
 
-		// TextView homeView =new TextView(mActivity);
-		// homeView.setText("Browser: I am home view");
-		// homeView.setBackgroundColor(Color.RED);
-		// homeView.setTextColor(Color.WHITE);
-		// homeView.setTextSize(36);
-		// homeView.setOnClickListener(new OnClickListener() {
-		//
-		// @Override
-		// public void onClick(View arg0) {
-		//
-		//
-		// UrlInputView uiv = new UrlInputView(mActivity);
-		// finishInput("www.baidu.com",null,"browser-type");
-		// }
-		// });
-		// wrapper.removeAllViews();
+		
 		Log.d("Liu Test", getClass().getSimpleName() + " addTabFromContentView(Tab tab) wrap.getchildcount = " + wrapper.getChildCount());
 		Log.d("Liu Test",
 				getClass().getSimpleName() + " addTabFromContentView(Tab tab) mContentView.getchildcount = " + mContentView.getChildCount());
@@ -513,7 +502,7 @@ public abstract class BaseUi implements UI {
 
 		} else {
 
-			wrapper.removeView(homeView);
+			wrapper.removeView(mHomeView);
 			Log.d("Liu Test", getClass().getSimpleName() + " removeTabFromContentView(Tab tab) remove homeview");
 		}
 		// Remove the container from the content and then remove the
@@ -550,7 +539,7 @@ public abstract class BaseUi implements UI {
 		if (webView == null) {
 
 			FrameLayout wrapper = (FrameLayout) container.findViewById(R.id.webview_wrapper);
-			wrapper.removeView(homeView);
+			wrapper.removeView(mHomeView);
 		} else if (tab.getWebView() != webView) {
 			// Just remove the old one.
 			FrameLayout wrapper = (FrameLayout) container.findViewById(R.id.webview_wrapper);
@@ -635,6 +624,7 @@ public abstract class BaseUi implements UI {
 	}
 
 	protected void hideTitleBar() {
+		
 		if (mTitleBar.isShowing()) {
 			mTitleBar.hide();
 		}
@@ -690,6 +680,7 @@ public abstract class BaseUi implements UI {
 
 	@Override
 	public void onHideCustomView() {
+		
 		((BrowserWebView) getWebView()).setVisibility(View.VISIBLE);
 		if (mCustomView == null)
 			return;
@@ -701,6 +692,7 @@ public abstract class BaseUi implements UI {
 		mCustomViewCallback.onCustomViewHidden();
 		// Show the content view.
 		mActivity.setRequestedOrientation(mOriginalOrientation);
+		
 	}
 
 	@Override
@@ -1016,14 +1008,9 @@ public abstract class BaseUi implements UI {
 	public void onVoiceResult(String result) {
 		mNavigationBar.onVoiceResult(result);
 	}
-
 	/**
-	 * 
-	 * 说明：网址导航<br>
-	 * 公司名称 ：步步高教育电子<br>
-	 * 
-	 * @author 李修金
-	 * @version 1.0
+	 * @author ly
+	 *
 	 */
 	class HomeViewOnSiteNavigationListener implements OnSiteNavigationListener {
 

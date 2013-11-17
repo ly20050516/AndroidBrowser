@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 <resources>
-    <style name="BrowserTheme" parent="@android:Theme.Holo">
+    <style name="BrowserTheme" parent="@android:Theme.Holo.Light">
         <item name="android:windowBackground">@color/white</item>
-        <item name="android:colorBackground">#FFFFFFFF</item>
+        <item name="android:colorBackground">@color/white</item>
         <item name="android:windowActionBar">true</item>
         <item name="android:windowNoTitle">false</item>
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>

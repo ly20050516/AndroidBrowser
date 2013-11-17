@@ -18,9 +18,13 @@ package com.android.browser;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -34,14 +38,18 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 
+import com.android.browser.navigation.PagerContentProvider.GreenSites;
 import com.android.browser.stub.NullController;
 import com.google.common.annotations.VisibleForTesting;
 
 public class BrowserActivity extends Activity {
 
 	public static final String ACTION_SHOW_BOOKMARKS = "show_bookmarks";
+
 	public static final String ACTION_SHOW_BROWSER = "show_browser";
+
 	public static final String ACTION_RESTART = "--restart--";
+
 	private static final String EXTRA_STATE = "state";
 
 	private final static String LOGTAG = "browser";
@@ -51,20 +59,23 @@ public class BrowserActivity extends Activity {
 	private ActivityController mController = NullController.INSTANCE;
 
 	@Override
-	public void onCreate(Bundle icicle) {
-		if (LOGV_ENABLED) {
+	public void onCreate ( Bundle icicle ) {
+
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, this + " onStart, has state: " + (icicle == null ? "false" : "true"));
 		}
 		super.onCreate(icicle);
 
-		if (shouldIgnoreIntents()) {
+		// wrtieDataToSites();
+
+		if ( shouldIgnoreIntents() ) {
 			finish();
 			return;
 		}
 
 		// If this was a web search request, pass it on to the default web
 		// search provider and finish this activity.
-		if (IntentHandler.handleWebSearchIntent(this, null, getIntent())) {
+		if ( IntentHandler.handleWebSearchIntent(this, null, getIntent()) ) {
 			finish();
 			return;
 		}
@@ -74,20 +85,21 @@ public class BrowserActivity extends Activity {
 		mController.start(intent);
 	}
 
-	public static boolean isTablet(Context context) {
+	public static boolean isTablet ( Context context ) {
+
 		return context.getResources().getBoolean(R.bool.isTablet);
 	}
 
-	private Controller createController() {
-		
+	private Controller createController ( ) {
+
 		Controller controller = new Controller(this);
 		boolean xlarge = isTablet(this);
 
-		if (LOGV_ENABLED) {
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, this + "xlarge is " + xlarge);
 		}
 		UI ui = null;
-		if (xlarge) {
+		if ( xlarge ) {
 			ui = new XLargeUi(this, controller);
 		} else {
 			ui = new PhoneUi(this, controller);
@@ -97,70 +109,77 @@ public class BrowserActivity extends Activity {
 	}
 
 	@VisibleForTesting
-	Controller getController() {
+	Controller getController ( ) {
+
 		return (Controller) mController;
 	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {
-		if (shouldIgnoreIntents())
+	protected void onNewIntent ( Intent intent ) {
+
+		if ( shouldIgnoreIntents() )
 			return;
-		if (ACTION_RESTART.equals(intent.getAction())) {
+		if ( ACTION_RESTART.equals(intent.getAction()) ) {
 			Bundle outState = new Bundle();
 			mController.onSaveInstanceState(outState);
 			finish();
 			getApplicationContext().startActivity(
-					new Intent(getApplicationContext(), BrowserActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra(
-							EXTRA_STATE, outState));
+					new Intent(getApplicationContext(), BrowserActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra(EXTRA_STATE, outState));
 			return;
 		}
 		mController.handleNewIntent(intent);
 	}
 
 	private KeyguardManager mKeyguardManager;
+
 	private PowerManager mPowerManager;
 
-	private boolean shouldIgnoreIntents() {
+	private boolean shouldIgnoreIntents ( ) {
+
 		// Only process intents if the screen is on and the device is unlocked
 		// aka, if we will be user-visible
-		if (mKeyguardManager == null) {
+		if ( mKeyguardManager == null ) {
 			mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 		}
-		if (mPowerManager == null) {
+		if ( mPowerManager == null ) {
 			mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		}
 		boolean ignore = !mPowerManager.isScreenOn();
 		ignore |= mKeyguardManager.inKeyguardRestrictedInputMode();
-		if (LOGV_ENABLED) {
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, "ignore intents: " + ignore);
 		}
 		return ignore;
 	}
 
 	@Override
-	protected void onResume() {
+	protected void onResume ( ) {
+
 		super.onResume();
-		if (LOGV_ENABLED) {
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, "BrowserActivity.onResume: this=" + this);
 		}
 		mController.onResume();
 	}
 
 	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		if (Window.FEATURE_OPTIONS_PANEL == featureId) {
+	public boolean onMenuOpened ( int featureId , Menu menu ) {
+
+		if ( Window.FEATURE_OPTIONS_PANEL == featureId ) {
 			mController.onMenuOpened(featureId, menu);
 		}
 		return true;
 	}
 
 	@Override
-	public void onOptionsMenuClosed(Menu menu) {
+	public void onOptionsMenuClosed ( Menu menu ) {
+
 		mController.onOptionsMenuClosed(menu);
 	}
 
 	@Override
-	public void onContextMenuClosed(Menu menu) {
+	public void onContextMenuClosed ( Menu menu ) {
+
 		super.onContextMenuClosed(menu);
 		mController.onContextMenuClosed(menu);
 	}
@@ -170,22 +189,25 @@ public class BrowserActivity extends Activity {
 	 * before onStop(). The map contains the saved state.
 	 */
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		if (LOGV_ENABLED) {
+	protected void onSaveInstanceState ( Bundle outState ) {
+
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, "BrowserActivity.onSaveInstanceState: this=" + this);
 		}
 		mController.onSaveInstanceState(outState);
 	}
 
 	@Override
-	protected void onPause() {
+	protected void onPause ( ) {
+
 		mController.onPause();
 		super.onPause();
 	}
 
 	@Override
-	protected void onDestroy() {
-		if (LOGV_ENABLED) {
+	protected void onDestroy ( ) {
+
+		if ( LOGV_ENABLED ) {
 			Log.v(LOGTAG, "BrowserActivity.onDestroy: this=" + this);
 		}
 		super.onDestroy();
@@ -194,107 +216,177 @@ public class BrowserActivity extends Activity {
 	}
 
 	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
+	public void onConfigurationChanged ( Configuration newConfig ) {
+
 		super.onConfigurationChanged(newConfig);
 		mController.onConfgurationChanged(newConfig);
 	}
 
 	@Override
-	public void onLowMemory() {
+	public void onLowMemory ( ) {
+
 		super.onLowMemory();
 		mController.onLowMemory();
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu ( Menu menu ) {
+
 		super.onCreateOptionsMenu(menu);
 		return mController.onCreateOptionsMenu(menu);
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu ( Menu menu ) {
+
 		super.onPrepareOptionsMenu(menu);
 		return mController.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (!mController.onOptionsItemSelected(item)) {
+	public boolean onOptionsItemSelected ( MenuItem item ) {
+
+		if ( !mController.onOptionsItemSelected(item) ) {
 			return super.onOptionsItemSelected(item);
 		}
 		return true;
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu ( ContextMenu menu , View v , ContextMenuInfo menuInfo ) {
+
 		mController.onCreateContextMenu(menu, v, menuInfo);
 	}
 
 	@Override
-	public boolean onContextItemSelected(MenuItem item) {
+	public boolean onContextItemSelected ( MenuItem item ) {
+
 		return mController.onContextItemSelected(item);
 	}
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	public boolean onKeyDown ( int keyCode , KeyEvent event ) {
+
 		return mController.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
 	}
 
 	@Override
-	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+	public boolean onKeyLongPress ( int keyCode , KeyEvent event ) {
+
 		return mController.onKeyLongPress(keyCode, event) || super.onKeyLongPress(keyCode, event);
 	}
 
 	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
+	public boolean onKeyUp ( int keyCode , KeyEvent event ) {
+
 		return mController.onKeyUp(keyCode, event) || super.onKeyUp(keyCode, event);
 	}
 
 	@Override
-	public void onActionModeStarted(ActionMode mode) {
+	public void onActionModeStarted ( ActionMode mode ) {
+
 		super.onActionModeStarted(mode);
 		mController.onActionModeStarted(mode);
 	}
 
 	@Override
-	public void onActionModeFinished(ActionMode mode) {
+	public void onActionModeFinished ( ActionMode mode ) {
+
 		super.onActionModeFinished(mode);
 		mController.onActionModeFinished(mode);
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+	protected void onActivityResult ( int requestCode , int resultCode , Intent intent ) {
+
 		mController.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	@Override
-	public boolean onSearchRequested() {
+	public boolean onSearchRequested ( ) {
+
 		return mController.onSearchRequested();
 	}
 
 	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
+	public boolean dispatchKeyEvent ( KeyEvent event ) {
+
 		return mController.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
 	}
 
 	@Override
-	public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+	public boolean dispatchKeyShortcutEvent ( KeyEvent event ) {
+
 		return mController.dispatchKeyShortcutEvent(event) || super.dispatchKeyShortcutEvent(event);
 	}
 
 	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
+	public boolean dispatchTouchEvent ( MotionEvent ev ) {
+
 		return mController.dispatchTouchEvent(ev) || super.dispatchTouchEvent(ev);
 	}
 
 	@Override
-	public boolean dispatchTrackballEvent(MotionEvent ev) {
+	public boolean dispatchTrackballEvent ( MotionEvent ev ) {
+
 		return mController.dispatchTrackballEvent(ev) || super.dispatchTrackballEvent(ev);
 	}
 
 	@Override
-	public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+	public boolean dispatchGenericMotionEvent ( MotionEvent ev ) {
+
 		return mController.dispatchGenericMotionEvent(ev) || super.dispatchGenericMotionEvent(ev);
 	}
 
+	protected void wrtieDataToSites ( ) {
+
+		ContentResolver cr = getContentResolver();
+		String AUTHORITY = "com.eebbk.junior.greenbrowser";
+		Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+		Uri GREENSITE_URI = Uri.withAppendedPath(AUTHORITY_URI, "greensites");
+
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(GREENSITE_URI, null, null, null, null);
+
+			int catalogCol = cursor.getColumnIndex(GreenSites.CATALOG);
+			int titleCol = cursor.getColumnIndex(GreenSites.TITLE);
+			int urlCol = cursor.getColumnIndex(GreenSites.URL);
+			int logoCol = cursor.getColumnIndex(GreenSites.LOGO);
+			int visitsCol = cursor.getColumnIndex(GreenSites.VISITS);
+			int ismeCol = cursor.getColumnIndex(GreenSites.ISME);
+			int presetCol = cursor.getColumnIndex(GreenSites.ISPRESET);
+			int catalogSN = cursor.getColumnIndex(GreenSites.CATALOGSN);
+
+			int count = 0;
+			while ( cursor.moveToNext() ) {
+
+				Log.d("Liu Test", "count = " + count++);
+				ContentValues cv = new ContentValues();
+				String c = cursor.getString(catalogCol);
+				String t = cursor.getString(titleCol);
+				String u = cursor.getString(urlCol);
+				String l = cursor.getString(logoCol);
+				int v = cursor.getInt(visitsCol);
+				int i = cursor.getInt(ismeCol);
+				int p = cursor.getInt(presetCol);
+				int cs = cursor.getInt(catalogSN);
+
+				cv.put(GreenSites.CATALOGSN, cs);
+				cv.put(GreenSites.CATALOG, c);
+				cv.put(GreenSites.TITLE, t);
+				cv.put(GreenSites.URL, u);
+				cv.put(GreenSites.LOGO, l);
+				cv.put(GreenSites.VISITS, v);
+				cv.put(GreenSites.ISME, i);
+				cv.put(GreenSites.ISPRESET, p);
+				cv.put(GreenSites.FLAG, 1);
+
+				cr.insert(GreenSites.GREENSITE_URI, cv);
+			}
+		} catch ( Exception e ) {
+
+		}
+		cursor.close();
+	}
 }

@@ -160,11 +160,15 @@ public class MySiteItem extends LinearLayout implements OnClickListener, OnTouch
 	public void onClick(View v) {
 
 		if (v == mImageView) {
+			
 			onSiteRemoveListener.onSiteRemove(this);
+			
 		} else if (v == mTextView) {
+			
 			if (mImageView.getVisibility() != View.VISIBLE) {
 				onSiteNavigationListener.onSiteNavigation(this);
 			}
+			
 		}
 	}
 

@@ -19,8 +19,8 @@
 -->
 <resources>
     
-    <style name="DialogWhenLarge" parent="@android:style/Theme.Holo.DialogWhenLarge" >
-        <item name="android:windowActionBar">false</item>
+    <style name="DialogWhenLarge" parent="@android:style/Theme.Holo.Light.Dialog" >
+       <!--  <item name="android:windowActionBar">false</item> -->
     </style>
     <style name="BookmarkTheme" parent="@android:Theme.Holo">
         <item name="android:windowActionBar">false</item>
@@ -66,11 +66,11 @@
         <item name="android:paddingRight">8dip</item>
     </style>
     <style name="TabTitleSelected" parent="@android:style/TextAppearance.Small">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/blue</item>
         <item name="android:textStyle">bold</item>
     </style>
     <style name="TabTitleUnselected" parent="@android:style/TextAppearance.Small">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textStyle">normal</item>
     </style>
 

@@ -16,6 +16,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group
+        
         android:id="@+id/MAIN_MENU">
         <group
             android:id="@+id/NAV_MENU"
@@ -58,7 +59,7 @@
                 android:alphabeticShortcut="s" />
             <item
                 android:id="@+id/find_menu_id"
-                android:title="@*android:string/find_on_page"/>
+                android:title="@string/find_on_page"/>
             <item
                 android:id="@+id/ua_desktop_menu_id"
                 android:checkable="true"

@@ -31,16 +31,29 @@
             android:visibility="gone" />
     </RelativeLayout>
 
-    <GridLayout
-        android:id="@+id/mysitesview_gridlayout"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dip"
-        android:layout_marginLeft="10dip"
-        android:layout_marginTop="10dip"
-        android:alignmentMode="alignBounds"
-        android:columnOrderPreserved="false"
-        android:useDefaultMargins="false" >
-    </GridLayout>
+        android:layout_height="wrap_content" >
+
+        <GridLayout
+            android:id="@+id/mysitesview_gridlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="10dip"
+            android:alignmentMode="alignBounds"
+            android:columnOrderPreserved="false"
+            android:useDefaultMargins="false" >
+        </GridLayout>
+
+        <ImageView
+            android:id="@+id/mysitesview_no_newsites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" 
+            android:layout_gravity="center"
+            android:src="@drawable/btn_no_newsitess"
+            android:visibility="gone"/>
+    </FrameLayout>
 
 </merge>

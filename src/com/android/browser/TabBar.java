@@ -54,8 +54,11 @@ public class TabBar extends LinearLayout implements OnClickListener {
 	private static final int PROGRESS_MAX = 100;
 
 	private Activity mActivity;
+
 	private UiController mUiController;
+
 	private TabControl mTabControl;
+
 	private XLargeUi mUi;
 
 	private int mTabWidth;
@@ -63,31 +66,43 @@ public class TabBar extends LinearLayout implements OnClickListener {
 	private TabScrollView mTabs;
 
 	private ImageButton mNewTab;
+
 	private int mButtonWidth;
 
-	private Map<Tab, TabView> mTabMap;
+	private Map< Tab , TabView> mTabMap;
 
 	private int mCurrentTextureWidth = 0;
+
 	private int mCurrentTextureHeight = 0;
 
 	private Drawable mActiveDrawable;
+
 	private Drawable mInactiveDrawable;
 
 	private final Paint mActiveShaderPaint = new Paint();
+
 	private final Paint mInactiveShaderPaint = new Paint();
+
 	private final Paint mFocusPaint = new Paint();
+
 	private final Matrix mActiveMatrix = new Matrix();
+
 	private final Matrix mInactiveMatrix = new Matrix();
 
 	private BitmapShader mActiveShader;
+
 	private BitmapShader mInactiveShader;
 
 	private int mTabOverlap;
+
 	private int mAddTabOverlap;
+
 	private int mTabSliceWidth;
+
 	private boolean mUseQuickControls;
 
-	public TabBar(Activity activity, UiController controller, XLargeUi ui) {
+	public TabBar ( Activity activity , UiController controller , XLargeUi ui ) {
+
 		super(activity);
 
 		Log.d("Liu Test", getClass().getSimpleName() + " TabBar(Activity activity, UiController controller, XLargeUi ui)");
@@ -98,16 +113,16 @@ public class TabBar extends LinearLayout implements OnClickListener {
 		mUi = ui;
 		Resources res = activity.getResources();
 		mTabWidth = (int) res.getDimension(R.dimen.tab_width);
-		mActiveDrawable = res.getDrawable(R.drawable.bg_urlbar);
-		mInactiveDrawable = res.getDrawable(R.drawable.browsertab_inactive);
+		mActiveDrawable = res.getDrawable(R.drawable.tab_other_pressed);
+		mInactiveDrawable = res.getDrawable(R.drawable.tab_other);
 
-		mTabMap = new HashMap<Tab, TabView>();
+		mTabMap = new HashMap< Tab , TabView>();
 		LayoutInflater factory = LayoutInflater.from(activity);
 		factory.inflate(R.layout.tab_bar, this);
 		setPadding(0, (int) res.getDimension(R.dimen.tab_padding_top), 0, 0);
 		mTabs = (TabScrollView) findViewById(R.id.tabs);
 		mNewTab = (ImageButton) findViewById(R.id.newtab);
-		
+
 		mNewTab.setVisibility(View.GONE);
 		mNewTab.setOnClickListener(this);
 
@@ -131,7 +146,8 @@ public class TabBar extends LinearLayout implements OnClickListener {
 	}
 
 	@Override
-	public void onConfigurationChanged(Configuration config) {
+	public void onConfigurationChanged ( Configuration config ) {
+
 		super.onConfigurationChanged(config);
 		Resources res = mActivity.getResources();
 		mTabWidth = (int) res.getDimension(R.dimen.tab_width);
@@ -139,19 +155,22 @@ public class TabBar extends LinearLayout implements OnClickListener {
 		mTabs.updateLayout();
 	}
 
-	void setUseQuickControls(boolean useQuickControls) {
+	void setUseQuickControls ( boolean useQuickControls ) {
+
 		mUseQuickControls = useQuickControls;
 		mNewTab.setVisibility(mUseQuickControls ? View.GONE : View.GONE);
 	}
 
-	int getTabCount() {
+	int getTabCount ( ) {
+
 		return mTabMap.size();
 	}
 
-	void updateTabs(List<Tab> tabs) {
+	void updateTabs ( List< Tab> tabs ) {
+
 		mTabs.clearTabs();
 		mTabMap.clear();
-		for (Tab tab : tabs) {
+		for ( Tab tab : tabs ) {
 			TabView tv = buildTabView(tab);
 			mTabs.addTab(tv);
 		}
@@ -159,96 +178,100 @@ public class TabBar extends LinearLayout implements OnClickListener {
 	}
 
 	@Override
-	protected void onMeasure(int hspec, int vspec) {
+	protected void onMeasure ( int hspec , int vspec ) {
+
 		super.onMeasure(hspec, vspec);
 		int w = getMeasuredWidth();
 		// adjust for new tab overlap
-		if (!mUseQuickControls) {
+		if ( !mUseQuickControls ) {
 			w -= mAddTabOverlap;
 		}
 		setMeasuredDimension(w, getMeasuredHeight());
 	}
 
 	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+	protected void onLayout ( boolean changed , int left , int top , int right , int bottom ) {
+
 		// use paddingLeft and paddingTop
 		int pl = getPaddingLeft();
 		int pt = getPaddingTop();
 		int sw = mTabs.getMeasuredWidth();
 		int w = right - left - pl;
-		if (mUseQuickControls) {
+		if ( mUseQuickControls ) {
 			mButtonWidth = 0;
 		} else {
 			mButtonWidth = mNewTab.getMeasuredWidth() - mAddTabOverlap;
-			if (w - sw < mButtonWidth) {
+			if ( w - sw < mButtonWidth ) {
 				sw = w - mButtonWidth;
 			}
 		}
 		mTabs.layout(pl, pt, pl + sw, bottom - top);
 		// adjust for overlap
-		if (!mUseQuickControls) {
+		if ( !mUseQuickControls ) {
 			mNewTab.layout(pl + sw - mAddTabOverlap, pt, pl + sw + mButtonWidth - mAddTabOverlap, bottom - top);
 		}
 	}
 
-	public void onClick(View view) {
+	public void onClick ( View view ) {
 
-		if (mNewTab == view) {
-			
+		if ( mNewTab == view ) {
+
 			mUiController.openTabToHomePage();
-			
-		} else if (mTabs.getSelectedTab() == view) {
-			
-			if (mUseQuickControls) {
-				
-				if (mUi.isTitleBarShowing() && !isLoading()) {
-					
+
+		} else if ( mTabs.getSelectedTab() == view ) {
+
+			if ( mUseQuickControls ) {
+
+				if ( mUi.isTitleBarShowing() && !isLoading() ) {
+
 					mUi.stopEditingUrl();
 					mUi.hideTitleBar();
-					
+
 				} else {
-					
+
 					mUi.stopWebViewScrolling();
 					mUi.editUrl(false, false);
-					
+
 				}
-			} else if (mUi.isTitleBarShowing() && !isLoading()) {
-				
+			} else if ( mUi.isTitleBarShowing() && !isLoading() ) {
+
 				mUi.stopEditingUrl();
 				mUi.hideTitleBar();
-				
+
 			} else {
-				
+
 				showUrlBar();
 			}
-			
-		} else if (view instanceof TabView) {
-			
+
+		} else if ( view instanceof TabView ) {
+
 			final Tab tab = ((TabView) view).mTab;
 			int ix = mTabs.getChildIndex(view);
-			if (ix >= 0) {
-				
+			if ( ix >= 0 ) {
+
 				mTabs.setSelectedTab(ix);
 				mUiController.switchToTab(tab);
-				
+
 			}
 		}
 	}
 
-	private void showUrlBar() {
+	private void showUrlBar ( ) {
+
 		mUi.stopWebViewScrolling();
 		mUi.showTitleBar();
 	}
 
-	private TabView buildTabView(Tab tab) {
-		
+	private TabView buildTabView ( Tab tab ) {
+
 		TabView tabview = new TabView(mActivity, tab);
 		mTabMap.put(tab, tabview);
 		tabview.setOnClickListener(this);
 		return tabview;
 	}
 
-	private static Bitmap getDrawableAsBitmap(Drawable drawable, int width, int height) {
+	private static Bitmap getDrawableAsBitmap ( Drawable drawable , int width , int height ) {
+
 		Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(b);
 		drawable.setBounds(0, 0, width, height);
@@ -263,32 +286,44 @@ public class TabBar extends LinearLayout implements OnClickListener {
 	class TabView extends LinearLayout implements OnClickListener {
 
 		Tab mTab;
+
 		View mTabContent;
+
 		TextView mTitle;
+
 		View mIncognito;
+
 		View mSnapshot;
+
 		ImageView mIconView;
+
 		ImageView mLock;
+
 		ImageView mClose;
+
 		boolean mSelected;
+
 		Path mPath;
+
 		Path mFocusPath;
+
 		int[] mWindowPos;
+
+		boolean mHomePage;
 
 		/**
 		 * @param context
 		 */
-		public TabView(Context context, Tab tab) {
-			
-			
+		public TabView ( Context context , Tab tab ) {
+
 			super(context);
-			
+
 			Log.d("Liu Test", getClass().getSimpleName() + " TabView(Context context, Tab tab)");
-			
+
 			setWillNotDraw(false);
 			mPath = new Path();
 			mFocusPath = new Path();
-			mWindowPos = new int[2];
+			mWindowPos = new int[ 2 ];
 			mTab = tab;
 			setGravity(Gravity.CENTER_VERTICAL);
 			setOrientation(LinearLayout.HORIZONTAL);
@@ -305,36 +340,53 @@ public class TabBar extends LinearLayout implements OnClickListener {
 			mSelected = false;
 			// update the status
 			updateFromTab();
+			
+			mHomePage = tab.isHomePage();
+			
+			if(tab.isHomePage()){
+				
+				mClose.setVisibility(View.GONE);
+			}
 		}
 
+
 		@Override
-		public void onClick(View v) {
-			if (v == mClose) {
+		public void onClick ( View v ) {
+
+			if ( v == mClose ) {
 				closeTab();
 			}
 		}
 
-		private void updateFromTab() {
+		private void updateFromTab ( ) {
+
 			String displayTitle = mTab.getTitle();
-			if (displayTitle == null) {
+			if ( displayTitle == null ) {
 				displayTitle = mTab.getUrl();
 			}
 			setDisplayTitle(displayTitle);
-			if (mTab.getFavicon() != null) {
+			if ( mTab.getFavicon() != null ) {
 				setFavicon(mUi.getFaviconDrawable(mTab.getFavicon()));
 			}
 			updateTabIcons();
 		}
 
-		private void updateTabIcons() {
+		private void updateTabIcons ( ) {
+
 			mIncognito.setVisibility(mTab.isPrivateBrowsingEnabled() ? View.VISIBLE : View.GONE);
 			mSnapshot.setVisibility(mTab.isSnapshot() ? View.VISIBLE : View.GONE);
 		}
 
 		@Override
-		public void setActivated(boolean selected) {
+		public void setActivated ( boolean selected ) {
+
 			mSelected = selected;
-			mClose.setVisibility(mSelected ? View.VISIBLE : View.GONE);
+
+			if ( !mHomePage ) {
+
+				mClose.setVisibility(mSelected ? View.VISIBLE : View.GONE);
+			}
+
 			mIconView.setVisibility(mSelected ? View.GONE : View.VISIBLE);
 			mTitle.setTextAppearance(mActivity, mSelected ? R.style.TabTitleSelected : R.style.TabTitleUnselected);
 			setHorizontalFadingEdgeEnabled(!mSelected);
@@ -344,23 +396,27 @@ public class TabBar extends LinearLayout implements OnClickListener {
 			postInvalidate();
 		}
 
-		public void updateLayoutParams() {
+		public void updateLayoutParams ( ) {
+
 			LayoutParams lp = (LinearLayout.LayoutParams) getLayoutParams();
 			lp.width = mTabWidth;
 			lp.height = LayoutParams.MATCH_PARENT;
 			setLayoutParams(lp);
 		}
 
-		void setDisplayTitle(String title) {
+		void setDisplayTitle ( String title ) {
+
 			mTitle.setText(title);
 		}
 
-		void setFavicon(Drawable d) {
+		void setFavicon ( Drawable d ) {
+
 			mIconView.setImageDrawable(d);
 		}
 
-		void setLock(Drawable d) {
-			if (null == d) {
+		void setLock ( Drawable d ) {
+
+			if ( null == d ) {
 				mLock.setVisibility(View.GONE);
 			} else {
 				mLock.setImageDrawable(d);
@@ -368,8 +424,9 @@ public class TabBar extends LinearLayout implements OnClickListener {
 			}
 		}
 
-		private void closeTab() {
-			if (mTab == mTabControl.getCurrentTab()) {
+		private void closeTab ( ) {
+
+			if ( mTab == mTabControl.getCurrentTab() ) {
 				mUiController.closeCurrentTab();
 			} else {
 				mUiController.closeTab(mTab);
@@ -377,21 +434,21 @@ public class TabBar extends LinearLayout implements OnClickListener {
 		}
 
 		@Override
-		protected void onLayout(boolean changed, int l, int t, int r, int b) {
-			
+		protected void onLayout ( boolean changed , int l , int t , int r , int b ) {
+
 			super.onLayout(changed, l, t, r, b);
 			setTabPath(mPath, 0, 0, r - l, b - t);
 			setFocusPath(mFocusPath, 0, 0, r - l, b - t);
 		}
 
 		@Override
-		protected void dispatchDraw(Canvas canvas) {
-			
-			if (mCurrentTextureWidth != mUi.getContentWidth() || mCurrentTextureHeight != getHeight()) {
+		protected void dispatchDraw ( Canvas canvas ) {
+
+			if ( mCurrentTextureWidth != mUi.getContentWidth() || mCurrentTextureHeight != getHeight() ) {
 				mCurrentTextureWidth = mUi.getContentWidth();
 				mCurrentTextureHeight = getHeight();
 
-				if (mCurrentTextureWidth > 0 && mCurrentTextureHeight > 0) {
+				if ( mCurrentTextureWidth > 0 && mCurrentTextureHeight > 0 ) {
 					Bitmap activeTexture = getDrawableAsBitmap(mActiveDrawable, mCurrentTextureWidth, mCurrentTextureHeight);
 					Bitmap inactiveTexture = getDrawableAsBitmap(mInactiveDrawable, mCurrentTextureWidth, mCurrentTextureHeight);
 
@@ -403,28 +460,30 @@ public class TabBar extends LinearLayout implements OnClickListener {
 				}
 			}
 			// add some monkey protection
-			if ((mActiveShader != null) && (mInactiveShader != null)) {
+			if ( (mActiveShader != null) && (mInactiveShader != null) ) {
 				int state = canvas.save();
 				getLocationInWindow(mWindowPos);
 				Paint paint = mSelected ? mActiveShaderPaint : mInactiveShaderPaint;
-				drawClipped(canvas, paint, mPath, mWindowPos[0]);
+				drawClipped(canvas, paint, mPath, mWindowPos[ 0 ]);
 				canvas.restoreToCount(state);
 			}
 			super.dispatchDraw(canvas);
 		}
 
-		private void drawClipped(Canvas canvas, Paint paint, Path clipPath, int left) {
+		private void drawClipped ( Canvas canvas , Paint paint , Path clipPath , int left ) {
+
 			// TODO: We should change the matrix/shader only when needed
 			final Matrix matrix = mSelected ? mActiveMatrix : mInactiveMatrix;
 			matrix.setTranslate(-left, 0.0f);
 			(mSelected ? mActiveShader : mInactiveShader).setLocalMatrix(matrix);
 			canvas.drawPath(clipPath, paint);
-			if (isFocused()) {
+			if ( isFocused() ) {
 				canvas.drawPath(mFocusPath, mFocusPaint);
 			}
 		}
 
-		private void setTabPath(Path path, int l, int t, int r, int b) {
+		private void setTabPath ( Path path , int l , int t , int r , int b ) {
+
 			path.reset();
 			path.moveTo(l, b);
 			path.lineTo(l, t);
@@ -433,7 +492,8 @@ public class TabBar extends LinearLayout implements OnClickListener {
 			path.close();
 		}
 
-		private void setFocusPath(Path path, int l, int t, int r, int b) {
+		private void setFocusPath ( Path path , int l , int t , int r , int b ) {
+
 			path.reset();
 			path.moveTo(l, b);
 			path.lineTo(l, t);
@@ -443,7 +503,8 @@ public class TabBar extends LinearLayout implements OnClickListener {
 
 	}
 
-	private void animateTabOut(final Tab tab, final TabView tv) {
+	private void animateTabOut ( final Tab tab , final TabView tv ) {
+
 		ObjectAnimator scalex = ObjectAnimator.ofFloat(tv, "scaleX", 1.0f, 0.0f);
 		ObjectAnimator scaley = ObjectAnimator.ofFloat(tv, "scaleY", 1.0f, 0.0f);
 		ObjectAnimator alpha = ObjectAnimator.ofFloat(tv, "alpha", 1.0f, 0.0f);
@@ -453,48 +514,57 @@ public class TabBar extends LinearLayout implements OnClickListener {
 		animator.addListener(new AnimatorListener() {
 
 			@Override
-			public void onAnimationCancel(Animator animation) {
+			public void onAnimationCancel ( Animator animation ) {
+
 			}
 
 			@Override
-			public void onAnimationEnd(Animator animation) {
+			public void onAnimationEnd ( Animator animation ) {
+
 				mTabs.removeTab(tv);
 				mTabMap.remove(tab);
 				mUi.onRemoveTabCompleted(tab);
 			}
 
 			@Override
-			public void onAnimationRepeat(Animator animation) {
+			public void onAnimationRepeat ( Animator animation ) {
+
 			}
 
 			@Override
-			public void onAnimationStart(Animator animation) {
+			public void onAnimationStart ( Animator animation ) {
+
 			}
 
 		});
 		animator.start();
 	}
 
-	private void animateTabIn(final Tab tab, final TabView tv) {
+	private void animateTabIn ( final Tab tab , final TabView tv ) {
+
 		ObjectAnimator scalex = ObjectAnimator.ofFloat(tv, "scaleX", 0.0f, 1.0f);
 		scalex.setDuration(150);
 		scalex.addListener(new AnimatorListener() {
 
 			@Override
-			public void onAnimationCancel(Animator animation) {
+			public void onAnimationCancel ( Animator animation ) {
+
 			}
 
 			@Override
-			public void onAnimationEnd(Animator animation) {
+			public void onAnimationEnd ( Animator animation ) {
+
 				mUi.onAddTabCompleted(tab);
 			}
 
 			@Override
-			public void onAnimationRepeat(Animator animation) {
+			public void onAnimationRepeat ( Animator animation ) {
+
 			}
 
 			@Override
-			public void onAnimationStart(Animator animation) {
+			public void onAnimationStart ( Animator animation ) {
+
 				mTabs.addTab(tv);
 			}
 
@@ -504,48 +574,52 @@ public class TabBar extends LinearLayout implements OnClickListener {
 
 	// TabChangeListener implementation
 
-	public void onSetActiveTab(Tab tab) {
-		
+	public void onSetActiveTab ( Tab tab ) {
+
 		mTabs.setSelectedTab(mTabControl.getTabPosition(tab));
 	}
 
-	public void onFavicon(Tab tab, Bitmap favicon) {
+	public void onFavicon ( Tab tab , Bitmap favicon ) {
+
 		TabView tv = mTabMap.get(tab);
-		if (tv != null) {
+		if ( tv != null ) {
 			tv.setFavicon(mUi.getFaviconDrawable(favicon));
 		}
 	}
 
-	public void onNewTab(Tab tab) {
-		
+	public void onNewTab ( Tab tab ) {
+
 		TabView tv = buildTabView(tab);
 		animateTabIn(tab, tv);
 	}
 
-	public void onRemoveTab(Tab tab) {
+	public void onRemoveTab ( Tab tab ) {
+
 		TabView tv = mTabMap.get(tab);
-		if (tv != null) {
+		if ( tv != null ) {
 			animateTabOut(tab, tv);
 		} else {
 			mTabMap.remove(tab);
 		}
 	}
 
-	public void onUrlAndTitle(Tab tab, String url, String title) {
+	public void onUrlAndTitle ( Tab tab , String url , String title ) {
+
 		TabView tv = mTabMap.get(tab);
-		if (tv != null) {
-			if (title != null) {
+		if ( tv != null ) {
+			if ( title != null ) {
 				tv.setDisplayTitle(title);
-			} else if (url != null) {
+			} else if ( url != null ) {
 				tv.setDisplayTitle(UrlUtils.stripUrl(url));
 			}
 			tv.updateTabIcons();
 		}
 	}
 
-	private boolean isLoading() {
+	private boolean isLoading ( ) {
+
 		Tab tab = mTabControl.getCurrentTab();
-		if (tab != null) {
+		if ( tab != null ) {
 			return tab.inPageLoad();
 		} else {
 			return false;

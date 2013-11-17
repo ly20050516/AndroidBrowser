@@ -31,7 +31,6 @@ import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
 
@@ -125,6 +124,7 @@ public class XLargeUi extends BaseUi {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		
 		MenuItem bm = menu.findItem(R.id.bookmarks_menu_id);
 		if (bm != null) {
 			bm.setVisible(false);
@@ -204,7 +204,7 @@ public class XLargeUi extends BaseUi {
 	public void onActionModeStarted(ActionMode mode) {
 		if (!mTitleBar.isEditingUrl()) {
 			// hide the title bar when CAB is shown
-			hideTitleBar();
+//			hideTitleBar();
 		}
 	}
 

@@ -53,7 +53,7 @@ public class GeneralPreferencesFragment extends PreferenceFragment implements Pr
 	static final String MOST_VISITED = "most_visited";
 	static final String OTHER = "other";
 
-	static final String PREF_HOMEPAGE_PICKER = "homepage_picker";
+//	static final String PREF_HOMEPAGE_PICKER = "homepage_picker";
 
 	String[] mChoices, mValues;
 	String mCurrentPage;
@@ -69,11 +69,11 @@ public class GeneralPreferencesFragment extends PreferenceFragment implements Pr
 		// Load the XML preferences file
 		addPreferencesFromResource(R.xml.general_preferences);
 
-		ListPreference pref = (ListPreference) findPreference(PREF_HOMEPAGE_PICKER);
-		pref.setSummary(getHomepageSummary());
-		pref.setPersistent(false);
-		pref.setValue(getHomepageValue());
-		pref.setOnPreferenceChangeListener(this);
+//		ListPreference pref = (ListPreference) findPreference(PREF_HOMEPAGE_PICKER);
+//		pref.setSummary(getHomepageSummary());
+//		pref.setPersistent(false);
+//		pref.setValue(getHomepageValue());
+//		pref.setOnPreferenceChangeListener(this);
 	}
 
 	@Override
@@ -85,28 +85,28 @@ public class GeneralPreferencesFragment extends PreferenceFragment implements Pr
 			return false;
 		}
 
-		if (pref.getKey().equals(PREF_HOMEPAGE_PICKER)) {
-			BrowserSettings settings = BrowserSettings.getInstance();
-			if (CURRENT.equals(objValue)) {
-				settings.setHomePage(mCurrentPage);
-			}
-			if (BLANK.equals(objValue)) {
-				settings.setHomePage(BLANK_URL);
-			}
-			if (DEFAULT.equals(objValue)) {
-				settings.setHomePage(BrowserSettings.getFactoryResetHomeUrl(getActivity()));
-			}
-			if (MOST_VISITED.equals(objValue)) {
-				settings.setHomePage(HomeProvider.MOST_VISITED);
-			}
-			if (OTHER.equals(objValue)) {
-				promptForHomepage((ListPreference) pref);
-				return false;
-			}
-			pref.setSummary(getHomepageSummary());
-			((ListPreference) pref).setValue(getHomepageValue());
-			return false;
-		}
+//		if (pref.getKey().equals(PREF_HOMEPAGE_PICKER)) {
+//			BrowserSettings settings = BrowserSettings.getInstance();
+//			if (CURRENT.equals(objValue)) {
+//				settings.setHomePage(mCurrentPage);
+//			}
+//			if (BLANK.equals(objValue)) {
+//				settings.setHomePage(BLANK_URL);
+//			}
+//			if (DEFAULT.equals(objValue)) {
+//				settings.setHomePage(BrowserSettings.getFactoryResetHomeUrl(getActivity()));
+//			}
+//			if (MOST_VISITED.equals(objValue)) {
+//				settings.setHomePage(HomeProvider.MOST_VISITED);
+//			}
+//			if (OTHER.equals(objValue)) {
+//				promptForHomepage((ListPreference) pref);
+//				return false;
+//			}
+//			pref.setSummary(getHomepageSummary());
+//			((ListPreference) pref).setValue(getHomepageValue());
+//			return false;
+//		}
 
 		return true;
 	}

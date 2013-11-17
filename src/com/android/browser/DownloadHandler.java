@@ -145,6 +145,7 @@ public class DownloadHandler {
 	/* package */static void onDownloadStartNoStream(Activity activity, String url, String userAgent, String contentDisposition,
 			String mimetype, boolean privateBrowsing) {
 
+		Log.d("Liu Test", "DownloadHandler onDownloadStartNoStream url = "+ url);
 		String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
 
 		// Check to see if we have an SDCard
@@ -181,6 +182,9 @@ public class DownloadHandler {
 		}
 
 		String addressString = webAddress.toString();
+		
+		Log.d("Liu Test", "DownloadHandler onDownloadStartNoStream url = "+ addressString);
+		
 		Uri uri = Uri.parse(addressString);
 		final DownloadManager.Request request;
 		try {

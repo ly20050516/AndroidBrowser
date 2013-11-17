@@ -58,6 +58,11 @@
     <uses-permission android:name="com.android.browser.green.permission.WRITE_DATAS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    
+    
+    
+   <!--  <uses-permission android:name="com.eebbk.junior.greenbrowser.permission.READ_DATAS" />
+    <uses-permission android:name="com.eebbk.junior.greenbrowser.permission.WRITE_DATAS" /> -->
 
     <permission
         android:name="com.android.browser.green.permission.READ_DATAS"
@@ -67,7 +72,7 @@
         android:name="com.android.browser.green.permission.WRITE_DATAS"
         android:protectionLevel="normal" >
     </permission>
-    
+
     <application
         android:name="Browser"
         android:backupAgent=".BrowserBackupAgent"
@@ -209,7 +214,8 @@
         </activity>
         <activity
             android:name="BrowserPreferencesPage"
-            android:label="@string/menu_preferences" >
+            android:label="@string/menu_preferences"
+            android:theme="@android:style/Theme.Holo.Light" >
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
 
@@ -328,7 +334,6 @@
             android:name=".provider.SnapshotProvider"
             android:authorities="com.android.browser.snapshots"
             android:exported="false" />
-        
         <provider
             android:name="com.android.browser.navigation.PagerContentProvider"
             android:authorities="com.android.browser.green"
@@ -337,7 +342,6 @@
             android:readPermission="com.android.browser.green.permission.READ_DATAS"
             android:writePermission="com.android.browser.green.permission.WRITE_DATAS" >
         </provider>
-        
     </application>
 
 </manifest>

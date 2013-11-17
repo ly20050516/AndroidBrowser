@@ -17,6 +17,10 @@ public class BaseObject implements Serializable {
 	/**  */
 	private static final long serialVersionUID = -5830796273305594685L;
 
+	/*
+	 * id
+	 * */
+	private long _ID;
 	/**
 	 * 网站分类
 	 */
@@ -171,6 +175,16 @@ public class BaseObject implements Serializable {
 
 	public void setVisits(int visits) {
 		this.visits = visits;
+	}
+
+	public long get_ID ( ) {
+
+		return _ID;
+	}
+
+	public void set_ID ( long _ID ) {
+
+		this._ID = _ID;
 	}
 
 }

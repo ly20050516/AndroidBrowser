@@ -119,6 +119,8 @@ public class NavScreen extends RelativeLayout implements OnClickListener, OnMenu
 		mBookmarks.setOnClickListener(this);
 		mNewTab.setOnClickListener(this);
 		mMore.setOnClickListener(this);
+		
+		
 		mScroller = (NavTabScroller) findViewById(R.id.scroller);
 		TabControl tc = mUiController.getTabControl();
 		mTabViews = new HashMap<Tab, View>(tc.getTabCount());

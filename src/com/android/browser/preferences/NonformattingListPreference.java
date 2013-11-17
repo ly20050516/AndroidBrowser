@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.browser.preferences;
 
 import android.content.Context;
@@ -23,26 +24,29 @@ public class NonformattingListPreference extends ListPreference {
 
 	private CharSequence mSummary;
 
-	public NonformattingListPreference(Context context) {
+	public NonformattingListPreference ( Context context ) {
+
 		super(context);
 	}
 
-	public NonformattingListPreference(Context context, AttributeSet attrs) {
+	public NonformattingListPreference ( Context context , AttributeSet attrs ) {
+
 		super(context, attrs);
 	}
 
 	@Override
-	public void setSummary(CharSequence summary) {
+	public void setSummary ( CharSequence summary ) {
+
 		mSummary = summary;
 		super.setSummary(summary);
 	}
 
 	@Override
-	public CharSequence getSummary() {
-		if (mSummary != null) {
+	public CharSequence getSummary ( ) {
+
+		if ( mSummary != null ) {
 			return mSummary;
 		}
 		return super.getSummary();
 	}
-
 }

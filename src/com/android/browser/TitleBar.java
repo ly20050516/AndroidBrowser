@@ -190,23 +190,23 @@ public class TitleBar extends RelativeLayout {
 	}
 
 	void hide() {
-		if (mUseQuickControls) {
-			this.setVisibility(View.GONE);
-		} else {
-			if (mIsFixedTitleBar)
-				return;
-			if (!mSkipTitleBarAnimations) {
-				cancelTitleBarAnimation(false);
-				int visibleHeight = getVisibleTitleHeight();
-				mTitleBarAnimator = ObjectAnimator.ofFloat(this, "translationY", getTranslationY(), (-getEmbeddedHeight() + visibleHeight));
-				mTitleBarAnimator.addListener(mHideTileBarAnimatorListener);
-				setupTitleBarAnimator(mTitleBarAnimator);
-				mTitleBarAnimator.start();
-			} else {
-				onScrollChanged();
-			}
-		}
-		mShowing = false;
+//		if (mUseQuickControls) {
+//			this.setVisibility(View.GONE);
+//		} else {
+//			if (mIsFixedTitleBar)
+//				return;
+//			if (!mSkipTitleBarAnimations) {
+//				cancelTitleBarAnimation(false);
+//				int visibleHeight = getVisibleTitleHeight();
+//				mTitleBarAnimator = ObjectAnimator.ofFloat(this, "translationY", getTranslationY(), (-getEmbeddedHeight() + visibleHeight));
+//				mTitleBarAnimator.addListener(mHideTileBarAnimatorListener);
+//				setupTitleBarAnimator(mTitleBarAnimator);
+//				mTitleBarAnimator.start();
+//			} else {
+//				onScrollChanged();
+//			}
+//		}
+//		mShowing = false;
 	}
 
 	boolean isShowing() {

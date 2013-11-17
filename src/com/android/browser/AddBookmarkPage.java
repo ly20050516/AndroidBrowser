@@ -634,7 +634,7 @@ public class AddBookmarkPage extends Activity implements View.OnClickListener, T
 
 		mDefaultView = findViewById(R.id.default_view);
 		mFolderSelector = findViewById(R.id.folder_selector);
-
+		
 		mFolderNamerHolder = getLayoutInflater().inflate(R.layout.new_folder_layout, null);
 		mFolderNamer = (EditText) mFolderNamerHolder.findViewById(R.id.folder_namer);
 		mFolderNamer.setOnEditorActionListener(this);

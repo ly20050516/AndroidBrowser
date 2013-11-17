@@ -20,6 +20,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.android.browser.preferences.BandwidthPreferencesFragment;
@@ -36,6 +37,7 @@ public class BrowserPreferencesPage extends PreferenceActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
+	    Log.d("Liu Test", getClass().getSimpleName() + " onCreate");
 		ActionBar actionBar = getActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);

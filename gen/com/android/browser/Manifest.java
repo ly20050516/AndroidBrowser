@@ -10,6 +10,9 @@ package com.android.browser;
 public final class Manifest {
     public static final class permission {
         public static final String PRELOAD="com.android.browser.permission.PRELOAD";
+        /**   <uses-permission android:name="com.eebbk.junior.greenbrowser.permission.READ_DATAS" />
+    <uses-permission android:name="com.eebbk.junior.greenbrowser.permission.WRITE_DATAS" /> 
+         */
         public static final String READ_DATAS="com.android.browser.green.permission.READ_DATAS";
         public static final String WRITE_DATAS="com.android.browser.green.permission.WRITE_DATAS";
     }

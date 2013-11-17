@@ -16,8 +16,23 @@
 
 package com.android.browser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -86,35 +101,29 @@ import com.android.browser.UI.ComboViews;
 import com.android.browser.provider.BrowserProvider2.Thumbnails;
 import com.android.browser.provider.SnapshotProvider.Snapshots;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Controller for browser
  */
-public class Controller implements WebViewController, UiController, ActivityController {
+public class Controller implements WebViewController , UiController , ActivityController {
 
 	private static final String LOGTAG = "Controller";
+
 	private static final String SEND_APP_ID_EXTRA = "android.speech.extras.SEND_APPLICATION_ID_EXTRA";
+
 	private static final String INCOGNITO_URI = "browser:incognito";
+
+	public static final String ENTER_SOURCE = "entersource";
+
+	public static final String PARENT_ASSISTANT = "parentassistant";
 
 	// public message ids
 	public final static int LOAD_URL = 1001;
+
 	public final static int STOP_LOAD = 1002;
 
 	// Message Ids
 	private static final int FOCUS_NODE_HREF = 102;
+
 	private static final int RELEASE_WAKELOCK = 107;
 
 	static final int UPDATE_BOOKMARK_THUMBNAIL = 108;
@@ -124,24 +133,28 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	private static final int EMPTY_MENU = -1;
 
 	private boolean isFirstInit = true;
-	
+
 	// activity requestCode
 	final static int COMBO_VIEW = 1;
+
 	final static int PREFERENCES_PAGE = 3;
+
 	final static int FILE_SELECTED = 4;
+
 	final static int AUTOFILL_SETUP = 5;
+
 	final static int VOICE_RESULT = 6;
 
 	private final static int WAKELOCK_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 	// As the ids are dynamically created, we can't guarantee that they will
 	// be in sequence, so this static array maps ids to a window number.
-	final static private int[] WINDOW_SHORTCUT_ID_ARRAY = { R.id.window_one_menu_id, R.id.window_two_menu_id, R.id.window_three_menu_id,
-			R.id.window_four_menu_id, R.id.window_five_menu_id, R.id.window_six_menu_id, R.id.window_seven_menu_id,
-			R.id.window_eight_menu_id };
+	final static private int[] WINDOW_SHORTCUT_ID_ARRAY = { R.id.window_one_menu_id, R.id.window_two_menu_id, R.id.window_three_menu_id, R.id.window_four_menu_id,
+			R.id.window_five_menu_id, R.id.window_six_menu_id, R.id.window_seven_menu_id, R.id.window_eight_menu_id };
 
 	// "source" parameter for Google search through search key
 	final static String GOOGLE_SEARCH_SOURCE_SEARCHKEY = "browser-key";
+
 	// "source" parameter for Google search through simplily type
 	final static String GOOGLE_SEARCH_SOURCE_TYPE = "browser-type";
 
@@ -152,17 +165,25 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	private static Bitmap sThumbnailBitmap;
 
 	private Activity mActivity;
+
 	private UI mUi;
+
 	private TabControl mTabControl;
+
 	private BrowserSettings mSettings;
+
 	private WebViewFactory mFactory;
 
 	private WakeLock mWakeLock;
 
 	private UrlHandler mUrlHandler;
+
 	private UploadHandler mUploadHandler;
+
 	private IntentHandler mIntentHandler;
+
 	private PageDialogsHandler mPageDialogsHandler;
+
 	private NetworkStateHandler mNetworkHandler;
 
 	private Message mAutoFillSetupMessage;
@@ -174,8 +195,11 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// FIXME, temp address onPrepareMenu performance problem.
 	// When we move everything out of view, we should rewrite this.
 	private int mCurrentMenuState = 0;
+
 	private int mMenuState = R.id.MAIN_MENU;
+
 	private int mOldMenuState = EMPTY_MENU;
+
 	private Menu mCachedMenu;
 
 	private boolean mMenuIsDown;
@@ -206,19 +230,23 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	private boolean mExtendedMenuOpen;
 
 	private boolean mActivityPaused = true;
+
 	private boolean mLoadStopped;
 
 	private Handler mHandler;
+
 	// Checks to see when the bookmarks database has changed, and updates the
 	// Tabs' notion of whether they represent bookmarked sites.
 	private ContentObserver mBookmarksObserver;
+
 	private CrashRecoveryHandler mCrashRecoveryHandler;
 
 	private boolean mBlockEvents;
 
 	private String mVoiceResult;
 
-	public Controller(Activity browser) {
+	public Controller ( Activity browser ) {
+
 		mActivity = browser;
 		mSettings = BrowserSettings.getInstance();
 		mTabControl = new TabControl(this);
@@ -233,10 +261,12 @@ public class Controller implements WebViewController, UiController, ActivityCont
 
 		startHandler();
 		mBookmarksObserver = new ContentObserver(mHandler) {
+
 			@Override
-			public void onChange(boolean selfChange) {
+			public void onChange ( boolean selfChange ) {
+
 				int size = mTabControl.getTabCount();
-				for (int i = 0; i < size; i++) {
+				for ( int i = 0 ; i < size ; i++ ) {
 					mTabControl.getTab(i).updateBookmarkedStatus();
 				}
 			}
@@ -253,13 +283,15 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void start(final Intent intent) {
+	public void start ( final Intent intent ) {
+
 		WebViewClassic.setShouldMonitorWebCoreThread();
 		// mCrashRecoverHandler has any previously saved state.
 		mCrashRecoveryHandler.startRecovery(intent);
 	}
 
-	void doStart(final Bundle icicle, final Intent intent) {
+	void doStart ( final Bundle icicle , final Intent intent ) {
+
 		// Unless the last browser usage was within 24 hours, destroy any
 		// remaining incognito tabs.
 
@@ -273,7 +305,7 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		// Find out if we will restore any state and remember the tab.
 		final long currentTabId = mTabControl.canRestoreState(icicle, restoreIncognitoTabs);
 
-		if (currentTabId == -1) {
+		if ( currentTabId == -1 ) {
 			// Not able to restore so we go ahead and clear session cookies. We
 			// must do this before trying to login the user as we don't want to
 			// clear any session cookies set during login.
@@ -281,28 +313,34 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		}
 
 		GoogleAccountLogin.startLoginIfNeeded(mActivity, new Runnable() {
+
 			@Override
-			public void run() {
+			public void run ( ) {
+
 				onPreloginFinished(icicle, intent, currentTabId, restoreIncognitoTabs);
 			}
 		});
 	}
 
-	private void onPreloginFinished(Bundle icicle, Intent intent, long currentTabId, boolean restoreIncognitoTabs) {
-		
-		if(isFirstInit){
-			
+	private void onPreloginFinished ( Bundle icicle , Intent intent , long currentTabId , boolean restoreIncognitoTabs ) {
+
+		if ( isFirstInit ) {
+
 			isFirstInit = false;
 			openTabToHomePage();
 		}
-		
-		if (currentTabId == -1) {
+
+		if(! isParentAssistant(intent)){
+			
+			return ;
+		}
+		if ( currentTabId == -1 ) {
 			BackgroundHandler.execute(new PruneThumbnails(mActivity, null));
-			if (intent == null) {
+			if ( intent == null ) {
 				// This won't happen under common scenarios. The icicle is
 				// not null, but there aren't any tabs to restore.
-//				openTabToHomePage();
-				
+				// openTabToHomePage();
+
 			} else {
 				final Bundle extra = intent.getExtras();
 				// Create an initial tab.
@@ -313,37 +351,37 @@ public class Controller implements WebViewController, UiController, ActivityCont
 				// the tab will be close when exit.
 				UrlData urlData = IntentHandler.getUrlDataFromIntent(intent);
 				Tab t = null;
-				if (!urlData.isEmpty()) {
-					
+				if ( !urlData.isEmpty() ) {
+
 					t = openTab(urlData);
-				} 
-				if (t != null) {
-					
+				}
+				if ( t != null ) {
+
 					t.setAppId(intent.getStringExtra(Browser.EXTRA_APPLICATION_ID));
-					
+
 					WebView webView = t.getWebView();
-					if (extra != null && webView != null) {
+					if ( extra != null && webView != null ) {
 						int scale = extra.getInt(Browser.INITIAL_ZOOM_LEVEL, 0);
-						if (scale > 0 && scale <= 1000) {
+						if ( scale > 0 && scale <= 1000 ) {
 							webView.setInitialScale(scale);
 						}
 					}
 				}
-				
+
 			}
 			mUi.updateTabs(mTabControl.getTabs());
 		} else {
-			
+
 			mTabControl.restoreState(icicle, currentTabId, restoreIncognitoTabs, mUi.needsRestoreAllTabs());
-			List<Tab> tabs = mTabControl.getTabs();
-			ArrayList<Long> restoredTabs = new ArrayList<Long>(tabs.size());
-			for (Tab t : tabs) {
+			List< Tab> tabs = mTabControl.getTabs();
+			ArrayList< Long> restoredTabs = new ArrayList< Long>(tabs.size());
+			for ( Tab t : tabs ) {
 				restoredTabs.add(t.getId());
 			}
 			BackgroundHandler.execute(new PruneThumbnails(mActivity, restoredTabs));
-			if (tabs.size() == 0) {
-				
-//				openTabToHomePage();
+			if ( tabs.size() == 0 ) {
+
+				// openTabToHomePage();
 			}
 			mUi.updateTabs(tabs);
 			// TabControl.restoreState() will create a new tab even if
@@ -351,43 +389,47 @@ public class Controller implements WebViewController, UiController, ActivityCont
 			setActiveTab(mTabControl.getCurrentTab());
 			// Intent is non-null when framework thinks the browser should be
 			// launching with a new intent (icicle is null).
-			if (intent != null) {
-				
+			if ( intent != null ) {
+
 				mIntentHandler.onNewIntent(intent);
 			}
 		}
 		// Read JavaScript flags if it exists.
 		String jsFlags = getSettings().getJsEngineFlags();
-		if (jsFlags.trim().length() != 0) {
+		if ( jsFlags.trim().length() != 0 ) {
 			WebViewClassic.fromWebView(getCurrentWebView()).setJsFlags(jsFlags);
 		}
-		if (intent != null && BrowserActivity.ACTION_SHOW_BOOKMARKS.equals(intent.getAction())) {
+		if ( intent != null && BrowserActivity.ACTION_SHOW_BOOKMARKS.equals(intent.getAction()) ) {
 			bookmarksOrHistoryPicker(ComboViews.Bookmarks);
 		}
 	}
 
 	private static class PruneThumbnails implements Runnable {
-		private Context mContext;
-		private List<Long> mIds;
 
-		PruneThumbnails(Context context, List<Long> preserveIds) {
+		private Context mContext;
+
+		private List< Long> mIds;
+
+		PruneThumbnails ( Context context , List< Long> preserveIds ) {
+
 			mContext = context.getApplicationContext();
 			mIds = preserveIds;
 		}
 
 		@Override
-		public void run() {
+		public void run ( ) {
+
 			ContentResolver cr = mContext.getContentResolver();
-			if (mIds == null || mIds.size() == 0) {
+			if ( mIds == null || mIds.size() == 0 ) {
 				cr.delete(Thumbnails.CONTENT_URI, null, null);
 			} else {
 				int length = mIds.size();
 				StringBuilder where = new StringBuilder();
 				where.append(Thumbnails._ID);
 				where.append(" not in (");
-				for (int i = 0; i < length; i++) {
+				for ( int i = 0 ; i < length ; i++ ) {
 					where.append(mIds.get(i));
-					if (i < (length - 1)) {
+					if ( i < (length - 1) ) {
 						where.append(",");
 					}
 				}
@@ -399,19 +441,21 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public WebViewFactory getWebViewFactory() {
+	public WebViewFactory getWebViewFactory ( ) {
+
 		return mFactory;
 	}
 
 	@Override
-	public void onSetWebView(Tab tab, WebView view) {
-		
-		Log.d("Liu Test", getClass().getSimpleName()  + " onSetWebView(Tab tab, WebView view) webview = " + view);
+	public void onSetWebView ( Tab tab , WebView view ) {
+
+		Log.d("Liu Test", getClass().getSimpleName() + " onSetWebView(Tab tab, WebView view) webview = " + view);
 		mUi.onSetWebView(tab, view);
 	}
 
 	@Override
-	public void createSubWindow(Tab tab) {
+	public void createSubWindow ( Tab tab ) {
+
 		endActionMode();
 		WebView mainView = tab.getWebView();
 		WebView subView = mFactory.createWebView((mainView == null) ? false : mainView.isPrivateBrowsingEnabled());
@@ -419,118 +463,129 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public Context getContext() {
+	public Context getContext ( ) {
+
 		return mActivity;
 	}
 
 	@Override
-	public Activity getActivity() {
+	public Activity getActivity ( ) {
+
 		return mActivity;
 	}
 
-	void setUi(UI ui) {
+	void setUi ( UI ui ) {
+
 		mUi = ui;
 	}
 
 	@Override
-	public BrowserSettings getSettings() {
+	public BrowserSettings getSettings ( ) {
+
 		return mSettings;
 	}
 
-	IntentHandler getIntentHandler() {
+	IntentHandler getIntentHandler ( ) {
+
 		return mIntentHandler;
 	}
 
 	@Override
-	public UI getUi() {
+	public UI getUi ( ) {
+
 		return mUi;
 	}
 
-	int getMaxTabs() {
+	int getMaxTabs ( ) {
 
-//		return mActivity.getResources().getInteger(R.integer.max_tabs);
-		return 5;
+		return mActivity.getResources().getInteger(R.integer.max_tabs);
 	}
 
 	@Override
-	public TabControl getTabControl() {
+	public TabControl getTabControl ( ) {
+
 		return mTabControl;
 	}
 
 	@Override
-	public List<Tab> getTabs() {
+	public List< Tab> getTabs ( ) {
+
 		return mTabControl.getTabs();
 	}
 
 	// Open the icon database.
-	private void openIconDatabase() {
+	private void openIconDatabase ( ) {
+
 		// We have to call getInstance on the UI thread
 		final WebIconDatabase instance = WebIconDatabase.getInstance();
 		BackgroundHandler.execute(new Runnable() {
 
 			@Override
-			public void run() {
+			public void run ( ) {
+
 				instance.open(mActivity.getDir("icons", 0).getPath());
 			}
 		});
 	}
 
-	private void startHandler() {
+	private void startHandler ( ) {
+
 		mHandler = new Handler() {
 
 			@Override
-			public void handleMessage(Message msg) {
-				switch (msg.what) {
-				case OPEN_BOOKMARKS:
+			public void handleMessage ( Message msg ) {
+
+				switch ( msg.what ) {
+				case OPEN_BOOKMARKS :
 					bookmarksOrHistoryPicker(ComboViews.Bookmarks);
 					break;
-				case FOCUS_NODE_HREF: {
+				case FOCUS_NODE_HREF : {
 					String url = (String) msg.getData().get("url");
 					String title = (String) msg.getData().get("title");
 					String src = (String) msg.getData().get("src");
-					if (url == "")
+					if ( url == "" )
 						url = src; // use image if no anchor
-					if (TextUtils.isEmpty(url)) {
+					if ( TextUtils.isEmpty(url) ) {
 						break;
 					}
 					HashMap focusNodeMap = (HashMap) msg.obj;
 					WebView view = (WebView) focusNodeMap.get("webview");
 					// Only apply the action if the top window did not change.
-					if (getCurrentTopWebView() != view) {
+					if ( getCurrentTopWebView() != view ) {
 						break;
 					}
-					switch (msg.arg1) {
-					case R.id.open_context_menu_id:
+					switch ( msg.arg1 ) {
+					case R.id.open_context_menu_id :
 						loadUrlFromContext(url);
 						break;
-					case R.id.view_image_context_menu_id:
+					case R.id.view_image_context_menu_id :
 						loadUrlFromContext(src);
 						break;
-					case R.id.open_newtab_context_menu_id:
+					case R.id.open_newtab_context_menu_id :
 						final Tab parent = mTabControl.getCurrentTab();
 						openTab(url, parent, !mSettings.openInBackground(), true);
 						break;
-					case R.id.copy_link_context_menu_id:
+					case R.id.copy_link_context_menu_id :
 						copy(url);
 						break;
-					case R.id.save_link_context_menu_id:
-					case R.id.download_context_menu_id:
+					case R.id.save_link_context_menu_id :
+					case R.id.download_context_menu_id :
 						DownloadHandler.onDownloadStartNoStream(mActivity, url, null, null, null, view.isPrivateBrowsingEnabled());
 						break;
 					}
 					break;
 				}
 
-				case LOAD_URL:
+				case LOAD_URL :
 					loadUrlFromContext((String) msg.obj);
 					break;
 
-				case STOP_LOAD:
+				case STOP_LOAD :
 					stopLoading();
 					break;
 
-				case RELEASE_WAKELOCK:
-					if (mWakeLock != null && mWakeLock.isHeld()) {
+				case RELEASE_WAKELOCK :
+					if ( mWakeLock != null && mWakeLock.isHeld() ) {
 						mWakeLock.release();
 						// if we reach here, Browser should be still in the
 						// background loading after WAKELOCK_TIMEOUT (5-min).
@@ -539,9 +594,9 @@ public class Controller implements WebViewController, UiController, ActivityCont
 					}
 					break;
 
-				case UPDATE_BOOKMARK_THUMBNAIL:
+				case UPDATE_BOOKMARK_THUMBNAIL :
 					Tab tab = (Tab) msg.obj;
-					if (tab != null) {
+					if ( tab != null ) {
 						updateScreenshot(tab);
 					}
 					break;
@@ -552,17 +607,20 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public Tab getCurrentTab() {
+	public Tab getCurrentTab ( ) {
+
 		return mTabControl.getCurrentTab();
 	}
 
 	@Override
-	public void shareCurrentPage() {
+	public void shareCurrentPage ( ) {
+
 		shareCurrentPage(mTabControl.getCurrentTab());
 	}
 
-	private void shareCurrentPage(Tab tab) {
-		if (tab != null) {
+	private void shareCurrentPage ( Tab tab ) {
+
+		if ( tab != null ) {
 			sharePage(mActivity, tab.getTitle(), tab.getUrl(), tab.getFavicon(),
 					createScreenshot(tab.getWebView(), getDesiredThumbnailWidth(mActivity), getDesiredThumbnailHeight(mActivity)));
 		}
@@ -587,7 +645,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            Bitmap of a screenshot of the page. Stored in the Intent with
 	 *            {@link Browser#EXTRA_SHARE_SCREENSHOT}
 	 */
-	static final void sharePage(Context c, String title, String url, Bitmap favicon, Bitmap screenshot) {
+	static final void sharePage ( Context c , String title , String url , Bitmap favicon , Bitmap screenshot ) {
+
 		Intent send = new Intent(Intent.ACTION_SEND);
 		send.setType("text/plain");
 		send.putExtra(Intent.EXTRA_TEXT, url);
@@ -596,14 +655,15 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		send.putExtra(Browser.EXTRA_SHARE_SCREENSHOT, screenshot);
 		try {
 			c.startActivity(Intent.createChooser(send, c.getString(R.string.choosertitle_sharevia)));
-		} catch (android.content.ActivityNotFoundException ex) {
+		} catch ( android.content.ActivityNotFoundException ex ) {
 			// if no app handles it, do nothing
 		}
 	}
 
-	@SuppressLint("NewApi")
-	@SuppressWarnings("deprecation")
-	private void copy(CharSequence text) {
+	@SuppressLint ( "NewApi" )
+	@SuppressWarnings ( "deprecation" )
+	private void copy ( CharSequence text ) {
+
 		ClipboardManager cm = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
 		cm.setText(text);
 	}
@@ -611,42 +671,50 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// lifecycle
 
 	@Override
-	public void onConfgurationChanged(Configuration config) {
+	public void onConfgurationChanged ( Configuration config ) {
+
 		mConfigChanged = true;
 		// update the menu in case of a locale change
 		mActivity.invalidateOptionsMenu();
-		if (mPageDialogsHandler != null) {
+		if ( mPageDialogsHandler != null ) {
 			mPageDialogsHandler.onConfigurationChanged(config);
 		}
 		mUi.onConfigurationChanged(config);
 	}
 
 	@Override
-	public void handleNewIntent(Intent intent) {
-		
-		if (!mUi.isWebShowing()) {
-			
-			mUi.showWeb(false);
-			
+	public void handleNewIntent ( Intent intent ) {
+
+		if ( !isParentAssistant(intent) ) {
+
+			return;
 		}
+
+		if ( !mUi.isWebShowing() ) {
+
+			mUi.showWeb(false);
+
+		}
+
 		mIntentHandler.onNewIntent(intent);
 	}
 
 	@Override
-	public void onPause() {
-		if (mUi.isCustomViewShowing()) {
+	public void onPause ( ) {
+
+		if ( mUi.isCustomViewShowing() ) {
 			hideCustomView();
 		}
-		if (mActivityPaused) {
+		if ( mActivityPaused ) {
 			Log.e(LOGTAG, "BrowserActivity is already paused.");
 			return;
 		}
 		mActivityPaused = true;
 		Tab tab = mTabControl.getCurrentTab();
-		if (tab != null) {
+		if ( tab != null ) {
 			tab.pause();
-			if (!pauseWebViewTimers(tab)) {
-				if (mWakeLock == null) {
+			if ( !pauseWebViewTimers(tab) ) {
+				if ( mWakeLock == null ) {
 					PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
 					mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Browser");
 				}
@@ -659,14 +727,15 @@ public class Controller implements WebViewController, UiController, ActivityCont
 
 		WebView.disablePlatformNotifications();
 		NfcHandler.unregister(mActivity);
-		if (sThumbnailBitmap != null) {
+		if ( sThumbnailBitmap != null ) {
 			sThumbnailBitmap.recycle();
 			sThumbnailBitmap = null;
 		}
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
+	public void onSaveInstanceState ( Bundle outState ) {
+
 		// Save all the tabs
 		Bundle saveState = createSaveState();
 
@@ -680,10 +749,11 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * 
 	 * @return Bundle containing the current state of all tabs.
 	 */
-	/* package */Bundle createSaveState() {
+	/* package */Bundle createSaveState ( ) {
+
 		Bundle saveState = new Bundle();
 		mTabControl.saveState(saveState);
-		if (!saveState.isEmpty()) {
+		if ( !saveState.isEmpty() ) {
 			// Save time so that we know how old incognito tabs (if any) are.
 			saveState.putSerializable("lastActiveDate", Calendar.getInstance());
 		}
@@ -691,15 +761,16 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onResume() {
-		if (!mActivityPaused) {
+	public void onResume ( ) {
+
+		if ( !mActivityPaused ) {
 			Log.e(LOGTAG, "BrowserActivity is already resumed.");
 			return;
 		}
 		mSettings.setLastRunPaused(false);
 		mActivityPaused = false;
 		Tab current = mTabControl.getCurrentTab();
-		if (current != null) {
+		if ( current != null ) {
 			current.resume();
 			resumeWebViewTimers(current);
 		}
@@ -709,14 +780,15 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		mNetworkHandler.onResume();
 		WebView.enablePlatformNotifications();
 		NfcHandler.register(mActivity, this);
-		if (mVoiceResult != null) {
+		if ( mVoiceResult != null ) {
 			mUi.onVoiceResult(mVoiceResult);
 			mVoiceResult = null;
 		}
 	}
 
-	private void releaseWakeLock() {
-		if (mWakeLock != null && mWakeLock.isHeld()) {
+	private void releaseWakeLock ( ) {
+
+		if ( mWakeLock != null && mWakeLock.isHeld() ) {
 			mHandler.removeMessages(RELEASE_WAKELOCK);
 			mWakeLock.release();
 		}
@@ -728,9 +800,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * @param tab
 	 *            guaranteed non-null
 	 */
-	private void resumeWebViewTimers(Tab tab) {
+	private void resumeWebViewTimers ( Tab tab ) {
+
 		boolean inLoad = tab.inPageLoad();
-		if ((!mActivityPaused && !inLoad) || (mActivityPaused && inLoad)) {
+		if ( (!mActivityPaused && !inLoad) || (mActivityPaused && inLoad) ) {
 			CookieSyncManager.getInstance().startSync();
 			WebView w = tab.getWebView();
 			WebViewTimersControl.getInstance().onBrowserActivityResume(w);
@@ -743,10 +816,11 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * @param tab
 	 * @return true if the timers are paused or tab is null
 	 */
-	private boolean pauseWebViewTimers(Tab tab) {
-		if (tab == null) {
+	private boolean pauseWebViewTimers ( Tab tab ) {
+
+		if ( tab == null ) {
 			return true;
-		} else if (!tab.inPageLoad()) {
+		} else if ( !tab.inPageLoad() ) {
 			CookieSyncManager.getInstance().stopSync();
 			WebViewTimersControl.getInstance().onBrowserActivityPause(getCurrentWebView());
 			return true;
@@ -755,17 +829,18 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onDestroy() {
-		if (mUploadHandler != null && !mUploadHandler.handled()) {
+	public void onDestroy ( ) {
+
+		if ( mUploadHandler != null && !mUploadHandler.handled() ) {
 			mUploadHandler.onResult(Activity.RESULT_CANCELED, null);
 			mUploadHandler = null;
 		}
-		if (mTabControl == null)
+		if ( mTabControl == null )
 			return;
 		mUi.onDestroy();
 		// Remove the current tab and sub window
 		Tab t = mTabControl.getCurrentTab();
-		if (t != null) {
+		if ( t != null ) {
 			dismissSubWindow(t);
 			removeTab(t);
 		}
@@ -778,28 +853,32 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		mSystemAllowGeolocationOrigins = null;
 	}
 
-	protected boolean isActivityPaused() {
+	protected boolean isActivityPaused ( ) {
+
 		return mActivityPaused;
 	}
 
 	@Override
-	public void onLowMemory() {
+	public void onLowMemory ( ) {
+
 		mTabControl.freeMemory();
 	}
 
 	@Override
-	public boolean shouldShowErrorConsole() {
+	public boolean shouldShowErrorConsole ( ) {
+
 		return mShouldShowErrorConsole;
 	}
 
-	protected void setShouldShowErrorConsole(boolean show) {
-		if (show == mShouldShowErrorConsole) {
+	protected void setShouldShowErrorConsole ( boolean show ) {
+
+		if ( show == mShouldShowErrorConsole ) {
 			// Nothing to do.
 			return;
 		}
 		mShouldShowErrorConsole = show;
 		Tab t = mTabControl.getCurrentTab();
-		if (t == null) {
+		if ( t == null ) {
 			// There is no current tab so we cannot toggle the error console
 			return;
 		}
@@ -807,24 +886,26 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void stopLoading() {
+	public void stopLoading ( ) {
+
 		mLoadStopped = true;
 		Tab tab = mTabControl.getCurrentTab();
 		WebView w = getCurrentTopWebView();
-		if (w != null) {
+		if ( w != null ) {
 			w.stopLoading();
 			mUi.onPageStopped(tab);
 		}
 	}
 
-	boolean didUserStopLoading() {
+	boolean didUserStopLoading ( ) {
+
 		return mLoadStopped;
 	}
 
 	// WebViewController
 
 	@Override
-	public void onPageStarted(Tab tab, WebView view, Bitmap favicon) {
+	public void onPageStarted ( Tab tab , WebView view , Bitmap favicon ) {
 
 		// We've started to load a new page. If there was a pending message
 		// to save a screenshot then we will now take the new page and save
@@ -835,7 +916,7 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		// reset sync timer to avoid sync starts during loading a page
 		CookieSyncManager.getInstance().resetSync();
 
-		if (!mNetworkHandler.isNetworkUp()) {
+		if ( !mNetworkHandler.isNetworkUp() ) {
 			view.setNetworkAvailable(false);
 		}
 
@@ -843,7 +924,7 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		// onResume as it is triggered from onCreate. Call resumeWebViewTimers
 		// to start the timer. As we won't switch tabs while an activity is in
 		// pause state, we can ensure calling resume and pause in pair.
-		if (mActivityPaused) {
+		if ( mActivityPaused ) {
 			resumeWebViewTimers(tab);
 		}
 		mLoadStopped = false;
@@ -858,24 +939,25 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		Performance.tracePageStart(url);
 
 		// Performance probe
-		if (false) {
+		if ( false ) {
 			Performance.onPageStarted();
 		}
 
 	}
 
 	@Override
-	public void onPageFinished(Tab tab) {
+	public void onPageFinished ( Tab tab ) {
+
 		mCrashRecoveryHandler.backupState();
 		mUi.onTabDataChanged(tab);
 		// pause the WebView timer and release the wake lock if it is finished
 		// while BrowserActivity is in pause state.
-		if (mActivityPaused && pauseWebViewTimers(tab)) {
+		if ( mActivityPaused && pauseWebViewTimers(tab) ) {
 			releaseWakeLock();
 		}
 
 		// Performance probe
-		if (false) {
+		if ( false ) {
 			Performance.onPageFinished(tab.getUrl());
 		}
 
@@ -883,10 +965,11 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onProgressChanged(Tab tab) {
+	public void onProgressChanged ( Tab tab ) {
+
 		int newProgress = tab.getLoadProgress();
 
-		if (newProgress == 100) {
+		if ( newProgress == 100 ) {
 			CookieSyncManager.getInstance().sync();
 			// onProgressChanged() may continue to be called after the main
 			// frame has finished loading, as any remaining sub frames continue
@@ -895,21 +978,21 @@ public class Controller implements WebViewController, UiController, ActivityCont
 			// when the main frame completes loading regardless of the state of
 			// any sub frames so calls to onProgressChanges may continue after
 			// onPageFinished has executed)
-			if (tab.inPageLoad()) {
+			if ( tab.inPageLoad() ) {
 				updateInLoadMenuItems(mCachedMenu, tab);
 			}
-			if (!tab.isPrivateBrowsingEnabled() && !TextUtils.isEmpty(tab.getUrl()) && !tab.isSnapshot()) {
+			if ( !tab.isPrivateBrowsingEnabled() && !TextUtils.isEmpty(tab.getUrl()) && !tab.isSnapshot() ) {
 				// Only update the bookmark screenshot if the user did not
 				// cancel the load early and there is not already
 				// a pending update for the tab.
-				if (tab.shouldUpdateThumbnail() && (tab.inForeground() && !didUserStopLoading() || !tab.inForeground())) {
-					if (!mHandler.hasMessages(UPDATE_BOOKMARK_THUMBNAIL, tab)) {
+				if ( tab.shouldUpdateThumbnail() && (tab.inForeground() && !didUserStopLoading() || !tab.inForeground()) ) {
+					if ( !mHandler.hasMessages(UPDATE_BOOKMARK_THUMBNAIL, tab) ) {
 						mHandler.sendMessageDelayed(mHandler.obtainMessage(UPDATE_BOOKMARK_THUMBNAIL, 0, 0, tab), 500);
 					}
 				}
 			}
 		} else {
-			if (!tab.inPageLoad()) {
+			if ( !tab.inPageLoad() ) {
 				// onPageFinished may have already been called but a subframe is
 				// still loading
 				// updating the progress and
@@ -921,38 +1004,43 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onUpdatedSecurityState(Tab tab) {
+	public void onUpdatedSecurityState ( Tab tab ) {
+
 		mUi.onTabDataChanged(tab);
 	}
 
 	@Override
-	public void onReceivedTitle(Tab tab, final String title) {
+	public void onReceivedTitle ( Tab tab , final String title ) {
+
 		mUi.onTabDataChanged(tab);
 		final String pageUrl = tab.getOriginalUrl();
-		if (TextUtils.isEmpty(pageUrl) || pageUrl.length() >= SQLiteDatabase.SQLITE_MAX_LIKE_PATTERN_LENGTH) {
+		if ( TextUtils.isEmpty(pageUrl) || pageUrl.length() >= SQLiteDatabase.SQLITE_MAX_LIKE_PATTERN_LENGTH ) {
 			return;
 		}
 		// Update the title in the history database if not in private browsing
 		// mode
-		if (!tab.isPrivateBrowsingEnabled()) {
+		if ( !tab.isPrivateBrowsingEnabled() ) {
 			DataController.getInstance(mActivity).updateHistoryTitle(pageUrl, title);
 		}
 	}
 
 	@Override
-	public void onFavicon(Tab tab, WebView view, Bitmap icon) {
+	public void onFavicon ( Tab tab , WebView view , Bitmap icon ) {
+
 		mUi.onTabDataChanged(tab);
 		maybeUpdateFavicon(tab, view.getOriginalUrl(), view.getUrl(), icon);
 	}
 
 	@Override
-	public boolean shouldOverrideUrlLoading(Tab tab, WebView view, String url) {
+	public boolean shouldOverrideUrlLoading ( Tab tab , WebView view , String url ) {
+
 		return mUrlHandler.shouldOverrideUrlLoading(tab, view, url);
 	}
 
 	@Override
-	public boolean shouldOverrideKeyEvent(KeyEvent event) {
-		if (mMenuIsDown) {
+	public boolean shouldOverrideKeyEvent ( KeyEvent event ) {
+
+		if ( mMenuIsDown ) {
 			// only check shortcut key when MENU is held
 			return mActivity.getWindow().isShortcutKey(event.getKeyCode(), event);
 		} else {
@@ -961,9 +1049,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public boolean onUnhandledKeyEvent(KeyEvent event) {
-		if (!isActivityPaused()) {
-			if (event.getAction() == KeyEvent.ACTION_DOWN) {
+	public boolean onUnhandledKeyEvent ( KeyEvent event ) {
+
+		if ( !isActivityPaused() ) {
+			if ( event.getAction() == KeyEvent.ACTION_DOWN ) {
 				return mActivity.onKeyDown(event.getKeyCode(), event);
 			} else {
 				return mActivity.onKeyUp(event.getKeyCode(), event);
@@ -973,13 +1062,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void doUpdateVisitedHistory(Tab tab, boolean isReload) {
+	public void doUpdateVisitedHistory ( Tab tab , boolean isReload ) {
+
 		// Don't save anything in private browsing mode
-		if (tab.isPrivateBrowsingEnabled())
+		if ( tab.isPrivateBrowsingEnabled() )
 			return;
 		String url = tab.getOriginalUrl();
 
-		if (TextUtils.isEmpty(url) || url.regionMatches(true, 0, "about:", 0, 6)) {
+		if ( TextUtils.isEmpty(url) || url.regionMatches(true, 0, "about:", 0, 6) ) {
 			return;
 		}
 		DataController.getInstance(mActivity).updateVisitedHistory(url);
@@ -987,15 +1077,19 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void getVisitedHistory(final ValueCallback<String[]> callback) {
-		AsyncTask<Void, Void, String[]> task = new AsyncTask<Void, Void, String[]>() {
+	public void getVisitedHistory ( final ValueCallback< String[]> callback ) {
+
+		AsyncTask< Void , Void , String[]> task = new AsyncTask< Void , Void , String[]>() {
+
 			@Override
-			public String[] doInBackground(Void... unused) {
+			public String[] doInBackground ( Void ... unused ) {
+
 				return Browser.getVisitedHistory(mActivity.getContentResolver());
 			}
 
 			@Override
-			public void onPostExecute(String[] result) {
+			public void onPostExecute ( String[] result ) {
+
 				callback.onReceiveValue(result);
 			}
 		};
@@ -1003,24 +1097,25 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onReceivedHttpAuthRequest(Tab tab, WebView view, final HttpAuthHandler handler, final String host, final String realm) {
+	public void onReceivedHttpAuthRequest ( Tab tab , WebView view , final HttpAuthHandler handler , final String host , final String realm ) {
+
 		String username = null;
 		String password = null;
 
 		boolean reuseHttpAuthUsernamePassword = handler.useHttpAuthUsernamePassword();
 
-		if (reuseHttpAuthUsernamePassword && view != null) {
+		if ( reuseHttpAuthUsernamePassword && view != null ) {
 			String[] credentials = view.getHttpAuthUsernamePassword(host, realm);
-			if (credentials != null && credentials.length == 2) {
-				username = credentials[0];
-				password = credentials[1];
+			if ( credentials != null && credentials.length == 2 ) {
+				username = credentials[ 0 ];
+				password = credentials[ 1 ];
 			}
 		}
 
-		if (username != null && password != null) {
+		if ( username != null && password != null ) {
 			handler.proceed(username, password);
 		} else {
-			if (tab.inForeground() && !handler.suppressDialog()) {
+			if ( tab.inForeground() && !handler.suppressDialog() ) {
 				mPageDialogsHandler.showHttpAuthentication(tab, handler, host, realm);
 			} else {
 				handler.cancel();
@@ -1029,13 +1124,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onDownloadStart(Tab tab, String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+	public void onDownloadStart ( Tab tab , String url , String userAgent , String contentDisposition , String mimetype , long contentLength ) {
+
 		WebView w = tab.getWebView();
 		DownloadHandler.onDownloadStart(mActivity, url, userAgent, contentDisposition, mimetype, w.isPrivateBrowsingEnabled());
-		if (w.copyBackForwardList().getSize() == 0) {
+		if ( w.copyBackForwardList().getSize() == 0 ) {
 			// This Tab was opened for the sole purpose of downloading a
 			// file. Remove it.
-			if (tab == mTabControl.getCurrentTab()) {
+			if ( tab == mTabControl.getCurrentTab() ) {
 				// In this case, the Tab is still on top.
 				goBackOnePageOrQuit();
 			} else {
@@ -1046,29 +1142,34 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public Bitmap getDefaultVideoPoster() {
+	public Bitmap getDefaultVideoPoster ( ) {
+
 		return mUi.getDefaultVideoPoster();
 	}
 
 	@Override
-	public View getVideoLoadingProgressView() {
+	public View getVideoLoadingProgressView ( ) {
+
 		return mUi.getVideoLoadingProgressView();
 	}
 
 	@Override
-	public void showSslCertificateOnError(WebView view, SslErrorHandler handler, SslError error) {
+	public void showSslCertificateOnError ( WebView view , SslErrorHandler handler , SslError error ) {
+
 		mPageDialogsHandler.showSSLCertificateOnError(view, handler, error);
 	}
 
 	@Override
-	public void showAutoLogin(Tab tab) {
+	public void showAutoLogin ( Tab tab ) {
+
 		assert tab.inForeground();
 		// Update the title bar to show the auto-login request.
 		mUi.showAutoLogin(tab);
 	}
 
 	@Override
-	public void hideAutoLogin(Tab tab) {
+	public void hideAutoLogin ( Tab tab ) {
+
 		assert tab.inForeground();
 		mUi.hideAutoLogin(tab);
 	}
@@ -1079,43 +1180,49 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * Update the favorites icon if the private browsing isn't enabled and the
 	 * icon is valid.
 	 */
-	private void maybeUpdateFavicon(Tab tab, final String originalUrl, final String url, Bitmap favicon) {
-		if (favicon == null) {
+	private void maybeUpdateFavicon ( Tab tab , final String originalUrl , final String url , Bitmap favicon ) {
+
+		if ( favicon == null ) {
 			return;
 		}
-		if (!tab.isPrivateBrowsingEnabled()) {
+		if ( !tab.isPrivateBrowsingEnabled() ) {
 			Bookmarks.updateFavicon(mActivity.getContentResolver(), originalUrl, url, favicon);
 		}
 	}
 
 	@Override
-	public void bookmarkedStatusHasChanged(Tab tab) {
+	public void bookmarkedStatusHasChanged ( Tab tab ) {
+
 		// TODO: Switch to using onTabDataChanged after b/3262950 is fixed
 		mUi.bookmarkedStatusHasChanged(tab);
 	}
 
 	// end WebViewController
 
-	protected void pageUp() {
+	protected void pageUp ( ) {
+
 		getCurrentTopWebView().pageUp(false);
 	}
 
-	protected void pageDown() {
+	protected void pageDown ( ) {
+
 		getCurrentTopWebView().pageDown(false);
 	}
 
 	// callback from phone title bar
 	@Override
-	public void editUrl() {
-		if (mOptionsMenuOpen)
+	public void editUrl ( ) {
+
+		if ( mOptionsMenuOpen )
 			mActivity.closeOptionsMenu();
 		mUi.editUrl(false, true);
 	}
 
 	@Override
-	public void showCustomView(Tab tab, View view, int requestedOrientation, WebChromeClient.CustomViewCallback callback) {
-		if (tab.inForeground()) {
-			if (mUi.isCustomViewShowing()) {
+	public void showCustomView ( Tab tab , View view , int requestedOrientation , WebChromeClient.CustomViewCallback callback ) {
+
+		if ( tab.inForeground() ) {
+			if ( mUi.isCustomViewShowing() ) {
 				callback.onCustomViewHidden();
 				return;
 			}
@@ -1129,8 +1236,9 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void hideCustomView() {
-		if (mUi.isCustomViewShowing()) {
+	public void hideCustomView ( ) {
+
+		if ( mUi.isCustomViewShowing() ) {
 			mUi.onHideCustomView();
 			// Reset the old menu state.
 			mMenuState = mOldMenuState;
@@ -1140,64 +1248,65 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (getCurrentTopWebView() == null)
+	public void onActivityResult ( int requestCode , int resultCode , Intent intent ) {
+
+		if ( getCurrentTopWebView() == null )
 			return;
-		switch (requestCode) {
-		case PREFERENCES_PAGE:
-			if (resultCode == Activity.RESULT_OK && intent != null) {
+		switch ( requestCode ) {
+		case PREFERENCES_PAGE :
+			if ( resultCode == Activity.RESULT_OK && intent != null ) {
 				String action = intent.getStringExtra(Intent.EXTRA_TEXT);
-				if (PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY.equals(action)) {
+				if ( PreferenceKeys.PREF_PRIVACY_CLEAR_HISTORY.equals(action) ) {
 					mTabControl.removeParentChildRelationShips();
 				}
 			}
 			break;
-		case FILE_SELECTED:
+		case FILE_SELECTED :
 			// Chose a file from the file picker.
-			if (null == mUploadHandler)
+			if ( null == mUploadHandler )
 				break;
 			mUploadHandler.onResult(resultCode, intent);
 			break;
-		case AUTOFILL_SETUP:
+		case AUTOFILL_SETUP :
 			// Determine whether a profile was actually set up or not
 			// and if so, send the message back to the WebTextView to
 			// fill the form with the new profile.
-			if (getSettings().getAutoFillProfile() != null) {
+			if ( getSettings().getAutoFillProfile() != null ) {
 				mAutoFillSetupMessage.sendToTarget();
 				mAutoFillSetupMessage = null;
 			}
 			break;
-		case COMBO_VIEW:
-			if (intent == null || resultCode != Activity.RESULT_OK) {
+		case COMBO_VIEW :
+			if ( intent == null || resultCode != Activity.RESULT_OK ) {
 				break;
 			}
 			mUi.showWeb(false);
-			if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			if ( Intent.ACTION_VIEW.equals(intent.getAction()) ) {
 				Tab t = getCurrentTab();
 				Uri uri = intent.getData();
 				loadUrl(t, uri.toString());
-			} else if (intent.hasExtra(ComboViewActivity.EXTRA_OPEN_ALL)) {
+			} else if ( intent.hasExtra(ComboViewActivity.EXTRA_OPEN_ALL) ) {
 				String[] urls = intent.getStringArrayExtra(ComboViewActivity.EXTRA_OPEN_ALL);
 				Tab parent = getCurrentTab();
-				for (String url : urls) {
+				for ( String url : urls ) {
 					parent = openTab(url, parent, !mSettings.openInBackground(), true);
 				}
-			} else if (intent.hasExtra(ComboViewActivity.EXTRA_OPEN_SNAPSHOT)) {
+			} else if ( intent.hasExtra(ComboViewActivity.EXTRA_OPEN_SNAPSHOT) ) {
 				long id = intent.getLongExtra(ComboViewActivity.EXTRA_OPEN_SNAPSHOT, -1);
-				if (id >= 0) {
+				if ( id >= 0 ) {
 					createNewSnapshotTab(id, true);
 				}
 			}
 			break;
-		case VOICE_RESULT:
-			if (resultCode == Activity.RESULT_OK && intent != null) {
-				ArrayList<String> results = intent.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-				if (results.size() >= 1) {
+		case VOICE_RESULT :
+			if ( resultCode == Activity.RESULT_OK && intent != null ) {
+				ArrayList< String> results = intent.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+				if ( results.size() >= 1 ) {
 					mVoiceResult = results.get(0);
 				}
 			}
 			break;
-		default:
+		default :
 			break;
 		}
 		getCurrentTopWebView().requestFocus();
@@ -1211,12 +1320,13 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            with the bookmarks tab.
 	 */
 	@Override
-	public void bookmarksOrHistoryPicker(ComboViews startView) {
-		if (mTabControl.getCurrentWebView() == null) {
+	public void bookmarksOrHistoryPicker ( ComboViews startView ) {
+
+		if ( mTabControl.getCurrentWebView() == null ) {
 			return;
 		}
 		// clear action mode
-		if (isInCustomActionMode()) {
+		if ( isInCustomActionMode() ) {
 			endActionMode();
 		}
 		Bundle extras = new Bundle();
@@ -1228,11 +1338,12 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// combo view callbacks
 
 	// key handling
-	protected void onBackKey() {
-		if (!mUi.onBackKey()) {
+	protected void onBackKey ( ) {
+
+		if ( !mUi.onBackKey() ) {
 			WebView subwindow = mTabControl.getCurrentSubWindow();
-			if (subwindow != null) {
-				if (subwindow.canGoBack()) {
+			if ( subwindow != null ) {
+				if ( subwindow.canGoBack() ) {
 					subwindow.goBack();
 				} else {
 					dismissSubWindow(mTabControl.getCurrentTab());
@@ -1243,7 +1354,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		}
 	}
 
-	protected boolean onMenuKey() {
+	protected boolean onMenuKey ( ) {
+
 		return mUi.onMenuKey();
 	}
 
@@ -1251,35 +1363,38 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// TODO: maybe put into separate handler
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		if (mMenuState == EMPTY_MENU) {
+	public boolean onCreateOptionsMenu ( Menu menu ) {
+
+		if ( mMenuState == EMPTY_MENU ) {
 			return false;
 		}
+
 		MenuInflater inflater = mActivity.getMenuInflater();
 		inflater.inflate(R.menu.browser, menu);
 		return true;
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		if (v instanceof TitleBar) {
+	public void onCreateContextMenu ( ContextMenu menu , View v , ContextMenuInfo menuInfo ) {
+
+		if ( v instanceof TitleBar ) {
 			return;
 		}
-		if (!(v instanceof WebView)) {
+		if ( !(v instanceof WebView) ) {
 			return;
 		}
 		final WebView webview = (WebView) v;
 		WebView.HitTestResult result = webview.getHitTestResult();
-		if (result == null) {
+		if ( result == null ) {
 			return;
 		}
 
 		int type = result.getType();
-		if (type == WebView.HitTestResult.UNKNOWN_TYPE) {
+		if ( type == WebView.HitTestResult.UNKNOWN_TYPE ) {
 			Log.w(LOGTAG, "We should not show context menu when nothing is touched");
 			return;
 		}
-		if (type == WebView.HitTestResult.EDIT_TEXT_TYPE) {
+		if ( type == WebView.HitTestResult.EDIT_TEXT_TYPE ) {
 			// let TextView handles context menu
 			return;
 		}
@@ -1292,24 +1407,22 @@ public class Controller implements WebViewController, UiController, ActivityCont
 
 		// Show the correct menu group
 		final String extra = result.getExtra();
-		if (extra == null)
+		if ( extra == null )
 			return;
 		menu.setGroupVisible(R.id.PHONE_MENU, type == WebView.HitTestResult.PHONE_TYPE);
 		menu.setGroupVisible(R.id.EMAIL_MENU, type == WebView.HitTestResult.EMAIL_TYPE);
 		menu.setGroupVisible(R.id.GEO_MENU, type == WebView.HitTestResult.GEO_TYPE);
-		menu.setGroupVisible(R.id.IMAGE_MENU, type == WebView.HitTestResult.IMAGE_TYPE
-				|| type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
-		menu.setGroupVisible(R.id.ANCHOR_MENU, type == WebView.HitTestResult.SRC_ANCHOR_TYPE
-				|| type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
-		boolean hitText = type == WebView.HitTestResult.SRC_ANCHOR_TYPE || type == WebView.HitTestResult.PHONE_TYPE
-				|| type == WebView.HitTestResult.EMAIL_TYPE || type == WebView.HitTestResult.GEO_TYPE;
+		menu.setGroupVisible(R.id.IMAGE_MENU, type == WebView.HitTestResult.IMAGE_TYPE || type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
+		menu.setGroupVisible(R.id.ANCHOR_MENU, type == WebView.HitTestResult.SRC_ANCHOR_TYPE || type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
+		boolean hitText = type == WebView.HitTestResult.SRC_ANCHOR_TYPE || type == WebView.HitTestResult.PHONE_TYPE || type == WebView.HitTestResult.EMAIL_TYPE
+				|| type == WebView.HitTestResult.GEO_TYPE;
 		menu.setGroupVisible(R.id.SELECT_TEXT_MENU, hitText);
-		if (hitText) {
+		if ( hitText ) {
 			menu.findItem(R.id.select_text_menu_id).setOnMenuItemClickListener(new SelectText(webview));
 		}
 		// Setup custom handling depending on the type
-		switch (type) {
-		case WebView.HitTestResult.PHONE_TYPE:
+		switch ( type ) {
+		case WebView.HitTestResult.PHONE_TYPE :
 			menu.setHeaderTitle(Uri.decode(extra));
 			menu.findItem(R.id.dial_context_menu_id).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(WebView.SCHEME_TEL + extra)));
 			Intent addIntent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
@@ -1319,34 +1432,34 @@ public class Controller implements WebViewController, UiController, ActivityCont
 			menu.findItem(R.id.copy_phone_context_menu_id).setOnMenuItemClickListener(new Copy(extra));
 			break;
 
-		case WebView.HitTestResult.EMAIL_TYPE:
+		case WebView.HitTestResult.EMAIL_TYPE :
 			menu.setHeaderTitle(extra);
 			menu.findItem(R.id.email_context_menu_id).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(WebView.SCHEME_MAILTO + extra)));
 			menu.findItem(R.id.copy_mail_context_menu_id).setOnMenuItemClickListener(new Copy(extra));
 			break;
 
-		case WebView.HitTestResult.GEO_TYPE:
+		case WebView.HitTestResult.GEO_TYPE :
 			menu.setHeaderTitle(extra);
-			menu.findItem(R.id.map_context_menu_id).setIntent(
-					new Intent(Intent.ACTION_VIEW, Uri.parse(WebView.SCHEME_GEO + URLEncoder.encode(extra))));
+			menu.findItem(R.id.map_context_menu_id).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(WebView.SCHEME_GEO + URLEncoder.encode(extra))));
 			menu.findItem(R.id.copy_geo_context_menu_id).setOnMenuItemClickListener(new Copy(extra));
 			break;
 
-		case WebView.HitTestResult.SRC_ANCHOR_TYPE:
-		case WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE:
+		case WebView.HitTestResult.SRC_ANCHOR_TYPE :
+		case WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE :
 			menu.setHeaderTitle(extra);
 			// decide whether to show the open link in new tab option
 			boolean showNewTab = mTabControl.canCreateNewTab();
 			MenuItem newTabItem = menu.findItem(R.id.open_newtab_context_menu_id);
-			newTabItem.setTitle(getSettings().openInBackground() ? R.string.contextmenu_openlink_newwindow_background
-					: R.string.contextmenu_openlink_newwindow);
+			newTabItem.setTitle(getSettings().openInBackground() ? R.string.contextmenu_openlink_newwindow_background : R.string.contextmenu_openlink_newwindow);
 			newTabItem.setVisible(showNewTab);
-			if (showNewTab) {
-				if (WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE == type) {
+			if ( showNewTab ) {
+				if ( WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE == type ) {
 					newTabItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
 						@Override
-						public boolean onMenuItemClick(MenuItem item) {
-							final HashMap<String, WebView> hrefMap = new HashMap<String, WebView>();
+						public boolean onMenuItemClick ( MenuItem item ) {
+
+							final HashMap< String , WebView> hrefMap = new HashMap< String , WebView>();
 							hrefMap.put("webview", webview);
 							final Message msg = mHandler.obtainMessage(FOCUS_NODE_HREF, R.id.open_newtab_context_menu_id, 0, hrefMap);
 							webview.requestFocusNodeHref(msg);
@@ -1355,8 +1468,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 					});
 				} else {
 					newTabItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
 						@Override
-						public boolean onMenuItemClick(MenuItem item) {
+						public boolean onMenuItemClick ( MenuItem item ) {
+
 							final Tab parent = mTabControl.getCurrentTab();
 							openTab(extra, parent, !mSettings.openInBackground(), true);
 							return true;
@@ -1364,36 +1479,39 @@ public class Controller implements WebViewController, UiController, ActivityCont
 					});
 				}
 			}
-			if (type == WebView.HitTestResult.SRC_ANCHOR_TYPE) {
+			if ( type == WebView.HitTestResult.SRC_ANCHOR_TYPE ) {
 				break;
 			}
 			// otherwise fall through to handle image part
-		case WebView.HitTestResult.IMAGE_TYPE:
+		case WebView.HitTestResult.IMAGE_TYPE :
 			MenuItem shareItem = menu.findItem(R.id.share_link_context_menu_id);
 			shareItem.setVisible(type == WebView.HitTestResult.IMAGE_TYPE);
-			if (type == WebView.HitTestResult.IMAGE_TYPE) {
+			if ( type == WebView.HitTestResult.IMAGE_TYPE ) {
 				menu.setHeaderTitle(extra);
 				shareItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
 					@Override
-					public boolean onMenuItemClick(MenuItem item) {
+					public boolean onMenuItemClick ( MenuItem item ) {
+
 						sharePage(mActivity, null, extra, null, null);
 						return true;
 					}
 				});
 			}
 			menu.findItem(R.id.view_image_context_menu_id).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
 				@Override
-				public boolean onMenuItemClick(MenuItem item) {
+				public boolean onMenuItemClick ( MenuItem item ) {
+
 					openTab(extra, mTabControl.getCurrentTab(), true, true);
 					return false;
 				}
 			});
-			menu.findItem(R.id.download_context_menu_id).setOnMenuItemClickListener(
-					new Download(mActivity, extra, webview.isPrivateBrowsingEnabled()));
+			menu.findItem(R.id.download_context_menu_id).setOnMenuItemClickListener(new Download(mActivity, extra, webview.isPrivateBrowsingEnabled()));
 			menu.findItem(R.id.set_wallpaper_context_menu_id).setOnMenuItemClickListener(new WallpaperHandler(mActivity, extra));
 			break;
 
-		default:
+		default :
 			Log.w(LOGTAG, "We should not get here.");
 			break;
 		}
@@ -1405,20 +1523,22 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * As the menu can be open when loading state changes we must manually
 	 * update the state of the stop/reload menu item
 	 */
-	private void updateInLoadMenuItems(Menu menu, Tab tab) {
-		if (menu == null) {
+	private void updateInLoadMenuItems ( Menu menu , Tab tab ) {
+
+		if ( menu == null ) {
 			return;
 		}
 		MenuItem dest = menu.findItem(R.id.stop_reload_menu_id);
 		MenuItem src = ((tab != null) && tab.inPageLoad()) ? menu.findItem(R.id.stop_menu_id) : menu.findItem(R.id.reload_menu_id);
-		if (src != null) {
+		if ( src != null ) {
 			dest.setIcon(src.getIcon());
 			dest.setTitle(src.getTitle());
 		}
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu ( Menu menu ) {
+
 		updateInLoadMenuItems(menu, getCurrentTab());
 		// hold on to the menu reference here; it is used by the page callbacks
 		// to update the menu based on loading state
@@ -1426,16 +1546,16 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		// Note: setVisible will decide whether an item is visible; while
 		// setEnabled() will decide whether an item is enabled, which also means
 		// whether the matching shortcut key will function.
-		switch (mMenuState) {
-		case EMPTY_MENU:
-			if (mCurrentMenuState != mMenuState) {
+		switch ( mMenuState ) {
+		case EMPTY_MENU :
+			if ( mCurrentMenuState != mMenuState ) {
 				menu.setGroupVisible(R.id.MAIN_MENU, false);
 				menu.setGroupEnabled(R.id.MAIN_MENU, false);
 				menu.setGroupEnabled(R.id.MAIN_SHORTCUT_MENU, false);
 			}
 			break;
-		default:
-			if (mCurrentMenuState != mMenuState) {
+		default :
+			if ( mCurrentMenuState != mMenuState ) {
 				menu.setGroupVisible(R.id.MAIN_MENU, true);
 				menu.setGroupEnabled(R.id.MAIN_MENU, true);
 				menu.setGroupEnabled(R.id.MAIN_SHORTCUT_MENU, true);
@@ -1448,13 +1568,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void updateMenuState(Tab tab, Menu menu) {
+	public void updateMenuState ( Tab tab , Menu menu ) {
+
 		boolean canGoBack = false;
 		boolean canGoForward = false;
 		boolean isHome = false;
 		boolean isDesktopUa = false;
 		boolean isLive = false;
-		if (tab != null) {
+		if ( tab != null ) {
 			canGoBack = tab.canGoBack();
 			canGoForward = tab.canGoForward();
 			isHome = mSettings.getHomePage().equals(tab.getUrl());
@@ -1472,7 +1593,7 @@ public class Controller implements WebViewController, UiController, ActivityCont
 
 		final MenuItem source = menu.findItem(isInLoad() ? R.id.stop_menu_id : R.id.reload_menu_id);
 		final MenuItem dest = menu.findItem(R.id.stop_reload_menu_id);
-		if (source != null && dest != null) {
+		if ( source != null && dest != null ) {
 			dest.setTitle(source.getTitle());
 			dest.setIcon(source.getIcon());
 		}
@@ -1501,145 +1622,146 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (null == getCurrentTopWebView()) {
+	public boolean onOptionsItemSelected ( MenuItem item ) {
+
+		if ( null == getCurrentTopWebView() ) {
 			return false;
 		}
-		if (mMenuIsDown) {
+		if ( mMenuIsDown ) {
 			// The shortcut action consumes the MENU. Even if it is still down,
 			// it won't trigger the next shortcut action. In the case of the
 			// shortcut action triggering a new activity, like Bookmarks, we
 			// won't get onKeyUp for MENU. So it is important to reset it here.
 			mMenuIsDown = false;
 		}
-		if (mUi.onOptionsItemSelected(item)) {
+		if ( mUi.onOptionsItemSelected(item) ) {
 			// ui callback handled it
 			return true;
 		}
-		switch (item.getItemId()) {
+		switch ( item.getItemId() ) {
 		// -- Main menu
-		case R.id.new_tab_menu_id:
-//			openTabToHomePage();
+		case R.id.new_tab_menu_id :
+			// openTabToHomePage();
 			break;
 
-		case R.id.incognito_menu_id:
+		case R.id.incognito_menu_id :
 			openIncognitoTab();
 			break;
 
-		case R.id.goto_menu_id:
+		case R.id.goto_menu_id :
 			editUrl();
 			break;
 
-		case R.id.bookmarks_menu_id:
+		case R.id.bookmarks_menu_id :
 			bookmarksOrHistoryPicker(ComboViews.Bookmarks);
 			break;
 
-		case R.id.history_menu_id:
+		case R.id.history_menu_id :
 			bookmarksOrHistoryPicker(ComboViews.History);
 			break;
 
-		case R.id.snapshots_menu_id:
+		case R.id.snapshots_menu_id :
 			bookmarksOrHistoryPicker(ComboViews.Snapshots);
 			break;
 
-		case R.id.add_bookmark_menu_id:
+		case R.id.add_bookmark_menu_id :
 			bookmarkCurrentPage();
 			break;
 
-		case R.id.stop_reload_menu_id:
-			if (isInLoad()) {
+		case R.id.stop_reload_menu_id :
+			if ( isInLoad() ) {
 				stopLoading();
 			} else {
 				getCurrentTopWebView().reload();
 			}
 			break;
 
-		case R.id.back_menu_id:
+		case R.id.back_menu_id :
 			getCurrentTab().goBack();
 			break;
 
-		case R.id.forward_menu_id:
+		case R.id.forward_menu_id :
 			getCurrentTab().goForward();
 			break;
 
-		case R.id.close_menu_id:
+		case R.id.close_menu_id :
 			// Close the subwindow if it exists.
-			if (mTabControl.getCurrentSubWindow() != null) {
+			if ( mTabControl.getCurrentSubWindow() != null ) {
 				dismissSubWindow(mTabControl.getCurrentTab());
 				break;
 			}
 			closeCurrentTab();
 			break;
 
-		case R.id.homepage_menu_id:
+		case R.id.homepage_menu_id :
 			Tab current = mTabControl.getCurrentTab();
 			loadUrl(current, mSettings.getHomePage());
 			break;
 
-		case R.id.preferences_menu_id:
+		case R.id.preferences_menu_id :
 			openPreferences();
 			break;
 
-		case R.id.find_menu_id:
+		case R.id.find_menu_id :
 			findOnPage();
 			break;
 
-		case R.id.save_snapshot_menu_id:
+		case R.id.save_snapshot_menu_id :
 			final Tab source = getTabControl().getCurrentTab();
-			if (source == null)
+			if ( source == null )
 				break;
 			new SaveSnapshotTask(source).execute();
 			break;
 
-		case R.id.page_info_menu_id:
+		case R.id.page_info_menu_id :
 			showPageInfo();
 			break;
 
-		case R.id.snapshot_go_live:
+		case R.id.snapshot_go_live :
 			goLive();
 			return true;
 
-		case R.id.share_page_menu_id:
+		case R.id.share_page_menu_id :
 			Tab currentTab = mTabControl.getCurrentTab();
-			if (null == currentTab) {
+			if ( null == currentTab ) {
 				return false;
 			}
 			shareCurrentPage(currentTab);
 			break;
 
-		case R.id.dump_nav_menu_id:
+		case R.id.dump_nav_menu_id :
 			getCurrentTopWebView().debugDump();
 			break;
 
-		case R.id.zoom_in_menu_id:
+		case R.id.zoom_in_menu_id :
 			getCurrentTopWebView().zoomIn();
 			break;
 
-		case R.id.zoom_out_menu_id:
+		case R.id.zoom_out_menu_id :
 			getCurrentTopWebView().zoomOut();
 			break;
 
-		case R.id.view_downloads_menu_id:
+		case R.id.view_downloads_menu_id :
 			viewDownloads();
 			break;
 
-		case R.id.ua_desktop_menu_id:
+		case R.id.ua_desktop_menu_id :
 			toggleUserAgent();
 			break;
 
-		case R.id.window_one_menu_id:
-		case R.id.window_two_menu_id:
-		case R.id.window_three_menu_id:
-		case R.id.window_four_menu_id:
-		case R.id.window_five_menu_id:
-		case R.id.window_six_menu_id:
-		case R.id.window_seven_menu_id:
-		case R.id.window_eight_menu_id: {
+		case R.id.window_one_menu_id :
+		case R.id.window_two_menu_id :
+		case R.id.window_three_menu_id :
+		case R.id.window_four_menu_id :
+		case R.id.window_five_menu_id :
+		case R.id.window_six_menu_id :
+		case R.id.window_seven_menu_id :
+		case R.id.window_eight_menu_id : {
 			int menuid = item.getItemId();
-			for (int id = 0; id < WINDOW_SHORTCUT_ID_ARRAY.length; id++) {
-				if (WINDOW_SHORTCUT_ID_ARRAY[id] == menuid) {
+			for ( int id = 0 ; id < WINDOW_SHORTCUT_ID_ARRAY.length ; id++ ) {
+				if ( WINDOW_SHORTCUT_ID_ARRAY[ id ] == menuid ) {
 					Tab desiredTab = mTabControl.getTab(id);
-					if (desiredTab != null && desiredTab != mTabControl.getCurrentTab()) {
+					if ( desiredTab != null && desiredTab != mTabControl.getCurrentTab() ) {
 						switchToTab(desiredTab);
 					}
 					break;
@@ -1648,45 +1770,50 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		}
 			break;
 
-		default:
+		default :
 			return false;
 		}
 		return true;
 	}
 
-	private class SaveSnapshotTask extends AsyncTask<Void, Void, Long> implements OnCancelListener {
+	private class SaveSnapshotTask extends AsyncTask< Void , Void , Long> implements OnCancelListener {
 
 		private Tab mTab;
+
 		private Dialog mProgressDialog;
+
 		private ContentValues mValues;
 
-		private SaveSnapshotTask(Tab tab) {
+		private SaveSnapshotTask ( Tab tab ) {
+
 			mTab = tab;
 		}
 
 		@Override
-		protected void onPreExecute() {
+		protected void onPreExecute ( ) {
+
 			CharSequence message = mActivity.getText(R.string.saving_snapshot);
 			mProgressDialog = ProgressDialog.show(mActivity, null, message, true, true, this);
 			mValues = mTab.createSnapshotValues();
 		}
 
 		@Override
-		protected Long doInBackground(Void... params) {
-			if (!mTab.saveViewState(mValues)) {
+		protected Long doInBackground ( Void ... params ) {
+
+			if ( !mTab.saveViewState(mValues) ) {
 				return null;
 			}
-			if (isCancelled()) {
+			if ( isCancelled() ) {
 				String path = mValues.getAsString(Snapshots.VIEWSTATE_PATH);
 				File file = mActivity.getFileStreamPath(path);
-				if (!file.delete()) {
+				if ( !file.delete() ) {
 					file.deleteOnExit();
 				}
 				return null;
 			}
 			final ContentResolver cr = mActivity.getContentResolver();
 			Uri result = cr.insert(Snapshots.CONTENT_URI, mValues);
-			if (result == null) {
+			if ( result == null ) {
 				return null;
 			}
 			long id = ContentUris.parseId(result);
@@ -1694,12 +1821,13 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		}
 
 		@Override
-		protected void onPostExecute(Long id) {
-			if (isCancelled()) {
+		protected void onPostExecute ( Long id ) {
+
+			if ( isCancelled() ) {
 				return;
 			}
 			mProgressDialog.dismiss();
-			if (id == null) {
+			if ( id == null ) {
 				Toast.makeText(mActivity, R.string.snapshot_failed, Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -1709,74 +1837,82 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		}
 
 		@Override
-		public void onCancel(DialogInterface dialog) {
+		public void onCancel ( DialogInterface dialog ) {
+
 			cancel(true);
 		}
 	}
 
 	@Override
-	public void toggleUserAgent() {
+	public void toggleUserAgent ( ) {
+
 		WebView web = getCurrentWebView();
 		mSettings.toggleDesktopUseragent(web);
 		web.loadUrl(web.getOriginalUrl());
 	}
 
 	@Override
-	public void findOnPage() {
+	public void findOnPage ( ) {
+
 		getCurrentTopWebView().showFindDialog(null, true);
 	}
 
 	@Override
-	public void openPreferences() {
+	public void openPreferences ( ) {
+
 		Intent intent = new Intent(mActivity, BrowserPreferencesPage.class);
 		intent.putExtra(BrowserPreferencesPage.CURRENT_PAGE, getCurrentTopWebView().getUrl());
 		mActivity.startActivityForResult(intent, PREFERENCES_PAGE);
 	}
 
 	@Override
-	public void bookmarkCurrentPage() {
+	public void bookmarkCurrentPage ( ) {
+
 		Intent bookmarkIntent = createBookmarkCurrentPageIntent(false);
-		if (bookmarkIntent != null) {
+		if ( bookmarkIntent != null ) {
 			mActivity.startActivity(bookmarkIntent);
 		}
 	}
 
-	private void goLive() {
+	private void goLive ( ) {
+
 		Tab t = getCurrentTab();
 		t.loadUrl(t.getUrl(), null);
 	}
 
 	@Override
-	public void showPageInfo() {
+	public void showPageInfo ( ) {
+
 		mPageDialogsHandler.showPageInfo(mTabControl.getCurrentTab(), false, null);
 	}
 
 	@Override
-	public boolean onContextItemSelected(MenuItem item) {
+	public boolean onContextItemSelected ( MenuItem item ) {
+
 		// Let the History and Bookmark fragments handle menus they created.
-		if (item.getGroupId() == R.id.CONTEXT_MENU) {
+		if ( item.getGroupId() == R.id.CONTEXT_MENU ) {
 			return false;
 		}
 
 		int id = item.getItemId();
 		boolean result = true;
-		switch (id) {
+		switch ( id ) {
 		// -- Browser context menu
-		case R.id.open_context_menu_id:
-		case R.id.save_link_context_menu_id:
-		case R.id.copy_link_context_menu_id:
+		case R.id.open_context_menu_id :
+		case R.id.save_link_context_menu_id :
+		case R.id.copy_link_context_menu_id :
 			final WebView webView = getCurrentTopWebView();
-			if (null == webView) {
+			if ( null == webView ) {
 				result = false;
 				break;
 			}
-			final HashMap<String, WebView> hrefMap = new HashMap<String, WebView>();
+			final HashMap< String , WebView> hrefMap = new HashMap< String , WebView>();
 			hrefMap.put("webview", webView);
 			final Message msg = mHandler.obtainMessage(FOCUS_NODE_HREF, id, 0, hrefMap);
 			webView.requestFocusNodeHref(msg);
 			break;
 
-		default:
+		default :
 			// For other context menus
 			result = onOptionsItemSelected(item);
 		}
@@ -1786,27 +1922,30 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	/**
 	 * support programmatically opening the context menu
 	 */
-	public void openContextMenu(View view) {
+	public void openContextMenu ( View view ) {
+
 		mActivity.openContextMenu(view);
 	}
 
 	/**
 	 * programmatically open the options menu
 	 */
-	public void openOptionsMenu() {
+	public void openOptionsMenu ( ) {
+
 		mActivity.openOptionsMenu();
 	}
 
 	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		if (mOptionsMenuOpen) {
-			if (mConfigChanged) {
+	public boolean onMenuOpened ( int featureId , Menu menu ) {
+
+		if ( mOptionsMenuOpen ) {
+			if ( mConfigChanged ) {
 				// We do not need to make any changes to the state of the
 				// title bar, since the only thing that happened was a
 				// change in orientation
 				mConfigChanged = false;
 			} else {
-				if (!mExtendedMenuOpen) {
+				if ( !mExtendedMenuOpen ) {
 					mExtendedMenuOpen = true;
 					mUi.onExtendedMenuOpened();
 				} else {
@@ -1827,24 +1966,28 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onOptionsMenuClosed(Menu menu) {
+	public void onOptionsMenuClosed ( Menu menu ) {
+
 		mOptionsMenuOpen = false;
 		mUi.onOptionsMenuClosed(isInLoad());
 	}
 
 	@Override
-	public void onContextMenuClosed(Menu menu) {
+	public void onContextMenuClosed ( Menu menu ) {
+
 		mUi.onContextMenuClosed(menu, isInLoad());
 	}
 
 	// Helper method for getting the top window.
 	@Override
-	public WebView getCurrentTopWebView() {
+	public WebView getCurrentTopWebView ( ) {
+
 		return mTabControl.getCurrentTopWebView();
 	}
 
 	@Override
-	public WebView getCurrentWebView() {
+	public WebView getCurrentWebView ( ) {
+
 		return mTabControl.getCurrentWebView();
 	}
 
@@ -1853,12 +1996,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * to see the download window. It shows the download window on top of the
 	 * current window.
 	 */
-	void viewDownloads() {
+	void viewDownloads ( ) {
+
 		Intent intent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
 		mActivity.startActivity(intent);
 	}
 
-	int getActionModeHeight() {
+	int getActionModeHeight ( ) {
+
 		TypedArray actionBarSizeTypedArray = mActivity.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
 		int size = (int) actionBarSizeTypedArray.getDimension(0, 0f);
 		actionBarSizeTypedArray.recycle();
@@ -1868,7 +2013,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// action mode
 
 	@Override
-	public void onActionModeStarted(ActionMode mode) {
+	public void onActionModeStarted ( ActionMode mode ) {
+
 		mUi.onActionModeStarted(mode);
 		mActionMode = mode;
 	}
@@ -1877,17 +2023,19 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * True if a custom ActionMode (i.e. find or select) is in use.
 	 */
 	@Override
-	public boolean isInCustomActionMode() {
+	public boolean isInCustomActionMode ( ) {
+
 		return mActionMode != null;
 	}
 
 	/*
 	 * End the current ActionMode.
 	 */
-	@SuppressLint("NewApi")
+	@SuppressLint ( "NewApi" )
 	@Override
-	public void endActionMode() {
-		if (mActionMode != null) {
+	public void endActionMode ( ) {
+
+		if ( mActionMode != null ) {
 			mActionMode.finish();
 		}
 	}
@@ -1897,14 +2045,16 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * necessary.
 	 */
 	@Override
-	public void onActionModeFinished(ActionMode mode) {
-		if (!isInCustomActionMode())
+	public void onActionModeFinished ( ActionMode mode ) {
+
+		if ( !isInCustomActionMode() )
 			return;
 		mUi.onActionModeFinished(isInLoad());
 		mActionMode = null;
 	}
 
-	boolean isInLoad() {
+	boolean isInLoad ( ) {
+
 		final Tab tab = getCurrentTab();
 		return (tab != null) && tab.inPageLoad();
 	}
@@ -1923,37 +2073,38 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            bookmark.
 	 */
 	@Override
-	public Intent createBookmarkCurrentPageIntent(boolean editExisting) {
+	public Intent createBookmarkCurrentPageIntent ( boolean editExisting ) {
+
 		WebView w = getCurrentTopWebView();
-		if (w == null) {
+		if ( w == null ) {
 			return null;
 		}
 		Intent i = new Intent(mActivity, AddBookmarkPage.class);
 		i.putExtra(BrowserContract.Bookmarks.URL, w.getUrl());
 		i.putExtra(BrowserContract.Bookmarks.TITLE, w.getTitle());
 		String touchIconUrl = w.getTouchIconUrl();
-		if (touchIconUrl != null) {
+		if ( touchIconUrl != null ) {
 			i.putExtra(AddBookmarkPage.TOUCH_ICON_URL, touchIconUrl);
 			WebSettings settings = w.getSettings();
-			if (settings != null) {
+			if ( settings != null ) {
 				i.putExtra(AddBookmarkPage.USER_AGENT, settings.getUserAgentString());
 			}
 		}
-		i.putExtra(BrowserContract.Bookmarks.THUMBNAIL,
-				createScreenshot(w, getDesiredThumbnailWidth(mActivity), getDesiredThumbnailHeight(mActivity)));
+		i.putExtra(BrowserContract.Bookmarks.THUMBNAIL, createScreenshot(w, getDesiredThumbnailWidth(mActivity), getDesiredThumbnailHeight(mActivity)));
 		i.putExtra(BrowserContract.Bookmarks.FAVICON, w.getFavicon());
-		if (editExisting) {
+		if ( editExisting ) {
 			i.putExtra(AddBookmarkPage.CHECK_FOR_DUPE, true);
 		}
 		// Put the dialog at the upper right of the screen, covering the
 		// star on the title bar.
-		i.putExtra("gravity", Gravity.RIGHT | Gravity.TOP);
+		i.putExtra("gravity", Gravity.CENTER);
 		return i;
 	}
 
 	// file chooser
 	@Override
-	public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
+	public void openFileChooser ( ValueCallback< Uri> uploadMsg , String acceptType , String capture ) {
+
 		mUploadHandler = new UploadHandler(this);
 		mUploadHandler.openFileChooser(uploadMsg, acceptType, capture);
 	}
@@ -1968,7 +2119,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            Context for finding out the density of the screen.
 	 * @return desired width for thumbnail screenshot.
 	 */
-	static int getDesiredThumbnailWidth(Context context) {
+	static int getDesiredThumbnailWidth ( Context context ) {
+
 		return context.getResources().getDimensionPixelOffset(R.dimen.bookmarkThumbnailWidth);
 	}
 
@@ -1980,12 +2132,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            Context for finding out the density of the screen.
 	 * @return desired height for thumbnail screenshot.
 	 */
-	static int getDesiredThumbnailHeight(Context context) {
+	static int getDesiredThumbnailHeight ( Context context ) {
+
 		return context.getResources().getDimensionPixelOffset(R.dimen.bookmarkThumbnailHeight);
 	}
 
-	static Bitmap createScreenshot(WebView view, int width, int height) {
-		if (view == null || view.getContentHeight() == 0 || view.getContentWidth() == 0) {
+	static Bitmap createScreenshot ( WebView view , int width , int height ) {
+
+		if ( view == null || view.getContentHeight() == 0 || view.getContentWidth() == 0 ) {
 			return null;
 		}
 		// We render to a bitmap 2x the desired size so that we can then
@@ -1994,8 +2148,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		final int filter_scale = 2;
 		int scaledWidth = width * filter_scale;
 		int scaledHeight = height * filter_scale;
-		if (sThumbnailBitmap == null || sThumbnailBitmap.getWidth() != scaledWidth || sThumbnailBitmap.getHeight() != scaledHeight) {
-			if (sThumbnailBitmap != null) {
+		if ( sThumbnailBitmap == null || sThumbnailBitmap.getWidth() != scaledWidth || sThumbnailBitmap.getHeight() != scaledHeight ) {
+			if ( sThumbnailBitmap != null ) {
 				sThumbnailBitmap.recycle();
 				sThumbnailBitmap = null;
 			}
@@ -2004,14 +2158,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		Canvas canvas = new Canvas(sThumbnailBitmap);
 		int contentWidth = view.getContentWidth();
 		float overviewScale = scaledWidth / (view.getScale() * contentWidth);
-		if (view instanceof BrowserWebView) {
+		if ( view instanceof BrowserWebView ) {
 			int dy = -((BrowserWebView) view).getTitleHeight();
 			canvas.translate(0, dy * overviewScale);
 		}
 
 		canvas.scale(overviewScale, overviewScale);
 
-		if (view instanceof BrowserWebView) {
+		if ( view instanceof BrowserWebView ) {
 			((BrowserWebView) view).drawContent(canvas);
 		} else {
 			view.draw(canvas);
@@ -2021,44 +2175,47 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		return ret;
 	}
 
-	private void updateScreenshot(Tab tab) {
+	private void updateScreenshot ( Tab tab ) {
+
 		// If this is a bookmarked site, add a screenshot to the database.
 		// FIXME: Would like to make sure there is actually something to
 		// draw, but the API for that (WebViewCore.pictureReady()) is not
 		// currently accessible here.
 
 		WebView view = tab.getWebView();
-		if (view == null) {
+		if ( view == null ) {
 			// Tab was destroyed
 			return;
 		}
 		final String url = tab.getUrl();
 		final String originalUrl = view.getOriginalUrl();
-		if (TextUtils.isEmpty(url)) {
+		if ( TextUtils.isEmpty(url) ) {
 			return;
 		}
 
 		// Only update thumbnails for web urls (http(s)://), not for
 		// about:, javascript:, data:, etc...
 		// Unless it is a bookmarked site, then always update
-		if (!Patterns.WEB_URL.matcher(url).matches() && !tab.isBookmarkedSite()) {
+		if ( !Patterns.WEB_URL.matcher(url).matches() && !tab.isBookmarkedSite() ) {
 			return;
 		}
 
 		final Bitmap bm = createScreenshot(view, getDesiredThumbnailWidth(mActivity), getDesiredThumbnailHeight(mActivity));
-		if (bm == null) {
+		if ( bm == null ) {
 			return;
 		}
 
 		final ContentResolver cr = mActivity.getContentResolver();
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask< Void , Void , Void>() {
+
 			@Override
-			protected Void doInBackground(Void... unused) {
+			protected Void doInBackground ( Void ... unused ) {
+
 				Cursor cursor = null;
 				try {
 					// TODO: Clean this up
 					cursor = Bookmarks.queryCombinedForUrl(cr, originalUrl, url);
-					if (cursor != null && cursor.moveToFirst()) {
+					if ( cursor != null && cursor.moveToFirst() ) {
 						final ByteArrayOutputStream os = new ByteArrayOutputStream();
 						bm.compress(Bitmap.CompressFormat.PNG, 100, os);
 
@@ -2068,12 +2225,12 @@ public class Controller implements WebViewController, UiController, ActivityCont
 						do {
 							values.put(Images.URL, cursor.getString(0));
 							cr.update(Images.CONTENT_URI, values, null, null);
-						} while (cursor.moveToNext());
+						} while ( cursor.moveToNext() );
 					}
-				} catch (IllegalStateException e) {
+				} catch ( IllegalStateException e ) {
 					// Ignore
 				} finally {
-					if (cursor != null)
+					if ( cursor != null )
 						cursor.close();
 				}
 				return null;
@@ -2082,29 +2239,38 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	private class Copy implements OnMenuItemClickListener {
+
 		private CharSequence mText;
 
 		@Override
-		public boolean onMenuItemClick(MenuItem item) {
+		public boolean onMenuItemClick ( MenuItem item ) {
+
 			copy(mText);
 			return true;
 		}
 
-		public Copy(CharSequence toCopy) {
+		public Copy ( CharSequence toCopy ) {
+
 			mText = toCopy;
 		}
 	}
 
 	private static class Download implements OnMenuItemClickListener {
+
 		private Activity mActivity;
+
 		private String mText;
+
 		private boolean mPrivateBrowsing;
+
 		private static final String FALLBACK_EXTENSION = "dat";
+
 		private static final String IMAGE_BASE_FORMAT = "yyyy-MM-dd-HH-mm-ss-";
 
 		@Override
-		public boolean onMenuItemClick(MenuItem item) {
-			if (DataUri.isDataUri(mText)) {
+		public boolean onMenuItemClick ( MenuItem item ) {
+
+			if ( DataUri.isDataUri(mText) ) {
 				saveDataUri();
 			} else {
 				DownloadHandler.onDownloadStartNoStream(mActivity, mText, null, null, null, mPrivateBrowsing);
@@ -2112,7 +2278,8 @@ public class Controller implements WebViewController, UiController, ActivityCont
 			return true;
 		}
 
-		public Download(Activity activity, String toDownload, boolean privateBrowsing) {
+		public Download ( Activity activity , String toDownload , boolean privateBrowsing ) {
+
 			mActivity = activity;
 			mText = toDownload;
 			mPrivateBrowsing = privateBrowsing;
@@ -2122,8 +2289,9 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		 * Treats mText as a data URI and writes its contents to a file based on
 		 * the current time.
 		 */
-		@SuppressLint("NewApi")
-		private void saveDataUri() {
+		@SuppressLint ( "NewApi" )
+		private void saveDataUri ( ) {
+
 			FileOutputStream outputStream = null;
 			try {
 				DataUri uri = new DataUri(mText);
@@ -2131,15 +2299,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 				outputStream = new FileOutputStream(target);
 				outputStream.write(uri.getData());
 				final DownloadManager manager = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
-				manager.addCompletedDownload(target.getName(), mActivity.getTitle().toString(), false, uri.getMimeType(),
-						target.getAbsolutePath(), uri.getData().length, true);
-			} catch (IOException e) {
+				manager.addCompletedDownload(target.getName(), mActivity.getTitle().toString(), false, uri.getMimeType(), target.getAbsolutePath(), uri.getData().length, true);
+			} catch ( IOException e ) {
 				Log.e(LOGTAG, "Could not save data URL");
 			} finally {
-				if (outputStream != null) {
+				if ( outputStream != null ) {
 					try {
 						outputStream.close();
-					} catch (IOException e) {
+					} catch ( IOException e ) {
 						// ignore close errors
 					}
 				}
@@ -2150,14 +2317,15 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		 * Creates a File based on the current time stamp and uses the mime type
 		 * of the DataUri to get the extension.
 		 */
-		private File getTarget(DataUri uri) throws IOException {
+		private File getTarget ( DataUri uri ) throws IOException {
+
 			File dir = mActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 			DateFormat format = new SimpleDateFormat(IMAGE_BASE_FORMAT);
 			String nameBase = format.format(new Date());
 			String mimeType = uri.getMimeType();
 			MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
 			String extension = mimeTypeMap.getExtensionFromMimeType(mimeType);
-			if (extension == null) {
+			if ( extension == null ) {
 				Log.w(LOGTAG, "Unknown mime type in data URI" + mimeType);
 				extension = FALLBACK_EXTENSION;
 			}
@@ -2168,17 +2336,20 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	private static class SelectText implements OnMenuItemClickListener {
+
 		private WebViewClassic mWebView;
 
 		@Override
-		public boolean onMenuItemClick(MenuItem item) {
-			if (mWebView != null) {
+		public boolean onMenuItemClick ( MenuItem item ) {
+
+			if ( mWebView != null ) {
 				return mWebView.selectText();
 			}
 			return false;
 		}
 
-		public SelectText(WebView webView) {
+		public SelectText ( WebView webView ) {
+
 			mWebView = WebViewClassic.fromWebView(webView);
 		}
 
@@ -2193,37 +2364,41 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// basic tab interactions:
 
 	// it is assumed that tabcontrol already knows about the tab
-	protected void addTab(Tab tab) {
+	protected void addTab ( Tab tab ) {
+
 		mUi.addTab(tab);
 	}
 
-	protected void removeTab(Tab tab) {
+	protected void removeTab ( Tab tab ) {
+
 		mUi.removeTab(tab);
 		mTabControl.removeTab(tab);
 		mCrashRecoveryHandler.backupState();
 	}
 
 	@Override
-	public void setActiveTab(Tab tab) {
-		
-		Log.d("Liu Test", getClass().getSimpleName()  + " setActiveTab(Tab tab) ");
+	public void setActiveTab ( Tab tab ) {
+
+		Log.d("Liu Test", getClass().getSimpleName() + " setActiveTab(Tab tab) ");
 		// monkey protection against delayed start
-		if (tab != null) {
-			
+		if ( tab != null ) {
+
 			mTabControl.setCurrentTab(tab);
 			// the tab is guaranteed to have a webview after setCurrentTab
 			mUi.setActiveTab(tab);
 		}
 	}
 
-	protected void closeEmptyTab() {
+	protected void closeEmptyTab ( ) {
+
 		Tab current = mTabControl.getCurrentTab();
-		if (current != null && current.getWebView().copyBackForwardList().getSize() == 0) {
+		if ( current != null && current.getWebView().copyBackForwardList().getSize() == 0 ) {
 			closeCurrentTab();
 		}
 	}
 
-	protected void reuseTab(Tab appTab, UrlData urlData) {
+	protected void reuseTab ( Tab appTab , UrlData urlData ) {
+
 		// Dismiss the subwindow if applicable.
 		dismissSubWindow(appTab);
 		// Since we might kill the WebView, remove it from the
@@ -2233,7 +2408,7 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		mTabControl.recreateWebView(appTab);
 		// TODO: analyze why the remove and add are necessary
 		mUi.attachTab(appTab);
-		if (mTabControl.getCurrentTab() != appTab) {
+		if ( mTabControl.getCurrentTab() != appTab ) {
 			switchToTab(appTab);
 			loadUrlDataIn(appTab, urlData);
 		} else {
@@ -2247,48 +2422,52 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// Remove the sub window if it exists. Also called by TabControl when the
 	// user clicks the 'X' to dismiss a sub window.
 	@Override
-	public void dismissSubWindow(Tab tab) {
+	public void dismissSubWindow ( Tab tab ) {
+
 		removeSubWindow(tab);
 		// dismiss the subwindow. This will destroy the WebView.
 		tab.dismissSubWindow();
 		WebView wv = getCurrentTopWebView();
-		if (wv != null) {
+		if ( wv != null ) {
 			wv.requestFocus();
 		}
 	}
 
 	@Override
-	public void removeSubWindow(Tab t) {
-		if (t.getSubWebView() != null) {
+	public void removeSubWindow ( Tab t ) {
+
+		if ( t.getSubWebView() != null ) {
 			mUi.removeSubWindow(t.getSubViewContainer());
 		}
 	}
 
 	@Override
-	public void attachSubWindow(Tab tab) {
-		if (tab.getSubWebView() != null) {
+	public void attachSubWindow ( Tab tab ) {
+
+		if ( tab.getSubWebView() != null ) {
 			mUi.attachSubWindow(tab.getSubViewContainer());
 			getCurrentTopWebView().requestFocus();
 		}
 	}
 
-	private Tab showPreloadedTab(final UrlData urlData) {
-		if (!urlData.isPreloaded()) {
+	private Tab showPreloadedTab ( final UrlData urlData ) {
+
+		if ( !urlData.isPreloaded() ) {
 			return null;
 		}
 		final PreloadedTabControl tabControl = urlData.getPreloadedTab();
 		final String sbQuery = urlData.getSearchBoxQueryToSubmit();
-		if (sbQuery != null) {
-			if (!tabControl.searchBoxSubmit(sbQuery, urlData.mUrl, urlData.mHeaders)) {
+		if ( sbQuery != null ) {
+			if ( !tabControl.searchBoxSubmit(sbQuery, urlData.mUrl, urlData.mHeaders) ) {
 				// Could not submit query. Fallback to regular tab creation
 				tabControl.destroy();
 				return null;
 			}
 		}
 		// check tab count and make room for new tab
-		if (!mTabControl.canCreateNewTab()) {
+		if ( !mTabControl.canCreateNewTab() ) {
 			Tab leastUsed = mTabControl.getLeastUsedTab(getCurrentTab());
-			if (leastUsed != null) {
+			if ( leastUsed != null ) {
 				closeTab(leastUsed);
 			}
 		}
@@ -2302,22 +2481,23 @@ public class Controller implements WebViewController, UiController, ActivityCont
 
 	// open a non inconito tab with the given url data
 	// and set as active tab
-	public Tab openTab(UrlData urlData) {
+	public Tab openTab ( UrlData urlData ) {
+
 		Tab tab = showPreloadedTab(urlData);
-		if (tab == null) {
+		if ( tab == null ) {
 			tab = createNewTab(false, true, true);
-			if ((tab != null) && !urlData.isEmpty()) {
+			if ( (tab != null) && !urlData.isEmpty() ) {
 				loadUrlDataIn(tab, urlData);
 			}
 		}
 		return tab;
 	}
 
-	
 	@Override
-	public Tab openTabToHomePage() {
-//		return openTab(mSettings.getHomePage(), false, true, false);
-		
+	public Tab openTabToHomePage ( ) {
+
+		// return openTab(mSettings.getHomePage(), false, true, false);
+
 		Tab tab = mTabControl.createHomeTab();
 		addTab(tab);
 		setActiveTab(tab);
@@ -2325,31 +2505,34 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public Tab openIncognitoTab() {
+	public Tab openIncognitoTab ( ) {
+
 		return openTab(INCOGNITO_URI, true, true, false);
 	}
 
 	@Override
-	public Tab openTab(String url, boolean incognito, boolean setActive, boolean useCurrent) {
+	public Tab openTab ( String url , boolean incognito , boolean setActive , boolean useCurrent ) {
+
 		return openTab(url, incognito, setActive, useCurrent, null);
 	}
 
 	@Override
-	public Tab openTab(String url, Tab parent, boolean setActive, boolean useCurrent) {
+	public Tab openTab ( String url , Tab parent , boolean setActive , boolean useCurrent ) {
+
 		return openTab(url, (parent != null) && parent.isPrivateBrowsingEnabled(), setActive, useCurrent, parent);
 	}
 
-	public Tab openTab(String url, boolean incognito, boolean setActive, boolean useCurrent, Tab parent) {
-		
+	public Tab openTab ( String url , boolean incognito , boolean setActive , boolean useCurrent , Tab parent ) {
+
 		Tab tab = createNewTab(incognito, setActive, useCurrent);
-		if (tab != null) {
-			
-			if (parent != null && parent != tab) {
-				
+		if ( tab != null ) {
+
+			if ( parent != null && parent != tab ) {
+
 				parent.addChildTab(tab);
 			}
-			if (url != null) {
-				
+			if ( url != null ) {
+
 				loadUrl(tab, url);
 			}
 		}
@@ -2360,25 +2543,25 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	// incognito: private browsing tab
 	// setActive: ste tab as current tab
 	// useCurrent: if no new tab can be created, return current tab
-	private Tab createNewTab(boolean incognito, boolean setActive, boolean useCurrent) {
-		
+	private Tab createNewTab ( boolean incognito , boolean setActive , boolean useCurrent ) {
+
 		Tab tab = null;
-		if (mTabControl.canCreateNewTab()) {
-			
+		if ( mTabControl.canCreateNewTab() ) {
+
 			tab = mTabControl.createNewTab(incognito);
 			addTab(tab);
-			if (setActive) {
-				
+			if ( setActive ) {
+
 				setActiveTab(tab);
 			}
 		} else {
-			
-			if (useCurrent) {
-				
+
+			if ( useCurrent ) {
+
 				tab = mTabControl.getCurrentTab();
 				reuseTab(tab, null);
 			} else {
-				
+
 				mUi.showMaxTabsWarning();
 			}
 		}
@@ -2386,12 +2569,13 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public SnapshotTab createNewSnapshotTab(long snapshotId, boolean setActive) {
+	public SnapshotTab createNewSnapshotTab ( long snapshotId , boolean setActive ) {
+
 		SnapshotTab tab = null;
-		if (mTabControl.canCreateNewTab()) {
+		if ( mTabControl.canCreateNewTab() ) {
 			tab = mTabControl.createSnapshotTab(snapshotId);
 			addTab(tab);
-			if (setActive) {
+			if ( setActive ) {
 				setActiveTab(tab);
 			}
 		} else {
@@ -2408,9 +2592,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *         current one, return false.
 	 */
 	@Override
-	public boolean switchToTab(Tab tab) {
+	public boolean switchToTab ( Tab tab ) {
+
 		Tab currentTab = mTabControl.getCurrentTab();
-		if (tab == null || tab == currentTab) {
+		if ( tab == null || tab == currentTab ) {
 			return false;
 		}
 		setActiveTab(tab);
@@ -2418,12 +2603,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void closeCurrentTab() {
+	public void closeCurrentTab ( ) {
+
 		closeCurrentTab(false);
 	}
 
-	protected void closeCurrentTab(boolean andQuit) {
-		if (mTabControl.getTabCount() == 1) {
+	protected void closeCurrentTab ( boolean andQuit ) {
+
+		if ( mTabControl.getTabCount() == 1 ) {
 			mCrashRecoveryHandler.clearState();
 			mTabControl.removeTab(getCurrentTab());
 			mActivity.finish();
@@ -2432,16 +2619,16 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		final Tab current = mTabControl.getCurrentTab();
 		final int pos = mTabControl.getCurrentPosition();
 		Tab newTab = current.getParent();
-		if (newTab == null) {
+		if ( newTab == null ) {
 			newTab = mTabControl.getTab(pos + 1);
-			if (newTab == null) {
+			if ( newTab == null ) {
 				newTab = mTabControl.getTab(pos - 1);
 			}
 		}
-		if (andQuit) {
+		if ( andQuit ) {
 			mTabControl.setCurrentTab(newTab);
 			closeTab(current);
-		} else if (switchToTab(newTab)) {
+		} else if ( switchToTab(newTab) ) {
 			// Close window
 			closeTab(current);
 		}
@@ -2452,8 +2639,9 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * current tab to a valid value.
 	 */
 	@Override
-	public void closeTab(Tab tab) {
-		if (tab == mTabControl.getCurrentTab()) {
+	public void closeTab ( Tab tab ) {
+
+		if ( tab == mTabControl.getCurrentTab() ) {
 			closeCurrentTab();
 		} else {
 			removeTab(tab);
@@ -2461,13 +2649,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	// Called when loading from context menu or LOAD_URL message
-	protected void loadUrlFromContext(String url) {
+	protected void loadUrlFromContext ( String url ) {
+
 		Tab tab = getCurrentTab();
 		WebView view = tab != null ? tab.getWebView() : null;
 		// In case the user enters nothing.
-		if (url != null && url.length() != 0 && tab != null && view != null) {
+		if ( url != null && url.length() != 0 && tab != null && view != null ) {
 			url = UrlUtils.smartUrlFilter(url);
-			if (!WebViewClassic.fromWebView(view).getWebViewClient().shouldOverrideUrlLoading(view, url)) {
+			if ( !WebViewClassic.fromWebView(view).getWebViewClient().shouldOverrideUrlLoading(view, url) ) {
 				loadUrl(tab, url);
 			}
 		}
@@ -2483,18 +2672,19 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 *            The URL to load.
 	 */
 	@Override
-	public void loadUrl(Tab tab, String url) {
+	public void loadUrl ( Tab tab , String url ) {
+
 		loadUrl(tab, url, null);
 	}
 
-	protected void loadUrl(Tab tab, String url, Map<String, String> headers) {
-		
-		if (tab != null) {
-			
+	protected void loadUrl ( Tab tab , String url , Map< String , String> headers ) {
+
+		if ( tab != null ) {
+
 			dismissSubWindow(tab);
 			tab.loadUrl(url, headers);
 			mUi.onProgressChanged(tab);
-			
+
 		}
 	}
 
@@ -2507,9 +2697,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * @param data
 	 *            The UrlData being loaded.
 	 */
-	protected void loadUrlDataIn(Tab t, UrlData data) {
-		if (data != null) {
-			if (data.isPreloaded()) {
+	protected void loadUrlDataIn ( Tab t , UrlData data ) {
+
+		if ( data != null ) {
+			if ( data.isPreloaded() ) {
 				// this isn't called for preloaded tabs
 			} else {
 				loadUrl(t, data.mUrl, data.mHeaders);
@@ -2518,18 +2709,20 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void onUserCanceledSsl(Tab tab) {
+	public void onUserCanceledSsl ( Tab tab ) {
+
 		// TODO: Figure out the "right" behavior
-		if (tab.canGoBack()) {
+		if ( tab.canGoBack() ) {
 			tab.goBack();
 		} else {
 			tab.loadUrl(mSettings.getHomePage(), null);
 		}
 	}
 
-	void goBackOnePageOrQuit() {
+	void goBackOnePageOrQuit ( ) {
+
 		Tab current = mTabControl.getCurrentTab();
-		if (current == null) {
+		if ( current == null ) {
 			/*
 			 * Instead of finishing the activity, simply push this to the back
 			 * of the stack and let ActivityManager to choose the foreground
@@ -2540,18 +2733,18 @@ public class Controller implements WebViewController, UiController, ActivityCont
 			mActivity.moveTaskToBack(true);
 			return;
 		}
-		if (current.canGoBack()) {
+		if ( current.canGoBack() ) {
 			current.goBack();
 		} else {
 			// Check to see if we are closing a window that was created by
 			// another window. If so, we switch back to that window.
 			Tab parent = current.getParent();
-			if (parent != null) {
+			if ( parent != null ) {
 				switchToTab(parent);
 				// Now we close the other tab
 				closeTab(current);
 			} else {
-				if ((current.getAppId() != null) || current.closeOnBack()) {
+				if ( (current.getAppId() != null) || current.closeOnBack() ) {
 					closeCurrentTab(true);
 				}
 				/*
@@ -2569,9 +2762,10 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	/**
 	 * helper method for key handler returns the current tab if it can't advance
 	 */
-	private Tab getNextTab() {
+	private Tab getNextTab ( ) {
+
 		int pos = mTabControl.getCurrentPosition() + 1;
-		if (pos >= mTabControl.getTabCount()) {
+		if ( pos >= mTabControl.getTabCount() ) {
 			pos = 0;
 		}
 		return mTabControl.getTab(pos);
@@ -2580,15 +2774,17 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	/**
 	 * helper method for key handler returns the current tab if it can't advance
 	 */
-	private Tab getPrevTab() {
+	private Tab getPrevTab ( ) {
+
 		int pos = mTabControl.getCurrentPosition() - 1;
-		if (pos < 0) {
+		if ( pos < 0 ) {
 			pos = mTabControl.getTabCount() - 1;
 		}
 		return mTabControl.getTab(pos);
 	}
 
-	boolean isMenuOrCtrlKey(int keyCode) {
+	boolean isMenuOrCtrlKey ( int keyCode ) {
+
 		return (KeyEvent.KEYCODE_MENU == keyCode) || (KeyEvent.KEYCODE_CTRL_LEFT == keyCode) || (KeyEvent.KEYCODE_CTRL_RIGHT == keyCode);
 	}
 
@@ -2600,27 +2796,28 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	 * @return true if handled, false to pass to super
 	 */
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	public boolean onKeyDown ( int keyCode , KeyEvent event ) {
+
 		boolean noModifiers = event.hasNoModifiers();
 		// Even if MENU is already held down, we need to call to super to open
 		// the IME on long press.
-		if (!noModifiers && isMenuOrCtrlKey(keyCode)) {
+		if ( !noModifiers && isMenuOrCtrlKey(keyCode) ) {
 			mMenuIsDown = true;
 			return false;
 		}
 
 		WebView webView = getCurrentTopWebView();
 		Tab tab = getCurrentTab();
-		if (webView == null || tab == null)
+		if ( webView == null || tab == null )
 			return false;
 
 		boolean ctrl = event.hasModifiers(KeyEvent.META_CTRL_ON);
 		boolean shift = event.hasModifiers(KeyEvent.META_SHIFT_ON);
 
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_TAB:
-			if (event.isCtrlPressed()) {
-				if (event.isShiftPressed()) {
+		switch ( keyCode ) {
+		case KeyEvent.KEYCODE_TAB :
+			if ( event.isCtrlPressed() ) {
+				if ( event.isShiftPressed() ) {
 					// prev tab
 					switchToTab(getPrevTab());
 				} else {
@@ -2630,47 +2827,47 @@ public class Controller implements WebViewController, UiController, ActivityCont
 				return true;
 			}
 			break;
-		case KeyEvent.KEYCODE_SPACE:
+		case KeyEvent.KEYCODE_SPACE :
 			// WebView/WebTextView handle the keys in the KeyDown. As
 			// the Activity's shortcut keys are only handled when WebView
 			// doesn't, have to do it in onKeyDown instead of onKeyUp.
-			if (shift) {
+			if ( shift ) {
 				pageUp();
-			} else if (noModifiers) {
+			} else if ( noModifiers ) {
 				pageDown();
 			}
 			return true;
-		case KeyEvent.KEYCODE_BACK:
-			if (!noModifiers)
+		case KeyEvent.KEYCODE_BACK :
+			if ( !noModifiers )
 				break;
 			event.startTracking();
 			return true;
-		case KeyEvent.KEYCODE_FORWARD:
-			if (!noModifiers)
+		case KeyEvent.KEYCODE_FORWARD :
+			if ( !noModifiers )
 				break;
 			tab.goForward();
 			return true;
-		case KeyEvent.KEYCODE_DPAD_LEFT:
-			if (ctrl) {
+		case KeyEvent.KEYCODE_DPAD_LEFT :
+			if ( ctrl ) {
 				tab.goBack();
 				return true;
 			}
 			break;
-		case KeyEvent.KEYCODE_DPAD_RIGHT:
-			if (ctrl) {
+		case KeyEvent.KEYCODE_DPAD_RIGHT :
+			if ( ctrl ) {
 				tab.goForward();
 				return true;
 			}
 			break;
-		case KeyEvent.KEYCODE_A:
-			if (ctrl) {
+		case KeyEvent.KEYCODE_A :
+			if ( ctrl ) {
 				WebViewClassic.fromWebView(webView).selectAll();
 				return true;
 			}
 			break;
 		// case KeyEvent.KEYCODE_B: // menu
-		case KeyEvent.KEYCODE_C:
-			if (ctrl) {
+		case KeyEvent.KEYCODE_C :
+			if ( ctrl ) {
 				WebViewClassic.fromWebView(webView).copySelection();
 				return true;
 			}
@@ -2691,14 +2888,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		// case KeyEvent.KEYCODE_Q: // unused
 		// case KeyEvent.KEYCODE_R:
 		// case KeyEvent.KEYCODE_S: // in Chrome: saves page
-		case KeyEvent.KEYCODE_T:
+		case KeyEvent.KEYCODE_T :
 			// we can't use the ctrl/shift flags, they check for
 			// exclusive use of a modifier
-			if (event.isCtrlPressed()) {
-				if (event.isShiftPressed()) {
+			if ( event.isCtrlPressed() ) {
+				if ( event.isShiftPressed() ) {
 					openIncognitoTab();
 				} else {
-//					openTabToHomePage();
+					// openTabToHomePage();
 				}
 				return true;
 			}
@@ -2715,10 +2912,11 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_BACK:
-			if (mUi.isWebShowing()) {
+	public boolean onKeyLongPress ( int keyCode , KeyEvent event ) {
+
+		switch ( keyCode ) {
+		case KeyEvent.KEYCODE_BACK :
+			if ( mUi.isWebShowing() ) {
 				bookmarksOrHistoryPicker(ComboViews.History);
 				return true;
 			}
@@ -2728,18 +2926,19 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (isMenuOrCtrlKey(keyCode)) {
+	public boolean onKeyUp ( int keyCode , KeyEvent event ) {
+
+		if ( isMenuOrCtrlKey(keyCode) ) {
 			mMenuIsDown = false;
-			if (KeyEvent.KEYCODE_MENU == keyCode && event.isTracking() && !event.isCanceled()) {
+			if ( KeyEvent.KEYCODE_MENU == keyCode && event.isTracking() && !event.isCanceled() ) {
 				return onMenuKey();
 			}
 		}
-		if (!event.hasNoModifiers())
+		if ( !event.hasNoModifiers() )
 			return false;
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_BACK:
-			if (event.isTracking() && !event.isCanceled()) {
+		switch ( keyCode ) {
+		case KeyEvent.KEYCODE_BACK :
+			if ( event.isTracking() && !event.isCanceled() ) {
 				onBackKey();
 				return true;
 			}
@@ -2748,12 +2947,14 @@ public class Controller implements WebViewController, UiController, ActivityCont
 		return false;
 	}
 
-	public boolean isMenuDown() {
+	public boolean isMenuDown ( ) {
+
 		return mMenuIsDown;
 	}
 
 	@Override
-	public void setupAutoFill(Message message) {
+	public void setupAutoFill ( Message message ) {
+
 		// Open the settings activity at the AutoFill profile fragment so that
 		// the user can create a new profile. When they return, we will dispatch
 		// the message so that we can autofill the form using their new profile.
@@ -2764,26 +2965,29 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public boolean onSearchRequested() {
+	public boolean onSearchRequested ( ) {
+
 		mUi.editUrl(false, true);
 		return true;
 	}
 
 	@Override
-	public boolean shouldCaptureThumbnails() {
-		
+	public boolean shouldCaptureThumbnails ( ) {
+
 		return mUi.shouldCaptureThumbnails();
 	}
 
 	@Override
-	public boolean supportsVoice() {
+	public boolean supportsVoice ( ) {
+
 		PackageManager pm = mActivity.getPackageManager();
 		List activities = pm.queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
 		return activities.size() != 0;
 	}
 
 	@Override
-	public void startVoiceRecognizer() {
+	public void startVoiceRecognizer ( ) {
+
 		Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 		voice.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
@@ -2791,33 +2995,65 @@ public class Controller implements WebViewController, UiController, ActivityCont
 	}
 
 	@Override
-	public void setBlockEvents(boolean block) {
+	public void setBlockEvents ( boolean block ) {
+
 		mBlockEvents = block;
 	}
 
 	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
+	public boolean dispatchKeyEvent ( KeyEvent event ) {
+
 		return mBlockEvents;
 	}
 
 	@Override
-	public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+	public boolean dispatchKeyShortcutEvent ( KeyEvent event ) {
+
 		return mBlockEvents;
 	}
 
 	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
+	public boolean dispatchTouchEvent ( MotionEvent ev ) {
+
 		return mBlockEvents;
 	}
 
 	@Override
-	public boolean dispatchTrackballEvent(MotionEvent ev) {
+	public boolean dispatchTrackballEvent ( MotionEvent ev ) {
+
 		return mBlockEvents;
 	}
 
 	@Override
-	public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+	public boolean dispatchGenericMotionEvent ( MotionEvent ev ) {
+
 		return mBlockEvents;
 	}
 
+	public boolean isParentAssistant ( Intent intent ) {
+
+		if ( intent.getData() != null ) {
+
+			String enter_source = intent.getStringExtra(ENTER_SOURCE);
+			if ( enter_source != null && enter_source.equals(PARENT_ASSISTANT) ) {
+
+				return true;
+
+			} else {
+
+				new AlertDialog.Builder(mActivity).setTitle(R.string.hintTitle)
+						.setMessage(mActivity.getResources().getString(R.string.cannot_access_outside_url) + intent.getDataString())
+						.setPositiveButton(R.string.btn_positive, new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick ( DialogInterface dialog , int which ) {
+
+							}
+
+						}).show();
+			}
+
+		}
+		return false;
+	}
 }

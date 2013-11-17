@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!--
+     Copyright (C) 2008 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,26 +15,20 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <com.android.browser.preferences.NonformattingListPreference
-        android:key="homepage_picker"
-        android:entries="@array/pref_homepage_choices"
-        android:entryValues="@array/pref_homepage_values"
-        android:title="@string/pref_content_homepage" />
-
-    <PreferenceCategory android:title="@string/pref_general_autofill_title">
-        <CheckBoxPreference android:key="autofill_enabled"
-            android:title="@string/pref_autofill_enabled"
-            android:summary="@string/pref_autofill_enabled_summary"
+    <PreferenceCategory android:title="@string/pref_general_autofill_title" >
+        <CheckBoxPreference
             android:defaultValue="true"
-        />
+            android:key="autofill_enabled"
+            android:summary="@string/pref_autofill_enabled_summary"
+            android:title="@string/pref_autofill_enabled" />
 
         <PreferenceScreen
             android:fragment="com.android.browser.AutoFillSettingsFragment"
             android:key="autofill_profile"
-            android:title="@string/pref_autofill_profile_editor"
-            android:summary="@string/pref_autofill_profile_editor_summary" />
+            android:summary="@string/pref_autofill_profile_editor_summary"
+            android:title="@string/pref_autofill_profile_editor" />
     </PreferenceCategory>
 
 </PreferenceScreen>

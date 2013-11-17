@@ -60,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dip"
-                android:background="@drawable/bg_grid_init"
+                android:background="@drawable/bg_grid"
                 android:orientation="vertical"
                 mysiteitem:type="2" >
             </com.android.browser.navigation.MySitesView>

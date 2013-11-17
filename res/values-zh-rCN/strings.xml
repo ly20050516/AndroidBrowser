@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="application_name" msgid="1935869255545976415">"浏览器"</string>
+    <string name="application_name" msgid="1935869255545976415">"绿色上网"</string>
     <string name="choose_upload" msgid="3649366287575002063">"选择要上传的文件"</string>
     <string name="uploads_disabled" msgid="463761197575372994">"文件上传功能已停用。"</string>
     <string name="new_tab" msgid="7971857320679510529">"新标签页"</string>
@@ -396,4 +396,6 @@
     <string name="accessibility_state_incognito" msgid="5786038488425202355">"隐身网页"</string>
     <string name="accessibility_state_frozen" msgid="8041539250447035570">"已保存的网页"</string>
     <string name="accessibility_transition_navscreen" msgid="2734915619351519547">"标签页管理"</string>
+    <string name="find_on_page">查找网页</string>
+    <string name="path_personal_control_cfg">/mnt/flasha/个人中心/PersonalControl.cfg</string>
 </resources>

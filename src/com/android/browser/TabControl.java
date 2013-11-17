@@ -192,7 +192,7 @@ class TabControl {
 
 	public Tab createHomeTab(){
 		
-		Tab tab = new Tab(mController,"home");
+		Tab tab = new Tab(mController,"HOME",true);
 		
 		mTabs.add(tab);
 		tab.putInBackground();

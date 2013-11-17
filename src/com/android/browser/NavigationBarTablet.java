@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.browser;
 
 import android.animation.Animator;
@@ -37,42 +38,63 @@ import com.android.browser.UrlInputView.StateListener;
 public class NavigationBarTablet extends NavigationBarBase implements StateListener {
 
 	private Drawable mStopDrawable;
+
 	private Drawable mReloadDrawable;
+
 	private String mStopDescription;
+
 	private String mRefreshDescription;
 
 	private View mUrlContainer;
+
 	private ImageButton mBackButton;
+
 	private ImageButton mForwardButton;
+
 	private ImageView mStar;
+
 	private ImageView mUrlIcon;
+
 	private ImageView mSearchButton;
+
 	private ImageView mStopButton;
+
 	private View mAllButton;
+
 	private View mClearButton;
+
 	private View mVoiceButton;
+
 	private View mNavButtons;
+
 	private Drawable mFocusDrawable;
+
 	private Drawable mUnfocusDrawable;
+
 	private boolean mHideNavButtons;
+
 	private Drawable mFaviconDrawable;
 
-	public NavigationBarTablet(Context context) {
+	public NavigationBarTablet ( Context context ) {
+
 		super(context);
 		init(context);
 	}
 
-	public NavigationBarTablet(Context context, AttributeSet attrs) {
+	public NavigationBarTablet ( Context context , AttributeSet attrs ) {
+
 		super(context, attrs);
 		init(context);
 	}
 
-	public NavigationBarTablet(Context context, AttributeSet attrs, int defStyle) {
+	public NavigationBarTablet ( Context context , AttributeSet attrs , int defStyle ) {
+
 		super(context, attrs, defStyle);
 		init(context);
 	}
 
-	private void init(Context context) {
+	private void init ( Context context ) {
+
 		Resources resources = context.getResources();
 		mStopDrawable = resources.getDrawable(R.drawable.ic_stop_holo_dark);
 		mReloadDrawable = resources.getDrawable(R.drawable.ic_refresh_holo_dark);
@@ -84,7 +106,8 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 	}
 
 	@Override
-	protected void onFinishInflate() {
+	protected void onFinishInflate ( ) {
+
 		super.onFinishInflate();
 		mAllButton = findViewById(R.id.all_btn);
 		// TODO: Change enabled states based on whether you can go
@@ -99,12 +122,17 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		mClearButton = findViewById(R.id.clear);
 		mVoiceButton = findViewById(R.id.voice);
 		mUrlContainer = findViewById(R.id.urlbar_focused);
-		
-		mUrlContainer.setVisibility(View.INVISIBLE);
+
+		mUrlContainer.setVisibility(View.VISIBLE);
 		mSearchButton.setVisibility(View.INVISIBLE);
-		mStar.setVisibility(View.GONE);
+		mStar.setVisibility(View.VISIBLE);
 		mAllButton.setVisibility(View.GONE);
-		
+		mUrlInput.setVisibility(View.INVISIBLE);
+		mClearButton.setVisibility(View.INVISIBLE);
+		mVoiceButton.setVisibility(View.INVISIBLE);
+		mSearchButton.setVisibility(View.VISIBLE);
+		mUrlIcon.setVisibility(View.INVISIBLE);
+
 		mBackButton.setOnClickListener(this);
 		mForwardButton.setOnClickListener(this);
 		mStar.setOnClickListener(this);
@@ -117,79 +145,105 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		mUrlInput.setStateListener(this);
 	}
 
-	public void onConfigurationChanged(Configuration config) {
+	public void onConfigurationChanged ( Configuration config ) {
+
 		super.onConfigurationChanged(config);
 		Resources res = mContext.getResources();
 		mHideNavButtons = res.getBoolean(R.bool.hide_nav_buttons);
-		if (mUrlInput.hasFocus()) {
-			if (mHideNavButtons && (mNavButtons.getVisibility() == View.VISIBLE)) {
+		if ( mUrlInput.hasFocus() ) {
+			if ( mHideNavButtons && (mNavButtons.getVisibility() == View.VISIBLE) ) {
+
 				int aw = mNavButtons.getMeasuredWidth();
 				mNavButtons.setVisibility(View.GONE);
 				mNavButtons.setAlpha(0f);
 				mNavButtons.setTranslationX(-aw);
-			} else if (!mHideNavButtons && (mNavButtons.getVisibility() == View.GONE)) {
+
+			} else if ( !mHideNavButtons && (mNavButtons.getVisibility() == View.GONE) ) {
+
 				mNavButtons.setVisibility(View.VISIBLE);
 				mNavButtons.setAlpha(1f);
 				mNavButtons.setTranslationX(0);
+
 			}
 		}
 	}
 
 	@Override
-	public void setTitleBar(TitleBar titleBar) {
+	public void setTitleBar ( TitleBar titleBar ) {
+
 		super.setTitleBar(titleBar);
 		setFocusState(false);
 	}
 
-	void updateNavigationState(Tab tab) {
-		if (tab != null) {
+	void updateNavigationState ( Tab tab ) {
+
+		if ( tab != null ) {
+
+			if ( tab.isHomePage() ) {
+
+				mBackButton.setEnabled(false);
+				mForwardButton.setEnabled(false);
+				mStopButton.setEnabled(false);
+				mStar.setEnabled(false);
+
+			}else{
+				
+				mBackButton.setEnabled(true);
+				mForwardButton.setEnabled(true);
+				mStopButton.setEnabled(true);
+				mStar.setEnabled(true);
+			}
 			mBackButton.setImageResource(tab.canGoBack() ? R.drawable.ic_back_holo_dark : R.drawable.ic_back_disabled_holo_dark);
-			mForwardButton
-					.setImageResource(tab.canGoForward() ? R.drawable.ic_forward_holo_dark : R.drawable.ic_forward_disabled_holo_dark);
+			mForwardButton.setImageResource(tab.canGoForward() ? R.drawable.ic_forward_holo_dark : R.drawable.ic_forward_disabled_holo_dark);
+
 		}
 		updateUrlIcon();
 	}
 
 	@Override
-	public void onTabDataChanged(Tab tab) {
+	public void onTabDataChanged ( Tab tab ) {
+
 		super.onTabDataChanged(tab);
 		showHideStar(tab);
 	}
 
 	@Override
-	public void setCurrentUrlIsBookmark(boolean isBookmark) {
+	public void setCurrentUrlIsBookmark ( boolean isBookmark ) {
+
 		mStar.setActivated(isBookmark);
-		
+
 	}
 
 	@Override
-	public void onClick(View v) {
-		if ((mBackButton == v) && (mUiController.getCurrentTab() != null)) {
+	public void onClick ( View v ) {
+
+		if ( (mBackButton == v) && (mUiController.getCurrentTab() != null) ) {
 			mUiController.getCurrentTab().goBack();
-		} else if ((mForwardButton == v) && (mUiController.getCurrentTab() != null)) {
+		} else if ( (mForwardButton == v) && (mUiController.getCurrentTab() != null) ) {
 			mUiController.getCurrentTab().goForward();
-		} else if (mStar == v) {
+		} else if ( mStar == v ) {
 			Intent intent = mUiController.createBookmarkCurrentPageIntent(true);
-			if (intent != null) {
+			if ( intent != null ) {
 				getContext().startActivity(intent);
 			}
-		} else if (mAllButton == v) {
+		} else if ( mAllButton == v ) {
 			mUiController.bookmarksOrHistoryPicker(ComboViews.Bookmarks);
-		} else if (mSearchButton == v) {
+		} else if ( mSearchButton == v ) {
 			mBaseUi.editUrl(true, true);
-		} else if (mStopButton == v) {
+		} else if ( mStopButton == v ) {
 			stopOrRefresh();
-		} else if (mClearButton == v) {
+		} else if ( mClearButton == v ) {
 			clearOrClose();
-		} else if (mVoiceButton == v) {
+		} else if ( mVoiceButton == v ) {
 			mUiController.startVoiceRecognizer();
 		} else {
 			super.onClick(v);
 		}
 	}
 
-	private void clearOrClose() {
-		if (TextUtils.isEmpty(mUrlInput.getText())) {
+	private void clearOrClose ( ) {
+
+		if ( TextUtils.isEmpty(mUrlInput.getText()) ) {
 			// close
 			mUrlInput.clearFocus();
 		} else {
@@ -199,16 +253,18 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 	}
 
 	@Override
-	public void setFavicon(Bitmap icon) {
+	public void setFavicon ( Bitmap icon ) {
+
 		mFaviconDrawable = mBaseUi.getFaviconDrawable(icon);
 		updateUrlIcon();
 	}
 
-	void updateUrlIcon() {
-		if (mUrlInput.hasFocus()) {
+	void updateUrlIcon ( ) {
+
+		if ( mUrlInput.hasFocus() ) {
 			mUrlIcon.setImageResource(R.drawable.ic_search_holo_dark);
 		} else {
-			if (mFaviconDrawable == null) {
+			if ( mFaviconDrawable == null ) {
 				mFaviconDrawable = mBaseUi.getFaviconDrawable(null);
 			}
 			mUrlIcon.setImageDrawable(mFaviconDrawable);
@@ -216,21 +272,22 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 	}
 
 	@Override
-	protected void setFocusState(boolean focus) {
+	protected void setFocusState ( boolean focus ) {
+
 		super.setFocusState(focus);
-		if (focus) {
-			if (mHideNavButtons) {
+		if ( focus ) {
+			if ( mHideNavButtons ) {
 				hideNavButtons();
 			}
 			mSearchButton.setVisibility(View.GONE);
-			mStar.setVisibility(View.GONE);
+			mStar.setVisibility(View.VISIBLE);
 			mUrlIcon.setImageResource(R.drawable.ic_search_holo_dark);
 		} else {
-			if (mHideNavButtons) {
+			if ( mHideNavButtons ) {
 				showNavButtons();
 			}
 			showHideStar(mUiController.getCurrentTab());
-			if (mTitleBar.useQuickControls()) {
+			if ( mTitleBar.useQuickControls() ) {
 				mSearchButton.setVisibility(View.GONE);
 			} else {
 				mSearchButton.setVisibility(View.GONE);
@@ -240,34 +297,38 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		mUrlContainer.setBackgroundDrawable(focus ? mFocusDrawable : mUnfocusDrawable);
 	}
 
-	private void stopOrRefresh() {
-		if (mUiController == null)
+	private void stopOrRefresh ( ) {
+
+		if ( mUiController == null )
 			return;
-		if (mTitleBar.isInLoad()) {
+		if ( mTitleBar.isInLoad() ) {
 			mUiController.stopLoading();
 		} else {
-			if (mUiController.getCurrentTopWebView() != null) {
+			if ( mUiController.getCurrentTopWebView() != null ) {
 				mUiController.getCurrentTopWebView().reload();
 			}
 		}
 	}
 
 	@Override
-	public void onProgressStarted() {
+	public void onProgressStarted ( ) {
+
 		mStopButton.setImageDrawable(mStopDrawable);
 		mStopButton.setContentDescription(mStopDescription);
 	}
 
 	@Override
-	public void onProgressStopped() {
+	public void onProgressStopped ( ) {
+
 		mStopButton.setImageDrawable(mReloadDrawable);
 		mStopButton.setContentDescription(mRefreshDescription);
 	}
 
 	private AnimatorSet mAnimation;
 
-	private void hideNavButtons() {
-		if (mBaseUi.blockFocusAnimations()) {
+	private void hideNavButtons ( ) {
+
+		if ( mBaseUi.blockFocusAnimations() ) {
 			mNavButtons.setVisibility(View.GONE);
 			return;
 		}
@@ -278,8 +339,10 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		mAnimation = new AnimatorSet();
 		mAnimation.playTogether(anim1, anim2, anim3);
 		mAnimation.addListener(new AnimatorListenerAdapter() {
+
 			@Override
-			public void onAnimationEnd(Animator animation) {
+			public void onAnimationEnd ( Animator animation ) {
+
 				mNavButtons.setVisibility(View.GONE);
 				mAnimation = null;
 			}
@@ -288,13 +351,14 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		mAnimation.start();
 	}
 
-	private void showNavButtons() {
-		if (mAnimation != null) {
+	private void showNavButtons ( ) {
+
+		if ( mAnimation != null ) {
 			mAnimation.cancel();
 		}
 		mNavButtons.setVisibility(View.VISIBLE);
 		mNavButtons.setTranslationX(0);
-		if (!mBaseUi.blockFocusAnimations()) {
+		if ( !mBaseUi.blockFocusAnimations() ) {
 			int awidth = mNavButtons.getMeasuredWidth();
 			Animator anim1 = ObjectAnimator.ofFloat(mNavButtons, View.TRANSLATION_X, -awidth, 0);
 			Animator anim2 = ObjectAnimator.ofInt(mUrlContainer, "left", 0, awidth);
@@ -306,31 +370,33 @@ public class NavigationBarTablet extends NavigationBarBase implements StateListe
 		}
 	}
 
-	private void showHideStar(Tab tab) {
+	private void showHideStar ( Tab tab ) {
+
 		// hide the bookmark star for data URLs
-		if (tab != null && tab.inForeground()) {
+		if ( tab != null && tab.inForeground() ) {
 			int starVisibility = View.VISIBLE;
 			String url = tab.getUrl();
-			if (DataUri.isDataUri(url)) {
+			if ( DataUri.isDataUri(url) ) {
 				starVisibility = View.GONE;
 			}
-			mStar.setVisibility(View.GONE);
+			mStar.setVisibility(View.VISIBLE);
 		}
 	}
 
 	@Override
-	public void onStateChanged(int state) {
-		switch (state) {
-		case STATE_NORMAL:
+	public void onStateChanged ( int state ) {
+
+		switch ( state ) {
+		case STATE_NORMAL :
 			mClearButton.setVisibility(View.GONE);
 			mVoiceButton.setVisibility(View.GONE);
 
 			break;
-		case STATE_HIGHLIGHTED:
+		case STATE_HIGHLIGHTED :
 			mClearButton.setVisibility(View.GONE);
 			mVoiceButton.setVisibility(View.VISIBLE);
 			break;
-		case STATE_EDITED:
+		case STATE_EDITED :
 			mClearButton.setVisibility(View.VISIBLE);
 			mVoiceButton.setVisibility(View.GONE);
 			break;

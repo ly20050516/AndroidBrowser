@@ -40,9 +40,9 @@
     <color name="navtab_bg">#80606060</color>
     
     <!-- TabItem 未选中字体颜色 -->
-    <color name="tabitemunselected">#FFFFFF</color>
+    <color name="tabitemunselected">#F0E68C</color>
     <!-- TabItem 选中时字体颜色 -->
-    <color name="tabitemselected">#F0E68C</color>
+    <color name="tabitemselected">#FFFFFF</color>
    
     <!-- 黄色 -->
     <color name="yellow">#FFFF00</color>

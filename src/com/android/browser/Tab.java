@@ -92,7 +92,9 @@ class Tab implements PictureListener {
 
 	// Log Tag
 	private static final String LOGTAG = "Tab";
+
 	private static final boolean LOGD_ENABLED = com.android.browser.Browser.LOGD_ENABLED;
+
 	// Special case the logtag for messages for the Console to make it easier to
 	// filter them and match the logtag used for these messages in older
 	// versions
@@ -100,7 +102,9 @@ class Tab implements PictureListener {
 	private static final String CONSOLE_LOGTAG = "browser";
 
 	private static final int MSG_CAPTURE = 42;
+
 	private static final int CAPTURE_DELAY = 100;
+
 	private static final int INITIAL_PROGRESS = 5;
 
 	private static Bitmap sDefaultFavicon;
@@ -114,20 +118,21 @@ class Tab implements PictureListener {
 	public enum SecurityState {
 		// The page's main resource does not use SSL. Note that we use this
 		// state irrespective of the SSL authentication state of sub-resources.
-		SECURITY_STATE_NOT_SECURE,
+		SECURITY_STATE_NOT_SECURE ,
 		// The page's main resource uses SSL and the certificate is good. The
 		// same is true of all sub-resources.
-		SECURITY_STATE_SECURE,
+		SECURITY_STATE_SECURE ,
 		// The page's main resource uses SSL and the certificate is good, but
 		// some sub-resources either do not use SSL or have problems with their
 		// certificates.
-		SECURITY_STATE_MIXED,
+		SECURITY_STATE_MIXED ,
 		// The page's main resource uses SSL but there is a problem with its
 		// certificate.
-		SECURITY_STATE_BAD_CERTIFICATE,
+		SECURITY_STATE_BAD_CERTIFICATE ,
 	}
 
 	Context mContext;
+
 	protected WebViewController mWebViewController;
 
 	// The tab ID
@@ -135,48 +140,66 @@ class Tab implements PictureListener {
 
 	// The Geolocation permissions prompt
 	private GeolocationPermissionsPrompt mGeolocationPermissionsPrompt;
+
 	// Main WebView wrapper
 	private View mContainer;
+
 	// Main WebView
 	private WebView mMainView;
+
 	// Subwindow container
 	private View mSubViewContainer;
+
 	// Subwindow WebView
 	private WebView mSubView;
+
 	// Saved bundle for when we are running low on memory. It contains the
 	// information needed to restore the WebView if the user goes back to the
 	// tab.
 	private Bundle mSavedState;
+
 	// Parent Tab. This is the Tab that created this Tab, or null if the Tab was
 	// created by the UI
 	private Tab mParent;
+
 	// Tab that constructed by this Tab. This is used when this Tab is
 	// destroyed, it clears all mParentTab values in the children.
-	private Vector<Tab> mChildren;
+	private Vector< Tab> mChildren;
+
 	// If true, the tab is in the foreground of the current activity.
 	private boolean mInForeground;
+
 	// If true, the tab is in page loading state (after onPageStarted,
 	// before onPageFinsihed)
 	private boolean mInPageLoad;
+
 	// The last reported progress of the current page
 	private int mPageLoadProgress;
+
 	// The time the load started, used to find load page time
 	private long mLoadStartTime;
+
 	// Application identifier used to find tabs that another application wants
 	// to reuse.
 	private String mAppId;
+
 	// flag to indicate if tab should be closed on back
 	private boolean mCloseOnBack;
+
 	// Keep the original url around to avoid killing the old WebView if the url
 	// has not changed.
 	// Error console for the tab
 	private ErrorConsoleView mErrorConsole;
+
 	// The listener that gets invoked when a download is started from the
 	// mMainView
 	private final DownloadListener mDownloadListener;
+
 	// Listener used to know when we move forward or back in the history list.
 	private final WebBackForwardListClient mWebBackForwardListClient;
+
 	private DataController mDataController;
+
 	// State of the auto-login request.
 	private DeviceAccountLogin mDeviceAccountLogin;
 
@@ -184,10 +207,15 @@ class Tab implements PictureListener {
 	DownloadTouchIcon mTouchIconLoader;
 
 	private BrowserSettings mSettings;
+
 	private int mCaptureWidth;
+
 	private int mCaptureHeight;
+
 	private Bitmap mCapture;
+
 	private Handler mHandler;
+
 	private boolean mUpdateThumbnail;
 
 	/**
@@ -195,8 +223,9 @@ class Tab implements PictureListener {
 	 */
 	private Pattern mClearHistoryUrlPattern;
 
-	private static synchronized Bitmap getDefaultFavicon(Context context) {
-		if (sDefaultFavicon == null) {
+	private static synchronized Bitmap getDefaultFavicon ( Context context ) {
+
+		if ( sDefaultFavicon == null ) {
 			sDefaultFavicon = BitmapFactory.decodeResource(context.getResources(), R.drawable.app_web_browser_sm);
 		}
 		return sDefaultFavicon;
@@ -204,20 +233,31 @@ class Tab implements PictureListener {
 
 	// All the state needed for a page
 	protected static class PageState {
+
 		String mUrl;
+
 		String mOriginalUrl;
+
 		String mTitle;
+
 		SecurityState mSecurityState;
+
 		// This is non-null only when mSecurityState is
 		// SECURITY_STATE_BAD_CERTIFICATE.
 		SslError mSslCertificateError;
+
 		Bitmap mFavicon;
+
 		boolean mIsBookmarkedSite;
+
 		boolean mIncognito;
 
-		PageState(Context c, boolean incognito) {
+		boolean mIsHomePage;
+
+		PageState ( Context c , boolean incognito ) {
+
 			mIncognito = incognito;
-			if (mIncognito) {
+			if ( mIncognito ) {
 				mOriginalUrl = mUrl = "browser:incognito";
 				mTitle = c.getString(R.string.new_incognito_tab);
 			} else {
@@ -227,10 +267,11 @@ class Tab implements PictureListener {
 			mSecurityState = SecurityState.SECURITY_STATE_NOT_SECURE;
 		}
 
-		PageState(Context c, boolean incognito, String url, Bitmap favicon) {
+		PageState ( Context c , boolean incognito , String url , Bitmap favicon ) {
+
 			mIncognito = incognito;
 			mOriginalUrl = mUrl = url;
-			if (URLUtil.isHttpsUrl(url)) {
+			if ( URLUtil.isHttpsUrl(url) ) {
 				mSecurityState = SecurityState.SECURITY_STATE_SECURE;
 			} else {
 				mSecurityState = SecurityState.SECURITY_STATE_NOT_SECURE;
@@ -245,34 +286,46 @@ class Tab implements PictureListener {
 
 	// Used for saving and restoring each Tab
 	static final String ID = "ID";
+
 	static final String CURRURL = "currentUrl";
+
 	static final String CURRTITLE = "currentTitle";
+
 	static final String PARENTTAB = "parentTab";
+
 	static final String APPID = "appid";
+
 	static final String INCOGNITO = "privateBrowsingEnabled";
+
 	static final String USERAGENT = "useragent";
+
 	static final String CLOSEFLAG = "closeOnBack";
 
 	// Container class for the next error dialog that needs to be displayed
 	private class ErrorDialog {
+
 		public final int mTitle;
+
 		public final String mDescription;
+
 		public final int mError;
 
-		ErrorDialog(int title, String desc, int error) {
+		ErrorDialog ( int title , String desc , int error ) {
+
 			mTitle = title;
 			mDescription = desc;
 			mError = error;
 		}
 	}
 
-	private void processNextError() {
-		if (mQueuedErrors == null) {
+	private void processNextError ( ) {
+
+		if ( mQueuedErrors == null ) {
 			return;
 		}
 		// The first one is currently displayed so just remove it.
 		mQueuedErrors.removeFirst();
-		if (mQueuedErrors.size() == 0) {
+		if ( mQueuedErrors.size() == 0 ) {
 			mQueuedErrors = null;
 			return;
 		}
@@ -280,36 +333,39 @@ class Tab implements PictureListener {
 	}
 
 	private DialogInterface.OnDismissListener mDialogListener = new DialogInterface.OnDismissListener() {
-		public void onDismiss(DialogInterface d) {
+
+		public void onDismiss ( DialogInterface d ) {
+
 			processNextError();
 		}
 	};
-	private LinkedList<ErrorDialog> mQueuedErrors;
 
-	private void queueError(int err, String desc) {
-		if (mQueuedErrors == null) {
-			mQueuedErrors = new LinkedList<ErrorDialog>();
+	private LinkedList< ErrorDialog> mQueuedErrors;
+
+	private void queueError ( int err , String desc ) {
+
+		if ( mQueuedErrors == null ) {
+			mQueuedErrors = new LinkedList< ErrorDialog>();
 		}
-		for (ErrorDialog d : mQueuedErrors) {
-			if (d.mError == err) {
+		for ( ErrorDialog d : mQueuedErrors ) {
+			if ( d.mError == err ) {
 				// Already saw a similar error, ignore the new one.
 				return;
 			}
 		}
-		ErrorDialog errDialog = new ErrorDialog(err == WebViewClient.ERROR_FILE_NOT_FOUND ? R.string.browserFrameFileErrorLabel
-				: R.string.browserFrameNetworkErrorLabel, desc, err);
+		ErrorDialog errDialog = new ErrorDialog(err == WebViewClient.ERROR_FILE_NOT_FOUND ? R.string.browserFrameFileErrorLabel : R.string.browserFrameNetworkErrorLabel, desc, err);
 		mQueuedErrors.addLast(errDialog);
 
 		// Show the dialog now if the queue was empty and it is in foreground
-		if (mQueuedErrors.size() == 1 && mInForeground) {
+		if ( mQueuedErrors.size() == 1 && mInForeground ) {
 			showError(errDialog);
 		}
 	}
 
-	private void showError(ErrorDialog errDialog) {
-		if (mInForeground) {
-			AlertDialog d = new AlertDialog.Builder(mContext).setTitle(errDialog.mTitle).setMessage(errDialog.mDescription)
-					.setPositiveButton(R.string.ok, null).create();
+	private void showError ( ErrorDialog errDialog ) {
+
+		if ( mInForeground ) {
+			AlertDialog d = new AlertDialog.Builder(mContext).setTitle(errDialog.mTitle).setMessage(errDialog.mDescription).setPositiveButton(R.string.ok, null).create();
 			d.setOnDismissListener(mDialogListener);
 			d.show();
 		}
@@ -320,17 +376,21 @@ class Tab implements PictureListener {
 	// -------------------------------------------------------------------------
 
 	private final WebViewClient mWebViewClient = new WebViewClient() {
+
 		private Message mDontResend;
+
 		private Message mResend;
 
-		private boolean providersDiffer(String url, String otherUrl) {
+		private boolean providersDiffer ( String url , String otherUrl ) {
+
 			Uri uri1 = Uri.parse(url);
 			Uri uri2 = Uri.parse(otherUrl);
 			return !uri1.getEncodedAuthority().equals(uri2.getEncodedAuthority());
 		}
 
 		@Override
-		public void onPageStarted(WebView view, String url, Bitmap favicon) {
+		public void onPageStarted ( WebView view , String url , Bitmap favicon ) {
+
 			mInPageLoad = true;
 			mUpdateThumbnail = true;
 			mPageLoadProgress = INITIAL_PROGRESS;
@@ -340,21 +400,21 @@ class Tab implements PictureListener {
 			// If we start a touch icon load and then load a new page, we don't
 			// want to cancel the current touch icon loader. But, we do want to
 			// create a new one when the touch icon url is known.
-			if (mTouchIconLoader != null) {
+			if ( mTouchIconLoader != null ) {
 				mTouchIconLoader.mTab = null;
 				mTouchIconLoader = null;
 			}
 
 			// reset the error console
-			if (mErrorConsole != null) {
+			if ( mErrorConsole != null ) {
 				mErrorConsole.clearErrorMessages();
-				if (mWebViewController.shouldShowErrorConsole()) {
+				if ( mWebViewController.shouldShowErrorConsole() ) {
 					mErrorConsole.showConsole(ErrorConsoleView.SHOW_NONE);
 				}
 			}
 
 			// Cancel the auto-login process.
-			if (mDeviceAccountLogin != null) {
+			if ( mDeviceAccountLogin != null ) {
 				mDeviceAccountLogin.cancel();
 				mDeviceAccountLogin = null;
 				mWebViewController.hideAutoLogin(Tab.this);
@@ -367,8 +427,9 @@ class Tab implements PictureListener {
 		}
 
 		@Override
-		public void onPageFinished(WebView view, String url) {
-			if (!isPrivateBrowsingEnabled()) {
+		public void onPageFinished ( WebView view , String url ) {
+
+			if ( !isPrivateBrowsingEnabled() ) {
 				LogTag.logPageFinishedLoading(url, SystemClock.uptimeMillis() - mLoadStartTime);
 			}
 			syncCurrentState(view, url);
@@ -377,8 +438,9 @@ class Tab implements PictureListener {
 
 		// return true if want to hijack the url to let another app to handle it
 		@Override
-		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			if (mInForeground) {
+		public boolean shouldOverrideUrlLoading ( WebView view , String url ) {
+
+			if ( mInForeground ) {
 				return mWebViewController.shouldOverrideUrlLoading(Tab.this, view, url);
 			} else {
 				return false;
@@ -393,13 +455,14 @@ class Tab implements PictureListener {
 		 * this way.
 		 */
 		@Override
-		public void onLoadResource(WebView view, String url) {
-			if (url != null && url.length() > 0) {
+		public void onLoadResource ( WebView view , String url ) {
+
+			if ( url != null && url.length() > 0 ) {
 				// It is only if the page claims to be secure that we may have
 				// to update the security state:
-				if (mCurrentState.mSecurityState == SecurityState.SECURITY_STATE_SECURE) {
+				if ( mCurrentState.mSecurityState == SecurityState.SECURITY_STATE_SECURE ) {
 					// If NOT a 'safe' url, change the state to mixed content!
-					if (!(URLUtil.isHttpsUrl(url) || URLUtil.isDataUrl(url) || URLUtil.isAboutUrl(url))) {
+					if ( !(URLUtil.isHttpsUrl(url) || URLUtil.isDataUrl(url) || URLUtil.isAboutUrl(url)) ) {
 						mCurrentState.mSecurityState = SecurityState.SECURITY_STATE_MIXED;
 					}
 				}
@@ -411,14 +474,14 @@ class Tab implements PictureListener {
 		 * WebCore if it is in the foreground.
 		 */
 		@Override
-		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-			if (errorCode != WebViewClient.ERROR_HOST_LOOKUP && errorCode != WebViewClient.ERROR_CONNECT
-					&& errorCode != WebViewClient.ERROR_BAD_URL && errorCode != WebViewClient.ERROR_UNSUPPORTED_SCHEME
-					&& errorCode != WebViewClient.ERROR_FILE) {
+		public void onReceivedError ( WebView view , int errorCode , String description , String failingUrl ) {
+
+			if ( errorCode != WebViewClient.ERROR_HOST_LOOKUP && errorCode != WebViewClient.ERROR_CONNECT && errorCode != WebViewClient.ERROR_BAD_URL
+					&& errorCode != WebViewClient.ERROR_UNSUPPORTED_SCHEME && errorCode != WebViewClient.ERROR_FILE ) {
 				queueError(errorCode, description);
 
 				// Don't log URLs when in private browsing mode
-				if (!isPrivateBrowsingEnabled()) {
+				if ( !isPrivateBrowsingEnabled() ) {
 					Log.e(LOGTAG, "onReceivedError " + errorCode + " " + failingUrl + " " + description);
 				}
 			}
@@ -429,39 +492,45 @@ class Tab implements PictureListener {
 		 * are trying to navigate to is the result of a POST.
 		 */
 		@Override
-		public void onFormResubmission(WebView view, final Message dontResend, final Message resend) {
-			if (!mInForeground) {
+		public void onFormResubmission ( WebView view , final Message dontResend , final Message resend ) {
+
+			if ( !mInForeground ) {
 				dontResend.sendToTarget();
 				return;
 			}
-			if (mDontResend != null) {
+			if ( mDontResend != null ) {
 				Log.w(LOGTAG, "onFormResubmission should not be called again " + "while dialog is still up");
 				dontResend.sendToTarget();
 				return;
 			}
 			mDontResend = dontResend;
 			mResend = resend;
-			new AlertDialog.Builder(mContext).setTitle(R.string.browserFrameFormResubmitLabel)
-					.setMessage(R.string.browserFrameFormResubmitMessage)
+			new AlertDialog.Builder(mContext).setTitle(R.string.browserFrameFormResubmitLabel).setMessage(R.string.browserFrameFormResubmitMessage)
 					.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							if (mResend != null) {
+
+						public void onClick ( DialogInterface dialog , int which ) {
+
+							if ( mResend != null ) {
 								mResend.sendToTarget();
 								mResend = null;
 								mDontResend = null;
 							}
 						}
 					}).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							if (mDontResend != null) {
+
+						public void onClick ( DialogInterface dialog , int which ) {
+
+							if ( mDontResend != null ) {
 								mDontResend.sendToTarget();
 								mResend = null;
 								mDontResend = null;
 							}
 						}
 					}).setOnCancelListener(new OnCancelListener() {
-						public void onCancel(DialogInterface dialog) {
-							if (mDontResend != null) {
+
+						public void onCancel ( DialogInterface dialog ) {
+
+							if ( mDontResend != null ) {
 								mDontResend.sendToTarget();
 								mResend = null;
 								mDontResend = null;
@@ -480,7 +549,8 @@ class Tab implements PictureListener {
 		 *            to do when reloading the page.
 		 */
 		@Override
-		public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+		public void doUpdateVisitedHistory ( WebView view , String url , boolean isReload ) {
+
 			mWebViewController.doUpdateVisitedHistory(Tab.this, isReload);
 		}
 
@@ -488,34 +558,42 @@ class Tab implements PictureListener {
 		 * Displays SSL error(s) dialog to the user.
 		 */
 		@Override
-		public void onReceivedSslError(final WebView view, final SslErrorHandler handler, final SslError error) {
-			if (!mInForeground) {
+		public void onReceivedSslError ( final WebView view , final SslErrorHandler handler , final SslError error ) {
+
+			if ( !mInForeground ) {
 				handler.cancel();
 				setSecurityState(SecurityState.SECURITY_STATE_NOT_SECURE);
 				return;
 			}
-			if (mSettings.showSecurityWarnings()) {
-				new AlertDialog.Builder(mContext).setTitle(R.string.security_warning).setMessage(R.string.ssl_warnings_header)
-						.setIcon(android.R.drawable.ic_dialog_alert)
+			if ( mSettings.showSecurityWarnings() ) {
+				new AlertDialog.Builder(mContext).setTitle(R.string.security_warning).setMessage(R.string.ssl_warnings_header).setIcon(android.R.drawable.ic_dialog_alert)
 						.setPositiveButton(R.string.ssl_continue, new DialogInterface.OnClickListener() {
+
 							@Override
-							public void onClick(DialogInterface dialog, int whichButton) {
+							public void onClick ( DialogInterface dialog , int whichButton ) {
+
 								handler.proceed();
 								handleProceededAfterSslError(error);
 							}
 						}).setNeutralButton(R.string.view_certificate, new DialogInterface.OnClickListener() {
+
 							@Override
-							public void onClick(DialogInterface dialog, int whichButton) {
+							public void onClick ( DialogInterface dialog , int whichButton ) {
+
 								mWebViewController.showSslCertificateOnError(view, handler, error);
 							}
 						}).setNegativeButton(R.string.ssl_go_back, new DialogInterface.OnClickListener() {
+
 							@Override
-							public void onClick(DialogInterface dialog, int whichButton) {
+							public void onClick ( DialogInterface dialog , int whichButton ) {
+
 								dialog.cancel();
 							}
 						}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+
 							@Override
-							public void onCancel(DialogInterface dialog) {
+							public void onCancel ( DialogInterface dialog ) {
+
 								handler.cancel();
 								setSecurityState(SecurityState.SECURITY_STATE_NOT_SECURE);
 								mWebViewController.onUserCanceledSsl(Tab.this);
@@ -533,24 +611,26 @@ class Tab implements PictureListener {
 		 * state to reflect this.
 		 */
 		@Override
-		public void onProceededAfterSslError(WebView view, SslError error) {
+		public void onProceededAfterSslError ( WebView view , SslError error ) {
+
 			handleProceededAfterSslError(error);
 		}
 
 		/**
 		 * Displays client certificate request to the user.
 		 */
-		@SuppressLint("NewApi")
+		@SuppressLint ( "NewApi" )
 		@Override
-		public void onReceivedClientCertRequest(final WebView view, final ClientCertRequestHandler handler, final String host_and_port) {
-			if (!mInForeground) {
+		public void onReceivedClientCertRequest ( final WebView view , final ClientCertRequestHandler handler , final String host_and_port ) {
+
+			if ( !mInForeground ) {
 				handler.ignore();
 				return;
 			}
 			int colon = host_and_port.lastIndexOf(':');
 			String host;
 			int port;
-			if (colon == -1) {
+			if ( colon == -1 ) {
 				host = host_and_port;
 				port = -1;
 			} else {
@@ -558,15 +638,17 @@ class Tab implements PictureListener {
 				try {
 					port = Integer.parseInt(portString);
 					host = host_and_port.substring(0, colon);
-				} catch (NumberFormatException e) {
+				} catch ( NumberFormatException e ) {
 					host = host_and_port;
 					port = -1;
 				}
 			}
 			KeyChain.choosePrivateKeyAlias(mWebViewController.getActivity(), new KeyChainAliasCallback() {
+
 				@Override
-				public void alias(String alias) {
-					if (alias == null) {
+				public void alias ( String alias ) {
+
+					if ( alias == null ) {
 						handler.cancel();
 						return;
 					}
@@ -586,51 +668,57 @@ class Tab implements PictureListener {
 		 *            The realm
 		 */
 		@Override
-		public void onReceivedHttpAuthRequest(WebView view, final HttpAuthHandler handler, final String host, final String realm) {
+		public void onReceivedHttpAuthRequest ( WebView view , final HttpAuthHandler handler , final String host , final String realm ) {
+
 			mWebViewController.onReceivedHttpAuthRequest(Tab.this, view, handler, host, realm);
 		}
 
 		@Override
-		public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+		public WebResourceResponse shouldInterceptRequest ( WebView view , String url ) {
+
 			WebResourceResponse res = HomeProvider.shouldInterceptRequest(mContext, url);
 			return res;
 		}
 
 		@Override
-		public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
-			if (!mInForeground) {
+		public boolean shouldOverrideKeyEvent ( WebView view , KeyEvent event ) {
+
+			if ( !mInForeground ) {
 				return false;
 			}
 			return mWebViewController.shouldOverrideKeyEvent(event);
 		}
 
 		@Override
-		public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
-			if (!mInForeground) {
+		public void onUnhandledKeyEvent ( WebView view , KeyEvent event ) {
+
+			if ( !mInForeground ) {
 				return;
 			}
-			if (!mWebViewController.onUnhandledKeyEvent(event)) {
+			if ( !mWebViewController.onUnhandledKeyEvent(event) ) {
 				super.onUnhandledKeyEvent(view, event);
 			}
 		}
 
 		@Override
-		public void onReceivedLoginRequest(WebView view, String realm, String account, String args) {
+		public void onReceivedLoginRequest ( WebView view , String realm , String account , String args ) {
+
 			new DeviceAccountLogin(mWebViewController.getActivity(), view, Tab.this, mWebViewController).handleLogin(realm, account, args);
 		}
 
 	};
 
-	private void syncCurrentState(WebView view, String url) {
+	private void syncCurrentState ( WebView view , String url ) {
+
 		// Sync state (in case of stop/timeout)
 		mCurrentState.mUrl = view.getUrl();
-		if (mCurrentState.mUrl == null) {
+		if ( mCurrentState.mUrl == null ) {
 			mCurrentState.mUrl = "";
 		}
 		mCurrentState.mOriginalUrl = view.getOriginalUrl();
 		mCurrentState.mTitle = view.getTitle();
 		mCurrentState.mFavicon = view.getFavicon();
-		if (!URLUtil.isHttpsUrl(mCurrentState.mUrl)) {
+		if ( !URLUtil.isHttpsUrl(mCurrentState.mUrl) ) {
 			// In case we stop when loading an HTTPS page from an HTTP page
 			// but before a provisional load occurred
 			mCurrentState.mSecurityState = SecurityState.SECURITY_STATE_NOT_SECURE;
@@ -641,12 +729,14 @@ class Tab implements PictureListener {
 
 	// Called by DeviceAccountLogin when the Tab needs to have the auto-login UI
 	// displayed.
-	void setDeviceAccountLogin(DeviceAccountLogin login) {
+	void setDeviceAccountLogin ( DeviceAccountLogin login ) {
+
 		mDeviceAccountLogin = login;
 	}
 
 	// Returns non-null if the title bar should display the auto-login UI.
-	DeviceAccountLogin getDeviceAccountLogin() {
+	DeviceAccountLogin getDeviceAccountLogin ( ) {
+
 		return mDeviceAccountLogin;
 	}
 
@@ -655,10 +745,12 @@ class Tab implements PictureListener {
 	// -------------------------------------------------------------------------
 
 	private final WebChromeClient mWebChromeClient = new WebChromeClient() {
+
 		// Helper method to create a new tab or sub window.
-		private void createWindow(final boolean dialog, final Message msg) {
+		private void createWindow ( final boolean dialog , final Message msg ) {
+
 			WebView.WebViewTransport transport = (WebView.WebViewTransport) msg.obj;
-			if (dialog) {
+			if ( dialog ) {
 				createSubWindow();
 				mWebViewController.attachSubWindow(Tab.this);
 				transport.setWebView(mSubView);
@@ -670,48 +762,50 @@ class Tab implements PictureListener {
 		}
 
 		@Override
-		public boolean onCreateWindow(WebView view, final boolean dialog, final boolean userGesture, final Message resultMsg) {
+		public boolean onCreateWindow ( WebView view , final boolean dialog , final boolean userGesture , final Message resultMsg ) {
+
 			// only allow new window or sub window for the foreground case
-			if (!mInForeground) {
+			if ( !mInForeground ) {
 				return false;
 			}
 			// Short-circuit if we can't create any more tabs or sub windows.
-			if (dialog && mSubView != null) {
-				new AlertDialog.Builder(mContext).setTitle(R.string.too_many_subwindows_dialog_title)
-						.setIcon(android.R.drawable.ic_dialog_alert).setMessage(R.string.too_many_subwindows_dialog_message)
-						.setPositiveButton(R.string.ok, null).show();
+			if ( dialog && mSubView != null ) {
+				new AlertDialog.Builder(mContext).setTitle(R.string.too_many_subwindows_dialog_title).setIcon(android.R.drawable.ic_dialog_alert)
+						.setMessage(R.string.too_many_subwindows_dialog_message).setPositiveButton(R.string.ok, null).show();
 				return false;
-			} else if (!mWebViewController.getTabControl().canCreateNewTab()) {
-				new AlertDialog.Builder(mContext).setTitle(R.string.too_many_windows_dialog_title)
-						.setIcon(android.R.drawable.ic_dialog_alert).setMessage(R.string.too_many_windows_dialog_message)
-						.setPositiveButton(R.string.ok, null).show();
+			} else if ( !mWebViewController.getTabControl().canCreateNewTab() ) {
+				new AlertDialog.Builder(mContext).setTitle(R.string.too_many_windows_dialog_title).setIcon(android.R.drawable.ic_dialog_alert)
+						.setMessage(R.string.too_many_windows_dialog_message).setPositiveButton(R.string.ok, null).show();
 				return false;
 			}
 
 			// Short-circuit if this was a user gesture.
-			if (userGesture) {
+			if ( userGesture ) {
 				createWindow(dialog, resultMsg);
 				return true;
 			}
 
 			// Allow the popup and create the appropriate window.
 			final AlertDialog.OnClickListener allowListener = new AlertDialog.OnClickListener() {
-				public void onClick(DialogInterface d, int which) {
+
+				public void onClick ( DialogInterface d , int which ) {
+
 					createWindow(dialog, resultMsg);
 				}
 			};
 
 			// Block the popup by returning a null WebView.
 			final AlertDialog.OnClickListener blockListener = new AlertDialog.OnClickListener() {
-				public void onClick(DialogInterface d, int which) {
+
+				public void onClick ( DialogInterface d , int which ) {
+
 					resultMsg.sendToTarget();
 				}
 			};
 
 			// Build a confirmation dialog to display to the user.
-			final AlertDialog d = new AlertDialog.Builder(mContext).setIcon(android.R.drawable.ic_dialog_alert)
-					.setMessage(R.string.popup_window_attempt).setPositiveButton(R.string.allow, allowListener)
-					.setNegativeButton(R.string.block, blockListener).setCancelable(false).create();
+			final AlertDialog d = new AlertDialog.Builder(mContext).setIcon(android.R.drawable.ic_dialog_alert).setMessage(R.string.popup_window_attempt)
+					.setPositiveButton(R.string.allow, allowListener).setNegativeButton(R.string.block, blockListener).setCancelable(false).create();
 
 			// Show the confirmation dialog.
 			d.show();
@@ -719,17 +813,19 @@ class Tab implements PictureListener {
 		}
 
 		@Override
-		public void onRequestFocus(WebView view) {
-			if (!mInForeground) {
+		public void onRequestFocus ( WebView view ) {
+
+			if ( !mInForeground ) {
 				mWebViewController.switchToTab(Tab.this);
 			}
 		}
 
 		@Override
-		public void onCloseWindow(WebView window) {
-			if (mParent != null) {
+		public void onCloseWindow ( WebView window ) {
+
+			if ( mParent != null ) {
 				// JavaScript can only close popup window.
-				if (mInForeground) {
+				if ( mInForeground ) {
 					mWebViewController.switchToTab(mParent);
 				}
 				mWebViewController.closeTab(Tab.this);
@@ -737,62 +833,69 @@ class Tab implements PictureListener {
 		}
 
 		@Override
-		public void onProgressChanged(WebView view, int newProgress) {
+		public void onProgressChanged ( WebView view , int newProgress ) {
+
 			mPageLoadProgress = newProgress;
-			if (newProgress == 100) {
+			if ( newProgress == 100 ) {
 				mInPageLoad = false;
 			}
 			mWebViewController.onProgressChanged(Tab.this);
-			if (mUpdateThumbnail && newProgress == 100) {
+			if ( mUpdateThumbnail && newProgress == 100 ) {
 				mUpdateThumbnail = false;
 			}
 		}
 
 		@Override
-		public void onReceivedTitle(WebView view, final String title) {
+		public void onReceivedTitle ( WebView view , final String title ) {
+
 			mCurrentState.mTitle = title;
 			mWebViewController.onReceivedTitle(Tab.this, title);
 		}
 
 		@Override
-		public void onReceivedIcon(WebView view, Bitmap icon) {
+		public void onReceivedIcon ( WebView view , Bitmap icon ) {
+
 			mCurrentState.mFavicon = icon;
 			mWebViewController.onFavicon(Tab.this, view, icon);
 		}
 
 		@Override
-		public void onReceivedTouchIconUrl(WebView view, String url, boolean precomposed) {
+		public void onReceivedTouchIconUrl ( WebView view , String url , boolean precomposed ) {
+
 			final ContentResolver cr = mContext.getContentResolver();
 			// Let precomposed icons take precedence over non-composed
 			// icons.
-			if (precomposed && mTouchIconLoader != null) {
+			if ( precomposed && mTouchIconLoader != null ) {
 				mTouchIconLoader.cancel(false);
 				mTouchIconLoader = null;
 			}
 			// Have only one async task at a time.
-			if (mTouchIconLoader == null) {
+			if ( mTouchIconLoader == null ) {
 				mTouchIconLoader = new DownloadTouchIcon(Tab.this, mContext, cr, view);
 				mTouchIconLoader.execute(url);
 			}
 		}
 
 		@Override
-		public void onShowCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+		public void onShowCustomView ( View view , WebChromeClient.CustomViewCallback callback ) {
+
 			Activity activity = mWebViewController.getActivity();
-			if (activity != null) {
+			if ( activity != null ) {
 				onShowCustomView(view, activity.getRequestedOrientation(), callback);
 			}
 		}
 
 		@Override
-		public void onShowCustomView(View view, int requestedOrientation, WebChromeClient.CustomViewCallback callback) {
-			if (mInForeground)
+		public void onShowCustomView ( View view , int requestedOrientation , WebChromeClient.CustomViewCallback callback ) {
+
+			if ( mInForeground )
 				mWebViewController.showCustomView(Tab.this, view, requestedOrientation, callback);
 		}
 
 		@Override
-		public void onHideCustomView() {
-			if (mInForeground)
+		public void onHideCustomView ( ) {
+
+			if ( mInForeground )
 				mWebViewController.hideCustomView();
 		}
 
@@ -815,10 +918,10 @@ class Tab implements PictureListener {
 		 *            has been made. Don't forget to call this!
 		 */
 		@Override
-		public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
-				long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
-			mSettings.getWebStorageSizeManager().onExceededDatabaseQuota(url, databaseIdentifier, currentQuota, estimatedSize,
-					totalUsedQuota, quotaUpdater);
+		public void onExceededDatabaseQuota ( String url , String databaseIdentifier , long currentQuota , long estimatedSize , long totalUsedQuota ,
+				WebStorage.QuotaUpdater quotaUpdater ) {
+
+			mSettings.getWebStorageSizeManager().onExceededDatabaseQuota(url, databaseIdentifier, currentQuota, estimatedSize, totalUsedQuota, quotaUpdater);
 		}
 
 		/**
@@ -836,7 +939,8 @@ class Tab implements PictureListener {
 		 *            thread is woken up.
 		 */
 		@Override
-		public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
+		public void onReachedMaxAppCacheSize ( long spaceNeeded , long totalUsedQuota , WebStorage.QuotaUpdater quotaUpdater ) {
+
 			mSettings.getWebStorageSizeManager().onReachedMaxAppCacheSize(spaceNeeded, totalUsedQuota, quotaUpdater);
 		}
 
@@ -852,8 +956,9 @@ class Tab implements PictureListener {
 		 *            permission state.
 		 */
 		@Override
-		public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-			if (mInForeground) {
+		public void onGeolocationPermissionsShowPrompt ( String origin , GeolocationPermissions.Callback callback ) {
+
+			if ( mInForeground ) {
 				getGeolocationPermissionsPrompt().show(origin, callback);
 			}
 		}
@@ -862,8 +967,9 @@ class Tab implements PictureListener {
 		 * Instructs the browser to hide the Geolocation permissions prompt.
 		 */
 		@Override
-		public void onGeolocationPermissionsHidePrompt() {
-			if (mInForeground && mGeolocationPermissionsPrompt != null) {
+		public void onGeolocationPermissionsHidePrompt ( ) {
+
+			if ( mInForeground && mGeolocationPermissionsPrompt != null ) {
 				mGeolocationPermissionsPrompt.hide();
 			}
 		}
@@ -875,36 +981,37 @@ class Tab implements PictureListener {
 		 * @param consoleMessage the message object.
 		 */
 		@Override
-		public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-			if (mInForeground) {
+		public boolean onConsoleMessage ( ConsoleMessage consoleMessage ) {
+
+			if ( mInForeground ) {
 				// call getErrorConsole(true) so it will create one if needed
 				ErrorConsoleView errorConsole = getErrorConsole(true);
 				errorConsole.addErrorMessage(consoleMessage);
-				if (mWebViewController.shouldShowErrorConsole() && errorConsole.getShowState() != ErrorConsoleView.SHOW_MAXIMIZED) {
+				if ( mWebViewController.shouldShowErrorConsole() && errorConsole.getShowState() != ErrorConsoleView.SHOW_MAXIMIZED ) {
 					errorConsole.showConsole(ErrorConsoleView.SHOW_MINIMIZED);
 				}
 			}
 
 			// Don't log console messages in private browsing mode
-			if (isPrivateBrowsingEnabled())
+			if ( isPrivateBrowsingEnabled() )
 				return true;
 
 			String message = "Console: " + consoleMessage.message() + " " + consoleMessage.sourceId() + ":" + consoleMessage.lineNumber();
 
-			switch (consoleMessage.messageLevel()) {
-			case TIP:
+			switch ( consoleMessage.messageLevel() ) {
+			case TIP :
 				Log.v(CONSOLE_LOGTAG, message);
 				break;
-			case LOG:
+			case LOG :
 				Log.i(CONSOLE_LOGTAG, message);
 				break;
-			case WARNING:
+			case WARNING :
 				Log.w(CONSOLE_LOGTAG, message);
 				break;
-			case ERROR:
+			case ERROR :
 				Log.e(CONSOLE_LOGTAG, message);
 				break;
-			case DEBUG:
+			case DEBUG :
 				Log.d(CONSOLE_LOGTAG, message);
 				break;
 			}
@@ -919,8 +1026,9 @@ class Tab implements PictureListener {
 		 * @return Bitmap The icon or null if no such icon is available.
 		 */
 		@Override
-		public Bitmap getDefaultVideoPoster() {
-			if (mInForeground) {
+		public Bitmap getDefaultVideoPoster ( ) {
+
+			if ( mInForeground ) {
 				return mWebViewController.getDefaultVideoPoster();
 			}
 			return null;
@@ -933,16 +1041,18 @@ class Tab implements PictureListener {
 		 * @return View The progress view.
 		 */
 		@Override
-		public View getVideoLoadingProgressView() {
-			if (mInForeground) {
+		public View getVideoLoadingProgressView ( ) {
+
+			if ( mInForeground ) {
 				return mWebViewController.getVideoLoadingProgressView();
 			}
 			return null;
 		}
 
 		@Override
-		public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-			if (mInForeground) {
+		public void openFileChooser ( ValueCallback< Uri> uploadMsg , String acceptType , String capture ) {
+
+			if ( mInForeground ) {
 				mWebViewController.openFileChooser(uploadMsg, acceptType, capture);
 			} else {
 				uploadMsg.onReceiveValue(null);
@@ -953,12 +1063,14 @@ class Tab implements PictureListener {
 		 * Deliver a list of already-visited URLs
 		 */
 		@Override
-		public void getVisitedHistory(final ValueCallback<String[]> callback) {
+		public void getVisitedHistory ( final ValueCallback< String[]> callback ) {
+
 			mWebViewController.getVisitedHistory(callback);
 		}
 
 		@Override
-		public void setupAutoFill(Message message) {
+		public void setupAutoFill ( Message message ) {
+
 			// Prompt the user to set up their profile.
 			final Message msg = message;
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -966,11 +1078,13 @@ class Tab implements PictureListener {
 			final View layout = inflater.inflate(R.layout.setup_autofill_dialog, null);
 
 			builder.setView(layout).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
 				@Override
-				public void onClick(DialogInterface dialog, int id) {
+				public void onClick ( DialogInterface dialog , int id ) {
+
 					CheckBox disableAutoFill = (CheckBox) layout.findViewById(R.id.setup_autofill_dialog_disable_autofill);
 
-					if (disableAutoFill.isChecked()) {
+					if ( disableAutoFill.isChecked() ) {
 						// Disable autofill and show a toast
 						// with how to turn it on again.
 						mSettings.setAutofillEnabled(false);
@@ -996,17 +1110,21 @@ class Tab implements PictureListener {
 	// Subclass of WebViewClient used in subwindows to notify the main
 	// WebViewClient of certain WebView activities.
 	private static class SubWindowClient extends WebViewClient {
+
 		// The main WebViewClient.
 		private final WebViewClient mClient;
+
 		private final WebViewController mController;
 
-		SubWindowClient(WebViewClient client, WebViewController controller) {
+		SubWindowClient ( WebViewClient client , WebViewController controller ) {
+
 			mClient = client;
 			mController = controller;
 		}
 
 		@Override
-		public void onPageStarted(WebView view, String url, Bitmap favicon) {
+		public void onPageStarted ( WebView view , String url , Bitmap favicon ) {
+
 			// Unlike the others, do not call mClient's version, which would
 			// change the progress bar. However, we do want to remove the
 			// find or select dialog.
@@ -1014,47 +1132,56 @@ class Tab implements PictureListener {
 		}
 
 		@Override
-		public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+		public void doUpdateVisitedHistory ( WebView view , String url , boolean isReload ) {
+
 			mClient.doUpdateVisitedHistory(view, url, isReload);
 		}
 
 		@Override
-		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+		public boolean shouldOverrideUrlLoading ( WebView view , String url ) {
+
 			return mClient.shouldOverrideUrlLoading(view, url);
 		}
 
 		@Override
-		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+		public void onReceivedSslError ( WebView view , SslErrorHandler handler , SslError error ) {
+
 			mClient.onReceivedSslError(view, handler, error);
 		}
 
 		@Override
-		public void onReceivedClientCertRequest(WebView view, ClientCertRequestHandler handler, String host_and_port) {
+		public void onReceivedClientCertRequest ( WebView view , ClientCertRequestHandler handler , String host_and_port ) {
+
 			mClient.onReceivedClientCertRequest(view, handler, host_and_port);
 		}
 
 		@Override
-		public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+		public void onReceivedHttpAuthRequest ( WebView view , HttpAuthHandler handler , String host , String realm ) {
+
 			mClient.onReceivedHttpAuthRequest(view, handler, host, realm);
 		}
 
 		@Override
-		public void onFormResubmission(WebView view, Message dontResend, Message resend) {
+		public void onFormResubmission ( WebView view , Message dontResend , Message resend ) {
+
 			mClient.onFormResubmission(view, dontResend, resend);
 		}
 
 		@Override
-		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+		public void onReceivedError ( WebView view , int errorCode , String description , String failingUrl ) {
+
 			mClient.onReceivedError(view, errorCode, description, failingUrl);
 		}
 
 		@Override
-		public boolean shouldOverrideKeyEvent(WebView view, android.view.KeyEvent event) {
+		public boolean shouldOverrideKeyEvent ( WebView view , android.view.KeyEvent event ) {
+
 			return mClient.shouldOverrideKeyEvent(view, event);
 		}
 
 		@Override
-		public void onUnhandledKeyEvent(WebView view, android.view.KeyEvent event) {
+		public void onUnhandledKeyEvent ( WebView view , android.view.KeyEvent event ) {
+
 			mClient.onUnhandledKeyEvent(view, event);
 		}
 	}
@@ -1064,26 +1191,31 @@ class Tab implements PictureListener {
 	// -------------------------------------------------------------------------
 
 	private class SubWindowChromeClient extends WebChromeClient {
+
 		// The main WebChromeClient.
 		private final WebChromeClient mClient;
 
-		SubWindowChromeClient(WebChromeClient client) {
+		SubWindowChromeClient ( WebChromeClient client ) {
+
 			mClient = client;
 		}
 
 		@Override
-		public void onProgressChanged(WebView view, int newProgress) {
+		public void onProgressChanged ( WebView view , int newProgress ) {
+
 			mClient.onProgressChanged(view, newProgress);
 		}
 
 		@Override
-		public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg) {
+		public boolean onCreateWindow ( WebView view , boolean dialog , boolean userGesture , android.os.Message resultMsg ) {
+
 			return mClient.onCreateWindow(view, dialog, userGesture, resultMsg);
 		}
 
 		@Override
-		public void onCloseWindow(WebView window) {
-			if (window != mSubView) {
+		public void onCloseWindow ( WebView window ) {
+
+			if ( window != mSubView ) {
 				Log.e(LOGTAG, "Can't close the window");
 			}
 			mWebViewController.dismissSubWindow(Tab.this);
@@ -1091,26 +1223,37 @@ class Tab implements PictureListener {
 	}
 
 	// -------------------------------------------------------------------------
-	public Tab(WebViewController wvcontroller, String str) {
+	public Tab ( WebViewController wvcontroller , String str , boolean home ) {
+
+		this(wvcontroller, str);
+
+		setHomePage(home);
+
+	}
+
+	public Tab ( WebViewController wvcontroller , String str ) {
+
 		this(wvcontroller, null, null);
 
 		setTitle(str);
 	}
 
 	// Construct a new tab
-	Tab(WebViewController wvcontroller, WebView w) {
+	Tab ( WebViewController wvcontroller , WebView w ) {
+
 		this(wvcontroller, w, null);
 
 		Log.d("Liu Test", getClass().getSimpleName() + " Tab(WebViewController wvcontroller, WebView w)");
 	}
 
-	Tab(WebViewController wvcontroller, Bundle state) {
+	Tab ( WebViewController wvcontroller , Bundle state ) {
+
 		this(wvcontroller, null, state);
 
 		Log.d("Liu Test", getClass().getSimpleName() + " Tab(WebViewController wvcontroller, Bundle state)");
 	}
 
-	Tab(WebViewController wvcontroller, WebView w, Bundle state) {
+	Tab ( WebViewController wvcontroller , WebView w , Bundle state ) {
 
 		Log.d("Liu Test", getClass().getSimpleName() + " Tab(WebViewController wvcontroller, WebView w, Bundle state)");
 
@@ -1123,20 +1266,24 @@ class Tab implements PictureListener {
 		mInForeground = false;
 
 		mDownloadListener = new DownloadListener() {
-			public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+
+			public void onDownloadStart ( String url , String userAgent , String contentDisposition , String mimetype , long contentLength ) {
+
 				mWebViewController.onDownloadStart(Tab.this, url, userAgent, contentDisposition, mimetype, contentLength);
 			}
 		};
 		mWebBackForwardListClient = new WebBackForwardListClient() {
+
 			@Override
-			public void onNewHistoryItem(WebHistoryItem item) {
-				if (mClearHistoryUrlPattern != null) {
+			public void onNewHistoryItem ( WebHistoryItem item ) {
+
+				if ( mClearHistoryUrlPattern != null ) {
 					boolean match = mClearHistoryUrlPattern.matcher(item.getOriginalUrl()).matches();
-					if (LOGD_ENABLED) {
+					if ( LOGD_ENABLED ) {
 						Log.d(LOGTAG, "onNewHistoryItem: match=" + match + "\n\t" + item.getUrl() + "\n\t" + mClearHistoryUrlPattern);
 					}
-					if (match) {
-						if (mMainView != null) {
+					if ( match ) {
+						if ( mMainView != null ) {
 							mMainView.clearHistory();
 						}
 					}
@@ -1149,7 +1296,7 @@ class Tab implements PictureListener {
 		mCaptureHeight = mContext.getResources().getDimensionPixelSize(R.dimen.tab_thumbnail_height);
 		updateShouldCaptureThumbnails();
 		restoreState(state);
-		if (getId() == -1) {
+		if ( getId() == -1 ) {
 			mId = TabControl.getNextId();
 		}
 
@@ -1157,10 +1304,12 @@ class Tab implements PictureListener {
 		setWebView(w);
 
 		mHandler = new Handler() {
+
 			@Override
-			public void handleMessage(Message m) {
-				switch (m.what) {
-				case MSG_CAPTURE:
+			public void handleMessage ( Message m ) {
+
+				switch ( m.what ) {
+				case MSG_CAPTURE :
 					capture();
 					break;
 				}
@@ -1168,7 +1317,8 @@ class Tab implements PictureListener {
 		};
 	}
 
-	public boolean shouldUpdateThumbnail() {
+	public boolean shouldUpdateThumbnail ( ) {
+
 		return mUpdateThumbnail;
 	}
 
@@ -1178,39 +1328,43 @@ class Tab implements PictureListener {
 	 * before restoreInstanceState, leading to overlapping IDs between the
 	 * preloaded and restored tabs.
 	 */
-	public void refreshIdAfterPreload() {
+	public void refreshIdAfterPreload ( ) {
+
 		mId = TabControl.getNextId();
 	}
 
-	public void updateShouldCaptureThumbnails() {
-		if (mWebViewController.shouldCaptureThumbnails()) {
-			synchronized (Tab.this) {
-				if (mCapture == null) {
+	public void updateShouldCaptureThumbnails ( ) {
+
+		if ( mWebViewController.shouldCaptureThumbnails() ) {
+			synchronized ( Tab.this ) {
+				if ( mCapture == null ) {
 					mCapture = Bitmap.createBitmap(mCaptureWidth, mCaptureHeight, Bitmap.Config.RGB_565);
 					mCapture.eraseColor(Color.WHITE);
-					if (mInForeground) {
+					if ( mInForeground ) {
 						postCapture();
 					}
 				}
 			}
 		} else {
-			synchronized (Tab.this) {
+			synchronized ( Tab.this ) {
 				mCapture = null;
 				deleteThumbnail();
 			}
 		}
 	}
 
-	public void setController(WebViewController ctl) {
+	public void setController ( WebViewController ctl ) {
+
 		mWebViewController = ctl;
 		updateShouldCaptureThumbnails();
 	}
 
-	public long getId() {
+	public long getId ( ) {
+
 		return mId;
 	}
 
-	void setWebView(WebView w) {
+	void setWebView ( WebView w ) {
 
 		Log.d("Liu Test", getClass().getSimpleName() + " setWebView(WebView w) w = " + w);
 		setWebView(w, true);
@@ -1220,18 +1374,18 @@ class Tab implements PictureListener {
 	 * Sets the WebView for this tab, correctly removing the old WebView from
 	 * the container view.
 	 */
-	void setWebView(WebView w, boolean restore) {
+	void setWebView ( WebView w , boolean restore ) {
 
 		Log.d("Liu Test", getClass().getSimpleName() + " setWebView(WebView w, boolean restore) w = " + w);
 
-		if (mMainView == w && w != null) {
+		if ( mMainView == w && w != null ) {
 
 			return;
 		}
 
 		// If the WebView is changing, the page will be reloaded, so any ongoing
 		// Geolocation permission requests are void.
-		if (mGeolocationPermissionsPrompt != null && w != null) {
+		if ( mGeolocationPermissionsPrompt != null && w != null ) {
 			mGeolocationPermissionsPrompt.hide();
 		}
 
@@ -1239,22 +1393,18 @@ class Tab implements PictureListener {
 		Log.d("Liu Test", getClass().getSimpleName() + "  w = " + w);
 		mWebViewController.onSetWebView(this, w);
 
-		if (null == w) {
+		if ( null == w ) {
 
 			return;
 		}
-		if (mMainView != null) {
+		if ( mMainView != null ) {
 			mMainView.setPictureListener(null);
-			if (w != null) {
-				syncCurrentState(w, null);
-			} else {
-				mCurrentState = new PageState(mContext, false);
-			}
+			syncCurrentState(w, null);
 		}
 		// set the new one
 		mMainView = w;
 		// attach the WebViewClient, WebChromeClient and DownloadListener
-		if (mMainView != null) {
+		if ( mMainView != null ) {
 			mMainView.setWebViewClient(mWebViewClient);
 			mMainView.setWebChromeClient(mWebChromeClient);
 			// Attach DownloadManager so that downloads can start in an active
@@ -1264,13 +1414,13 @@ class Tab implements PictureListener {
 			mMainView.setDownloadListener(mDownloadListener);
 			getWebViewClassic().setWebBackForwardListClient(mWebBackForwardListClient);
 			TabControl tc = mWebViewController.getTabControl();
-			if (tc != null && tc.getOnThumbnailUpdatedListener() != null) {
+			if ( tc != null && tc.getOnThumbnailUpdatedListener() != null ) {
 				mMainView.setPictureListener(this);
 			}
-			if (restore && (mSavedState != null)) {
+			if ( restore && (mSavedState != null) ) {
 				restoreUserAgent();
 				WebBackForwardList restoredState = mMainView.restoreState(mSavedState);
-				if (restoredState == null || restoredState.getSize() == 0) {
+				if ( restoredState == null || restoredState.getSize() == 0 ) {
 					Log.w(LOGTAG, "Failed to restore WebView state!");
 					loadUrl(mCurrentState.mOriginalUrl, null);
 				}
@@ -1282,8 +1432,9 @@ class Tab implements PictureListener {
 	/**
 	 * Destroy the tab's main WebView and subWindow if any
 	 */
-	void destroy() {
-		if (mMainView != null) {
+	void destroy ( ) {
+
+		if ( mMainView != null ) {
 			dismissSubWindow();
 			// save the WebView to call destroy() after detach it from the tab
 			WebView webView = mMainView;
@@ -1295,15 +1446,16 @@ class Tab implements PictureListener {
 	/**
 	 * Remove the tab from the parent
 	 */
-	void removeFromTree() {
+	void removeFromTree ( ) {
+
 		// detach the children
-		if (mChildren != null) {
-			for (Tab t : mChildren) {
+		if ( mChildren != null ) {
+			for ( Tab t : mChildren ) {
 				t.setParent(null);
 			}
 		}
 		// remove itself from the parent list
-		if (mParent != null) {
+		if ( mParent != null ) {
 			mParent.mChildren.remove(this);
 		}
 		deleteThumbnail();
@@ -1314,17 +1466,20 @@ class Tab implements PictureListener {
 	 * 
 	 * @return True if a new subwindow was created. False if one already exists.
 	 */
-	boolean createSubWindow() {
-		if (mSubView == null) {
+	boolean createSubWindow ( ) {
+
+		if ( mSubView == null ) {
 			mWebViewController.createSubWindow(this);
 			mSubView.setWebViewClient(new SubWindowClient(mWebViewClient, mWebViewController));
 			mSubView.setWebChromeClient(new SubWindowChromeClient(mWebChromeClient));
 			// Set a different DownloadListener for the mSubView, since it will
 			// just need to dismiss the mSubView, rather than close the Tab
 			mSubView.setDownloadListener(new DownloadListener() {
-				public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+
+				public void onDownloadStart ( String url , String userAgent , String contentDisposition , String mimetype , long contentLength ) {
+
 					mWebViewController.onDownloadStart(Tab.this, url, userAgent, contentDisposition, mimetype, contentLength);
-					if (mSubView.copyBackForwardList().getSize() == 0) {
+					if ( mSubView.copyBackForwardList().getSize() == 0 ) {
 						// This subwindow was opened for the sole purpose of
 						// downloading a file. Remove it.
 						mWebViewController.dismissSubWindow(Tab.this);
@@ -1340,8 +1495,9 @@ class Tab implements PictureListener {
 	/**
 	 * Dismiss the subWindow for the tab.
 	 */
-	void dismissSubWindow() {
-		if (mSubView != null) {
+	void dismissSubWindow ( ) {
+
+		if ( mSubView != null ) {
 			mWebViewController.endActionMode();
 			mSubView.destroy();
 			mSubView = null;
@@ -1352,8 +1508,9 @@ class Tab implements PictureListener {
 	/**
 	 * Set the parent tab of this tab.
 	 */
-	void setParent(Tab parent) {
-		if (parent == this) {
+	void setParent ( Tab parent ) {
+
+		if ( parent == this ) {
 			throw new IllegalStateException("Cannot set parent to self!");
 		}
 		mParent = parent;
@@ -1361,8 +1518,8 @@ class Tab implements PictureListener {
 		// the parent tab id is already saved. If we are changing that id
 		// (most likely due to removing the parent tab) we must update the
 		// parent tab id in the saved Bundle.
-		if (mSavedState != null) {
-			if (parent == null) {
+		if ( mSavedState != null ) {
+			if ( parent == null ) {
 				mSavedState.remove(PARENTTAB);
 			} else {
 				mSavedState.putLong(PARENTTAB, parent.getId());
@@ -1370,11 +1527,11 @@ class Tab implements PictureListener {
 		}
 
 		// Sync the WebView useragent with the parent
-		if (parent != null && mSettings.hasDesktopUseragent(parent.getWebView()) != mSettings.hasDesktopUseragent(getWebView())) {
+		if ( parent != null && mSettings.hasDesktopUseragent(parent.getWebView()) != mSettings.hasDesktopUseragent(getWebView()) ) {
 			mSettings.toggleDesktopUseragent(getWebView());
 		}
 
-		if (parent != null && parent.getId() == getId()) {
+		if ( parent != null && parent.getId() == getId() ) {
 			throw new IllegalStateException("Parent has same ID as child!");
 		}
 	}
@@ -1385,7 +1542,8 @@ class Tab implements PictureListener {
 	 * 
 	 * @return the Tab parent or null
 	 */
-	public Tab getParent() {
+	public Tab getParent ( ) {
+
 		return mParent;
 	}
 
@@ -1396,88 +1554,103 @@ class Tab implements PictureListener {
 	 * @param child
 	 *            the Tab that was created from this Tab
 	 */
-	void addChildTab(Tab child) {
-		if (mChildren == null) {
-			mChildren = new Vector<Tab>();
+	void addChildTab ( Tab child ) {
+
+		if ( mChildren == null ) {
+			mChildren = new Vector< Tab>();
 		}
 		mChildren.add(child);
 		child.setParent(this);
 	}
 
-	Vector<Tab> getChildren() {
+	Vector< Tab> getChildren ( ) {
+
 		return mChildren;
 	}
 
-	void resume() {
-		if (mMainView != null) {
+	void resume ( ) {
+
+		if ( isHomePage() ) {
+
+			return;
+		}
+		if ( mMainView != null ) {
 			setupHwAcceleration(mMainView);
 			mMainView.onResume();
-			if (mSubView != null) {
+			if ( mSubView != null ) {
 				mSubView.onResume();
 			}
 		}
 	}
 
-	private void setupHwAcceleration(View web) {
-		if (web == null)
+	private void setupHwAcceleration ( View web ) {
+
+		if ( web == null )
 			return;
 		BrowserSettings settings = BrowserSettings.getInstance();
-		if (settings.isHardwareAccelerated()) {
+		if ( settings.isHardwareAccelerated() ) {
 			web.setLayerType(View.LAYER_TYPE_NONE, null);
 		} else {
 			web.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		}
 	}
 
-	void pause() {
-		if (mMainView != null) {
+	void pause ( ) {
+
+		if ( isHomePage() ) {
+
+			return;
+		}
+		if ( mMainView != null ) {
 			mMainView.onPause();
-			if (mSubView != null) {
+			if ( mSubView != null ) {
 				mSubView.onPause();
 			}
 		}
 	}
 
-	void putInForeground() {
-		if (mInForeground) {
+	void putInForeground ( ) {
+
+		if ( mInForeground ) {
 			return;
 		}
 		mInForeground = true;
 		resume();
 		Activity activity = mWebViewController.getActivity();
-		if (mMainView != null) {
+		if ( mMainView != null ) {
 
 			mMainView.setOnCreateContextMenuListener(activity);
 		}
-		if (mSubView != null) {
+		if ( mSubView != null ) {
 
 			mSubView.setOnCreateContextMenuListener(activity);
 		}
 		// Show the pending error dialog if the queue is not empty
-		if (mQueuedErrors != null && mQueuedErrors.size() > 0) {
+		if ( mQueuedErrors != null && mQueuedErrors.size() > 0 ) {
 			showError(mQueuedErrors.getFirst());
 		}
 		mWebViewController.bookmarkedStatusHasChanged(this);
 	}
 
-	void putInBackground() {
+	void putInBackground ( ) {
 
-		if (!mInForeground) {
+		if ( !mInForeground ) {
 			return;
 		}
 		capture();
 		mInForeground = false;
 		pause();
-		if (null != mMainView) {
+		if ( null != mMainView ) {
 
 			mMainView.setOnCreateContextMenuListener(null);
 		}
-		if (mSubView != null) {
+		if ( mSubView != null ) {
 			mSubView.setOnCreateContextMenuListener(null);
 		}
 	}
 
-	boolean inForeground() {
+	boolean inForeground ( ) {
+
 		return mInForeground;
 	}
 
@@ -1487,10 +1660,10 @@ class Tab implements PictureListener {
 	 * 
 	 * @return The top window of this tab.
 	 */
-	WebView getTopWindow() {
-		
-		if (mSubView != null) {
-			
+	WebView getTopWindow ( ) {
+
+		if ( mSubView != null ) {
+
 			return mSubView;
 		}
 		return mMainView;
@@ -1503,7 +1676,8 @@ class Tab implements PictureListener {
 	 * 
 	 * @return The main WebView of this tab.
 	 */
-	WebView getWebView() {
+	WebView getWebView ( ) {
+
 		return mMainView;
 	}
 
@@ -1513,15 +1687,18 @@ class Tab implements PictureListener {
 	 * 
 	 * @return The main WebView of this tab.
 	 */
-	WebViewClassic getWebViewClassic() {
+	WebViewClassic getWebViewClassic ( ) {
+
 		return WebViewClassic.fromWebView(mMainView);
 	}
 
-	void setViewContainer(View container) {
+	void setViewContainer ( View container ) {
+
 		mContainer = container;
 	}
 
-	View getViewContainer() {
+	View getViewContainer ( ) {
+
 		return mContainer;
 	}
 
@@ -1531,7 +1708,8 @@ class Tab implements PictureListener {
 	 * 
 	 * @return True if private browsing is enabled.
 	 */
-	boolean isPrivateBrowsingEnabled() {
+	boolean isPrivateBrowsingEnabled ( ) {
+
 		return mCurrentState.mIncognito;
 	}
 
@@ -1540,27 +1718,32 @@ class Tab implements PictureListener {
 	 * 
 	 * @return The subwindow of this tab or null.
 	 */
-	WebView getSubWebView() {
+	WebView getSubWebView ( ) {
+
 		return mSubView;
 	}
 
-	void setSubWebView(WebView subView) {
+	void setSubWebView ( WebView subView ) {
+
 		mSubView = subView;
 	}
 
-	View getSubViewContainer() {
+	View getSubViewContainer ( ) {
+
 		return mSubViewContainer;
 	}
 
-	void setSubViewContainer(View subViewContainer) {
+	void setSubViewContainer ( View subViewContainer ) {
+
 		mSubViewContainer = subViewContainer;
 	}
 
 	/**
 	 * @return The geolocation permissions prompt for this tab.
 	 */
-	GeolocationPermissionsPrompt getGeolocationPermissionsPrompt() {
-		if (mGeolocationPermissionsPrompt == null) {
+	GeolocationPermissionsPrompt getGeolocationPermissionsPrompt ( ) {
+
+		if ( mGeolocationPermissionsPrompt == null ) {
 			ViewStub stub = (ViewStub) mContainer.findViewById(R.id.geolocation_permissions_prompt);
 			mGeolocationPermissionsPrompt = (GeolocationPermissionsPrompt) stub.inflate();
 		}
@@ -1570,7 +1753,8 @@ class Tab implements PictureListener {
 	/**
 	 * @return The application id string
 	 */
-	String getAppId() {
+	String getAppId ( ) {
+
 		return mAppId;
 	}
 
@@ -1579,24 +1763,29 @@ class Tab implements PictureListener {
 	 * 
 	 * @param id
 	 */
-	void setAppId(String id) {
+	void setAppId ( String id ) {
+
 		mAppId = id;
 	}
 
-	boolean closeOnBack() {
+	boolean closeOnBack ( ) {
+
 		return mCloseOnBack;
 	}
 
-	void setCloseOnBack(boolean close) {
+	void setCloseOnBack ( boolean close ) {
+
 		mCloseOnBack = close;
 	}
 
-	String getUrl() {
+	String getUrl ( ) {
+
 		return UrlUtils.filteredUrl(mCurrentState.mUrl);
 	}
 
-	String getOriginalUrl() {
-		if (mCurrentState.mOriginalUrl == null) {
+	String getOriginalUrl ( ) {
+
+		if ( mCurrentState.mOriginalUrl == null ) {
 			return getUrl();
 		}
 		return UrlUtils.filteredUrl(mCurrentState.mOriginalUrl);
@@ -1605,30 +1794,42 @@ class Tab implements PictureListener {
 	/**
 	 * Get the title of this tab.
 	 */
-	String getTitle() {
+	String getTitle ( ) {
 
-		if (mCurrentState.mTitle == null && mInPageLoad) {
+		if ( mCurrentState.mTitle == null && mInPageLoad ) {
 			return mContext.getString(R.string.title_bar_loading);
 		}
 		return mCurrentState.mTitle;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle ( String title ) {
 
 		mCurrentState.mTitle = title;
+	}
+
+	public void setHomePage ( boolean home ) {
+
+		mCurrentState.mIsHomePage = home;
+	}
+
+	public boolean isHomePage ( ) {
+
+		return mCurrentState.mIsHomePage;
 	}
 
 	/**
 	 * Get the favicon of this tab.
 	 */
-	Bitmap getFavicon() {
-		if (mCurrentState.mFavicon != null) {
+	Bitmap getFavicon ( ) {
+
+		if ( mCurrentState.mFavicon != null ) {
 			return mCurrentState.mFavicon;
 		}
 		return getDefaultFavicon(mContext);
 	}
 
-	public boolean isBookmarkedSite() {
+	public boolean isBookmarkedSite ( ) {
+
 		return mCurrentState.mIsBookmarkedSite;
 	}
 
@@ -1642,8 +1843,9 @@ class Tab implements PictureListener {
 	 * @return The tab's error console, or null if one has not been created and
 	 *         createIfNecessary is false.
 	 */
-	ErrorConsoleView getErrorConsole(boolean createIfNecessary) {
-		if (createIfNecessary && mErrorConsole == null) {
+	ErrorConsoleView getErrorConsole ( boolean createIfNecessary ) {
+
+		if ( createIfNecessary && mErrorConsole == null ) {
 			mErrorConsole = new ErrorConsoleView(mContext);
 			mErrorConsole.setWebView(mMainView);
 		}
@@ -1654,7 +1856,8 @@ class Tab implements PictureListener {
 	 * Sets the security state, clears the SSL certificate error and informs the
 	 * controller.
 	 */
-	private void setSecurityState(SecurityState securityState) {
+	private void setSecurityState ( SecurityState securityState ) {
+
 		mCurrentState.mSecurityState = securityState;
 		mCurrentState.mSslCertificateError = null;
 		mWebViewController.onUpdatedSecurityState(this);
@@ -1663,7 +1866,8 @@ class Tab implements PictureListener {
 	/**
 	 * @return The tab's security state.
 	 */
-	SecurityState getSecurityState() {
+	SecurityState getSecurityState ( ) {
+
 		return mCurrentState.mSecurityState;
 	}
 
@@ -1672,12 +1876,14 @@ class Tab implements PictureListener {
 	 * This is only non-null when the security state is
 	 * SECURITY_STATE_BAD_CERTIFICATE.
 	 */
-	SslError getSslCertificateError() {
+	SslError getSslCertificateError ( ) {
+
 		return mCurrentState.mSslCertificateError;
 	}
 
-	int getLoadProgress() {
-		if (mInPageLoad) {
+	int getLoadProgress ( ) {
+
+		if ( mInPageLoad ) {
 			return mPageLoadProgress;
 		}
 		return 100;
@@ -1687,7 +1893,8 @@ class Tab implements PictureListener {
 	 * @return TRUE if onPageStarted is called while onPageFinished is not
 	 *         called yet.
 	 */
-	boolean inPageLoad() {
+	boolean inPageLoad ( ) {
+
 		return mInPageLoad;
 	}
 
@@ -1695,20 +1902,21 @@ class Tab implements PictureListener {
 	 * @return The Bundle with the tab's state if it can be saved, otherwise
 	 *         null
 	 */
-	public Bundle saveState() {
+	public Bundle saveState ( ) {
+
 		// If the WebView is null it means we ran low on memory and we already
 		// stored the saved state in mSavedState.
-		if (mMainView == null) {
+		if ( mMainView == null ) {
 			return mSavedState;
 		}
 
-		if (TextUtils.isEmpty(mCurrentState.mUrl)) {
+		if ( TextUtils.isEmpty(mCurrentState.mUrl) ) {
 			return null;
 		}
 
 		mSavedState = new Bundle();
 		WebBackForwardList savedList = mMainView.saveState(mSavedState);
-		if (savedList == null || savedList.getSize() == 0) {
+		if ( savedList == null || savedList.getSize() == 0 ) {
 			Log.w(LOGTAG, "Failed to save back/forward list for " + mCurrentState.mUrl);
 		}
 
@@ -1716,12 +1924,12 @@ class Tab implements PictureListener {
 		mSavedState.putString(CURRURL, mCurrentState.mUrl);
 		mSavedState.putString(CURRTITLE, mCurrentState.mTitle);
 		mSavedState.putBoolean(INCOGNITO, mMainView.isPrivateBrowsingEnabled());
-		if (mAppId != null) {
+		if ( mAppId != null ) {
 			mSavedState.putString(APPID, mAppId);
 		}
 		mSavedState.putBoolean(CLOSEFLAG, mCloseOnBack);
 		// Remember the parent tab so the relationship can be restored.
-		if (mParent != null) {
+		if ( mParent != null ) {
 			mSavedState.putLong(PARENTTAB, mParent.mId);
 		}
 		mSavedState.putBoolean(USERAGENT, mSettings.hasDesktopUseragent(getWebView()));
@@ -1731,9 +1939,10 @@ class Tab implements PictureListener {
 	/*
 	 * Restore the state of the tab.
 	 */
-	private void restoreState(Bundle b) {
+	private void restoreState ( Bundle b ) {
+
 		mSavedState = b;
-		if (mSavedState == null) {
+		if ( mSavedState == null ) {
 			return;
 		}
 		// Restore the internal state even if the WebView fails to restore.
@@ -1747,53 +1956,61 @@ class Tab implements PictureListener {
 		boolean incognito = b.getBoolean(INCOGNITO);
 		mCurrentState = new PageState(mContext, incognito, url, null);
 		mCurrentState.mTitle = title;
-		synchronized (Tab.this) {
-			if (mCapture != null) {
+		synchronized ( Tab.this ) {
+			if ( mCapture != null ) {
 				DataController.getInstance(mContext).loadThumbnail(this);
 			}
 		}
 	}
 
-	private void restoreUserAgent() {
-		if (mMainView == null || mSavedState == null) {
+	private void restoreUserAgent ( ) {
+
+		if ( mMainView == null || mSavedState == null ) {
 			return;
 		}
-		if (mSavedState.getBoolean(USERAGENT) != mSettings.hasDesktopUseragent(mMainView)) {
+		if ( mSavedState.getBoolean(USERAGENT) != mSettings.hasDesktopUseragent(mMainView) ) {
 			mSettings.toggleDesktopUseragent(mMainView);
 		}
 	}
 
-	public void updateBookmarkedStatus() {
+	public void updateBookmarkedStatus ( ) {
+
 		mDataController.queryBookmarkStatus(getUrl(), mIsBookmarkCallback);
 	}
 
 	private DataController.OnQueryUrlIsBookmark mIsBookmarkCallback = new DataController.OnQueryUrlIsBookmark() {
+
 		@Override
-		public void onQueryUrlIsBookmark(String url, boolean isBookmark) {
-			if (mCurrentState.mUrl.equals(url)) {
+		public void onQueryUrlIsBookmark ( String url , boolean isBookmark ) {
+
+			if ( mCurrentState.mUrl.equals(url) ) {
 				mCurrentState.mIsBookmarkedSite = isBookmark;
 				mWebViewController.bookmarkedStatusHasChanged(Tab.this);
 			}
 		}
 	};
 
-	public Bitmap getScreenshot() {
-		synchronized (Tab.this) {
+	public Bitmap getScreenshot ( ) {
+
+		synchronized ( Tab.this ) {
 			return mCapture;
 		}
 	}
 
-	public boolean isSnapshot() {
+	public boolean isSnapshot ( ) {
+
 		return false;
 	}
 
-	private static class SaveCallback implements ValueCallback<Boolean> {
+	private static class SaveCallback implements ValueCallback< Boolean> {
+
 		boolean mResult;
 
 		@Override
-		public void onReceiveValue(Boolean value) {
+		public void onReceiveValue ( Boolean value ) {
+
 			mResult = value;
-			synchronized (this) {
+			synchronized ( this ) {
 				notifyAll();
 			}
 		}
@@ -1803,9 +2020,10 @@ class Tab implements PictureListener {
 	/**
 	 * Must be called on the UI thread
 	 */
-	public ContentValues createSnapshotValues() {
+	public ContentValues createSnapshotValues ( ) {
+
 		WebViewClassic web = getWebViewClassic();
-		if (web == null)
+		if ( web == null )
 			return null;
 		ContentValues values = new ContentValues();
 		values.put(Snapshots.TITLE, mCurrentState.mTitle);
@@ -1813,8 +2031,7 @@ class Tab implements PictureListener {
 		values.put(Snapshots.BACKGROUND, web.getPageBackgroundColor());
 		values.put(Snapshots.DATE_CREATED, System.currentTimeMillis());
 		values.put(Snapshots.FAVICON, compressBitmap(getFavicon()));
-		Bitmap screenshot = Controller.createScreenshot(mMainView, Controller.getDesiredThumbnailWidth(mContext),
-				Controller.getDesiredThumbnailHeight(mContext));
+		Bitmap screenshot = Controller.createScreenshot(mMainView, Controller.getDesiredThumbnailWidth(mContext), Controller.getDesiredThumbnailHeight(mContext));
 		values.put(Snapshots.THUMBNAIL, compressBitmap(screenshot));
 		return values;
 	}
@@ -1822,9 +2039,10 @@ class Tab implements PictureListener {
 	/**
 	 * Probably want to call this on a background thread
 	 */
-	public boolean saveViewState(ContentValues values) {
+	public boolean saveViewState ( ContentValues values ) {
+
 		WebViewClassic web = getWebViewClassic();
-		if (web == null)
+		if ( web == null )
 			return false;
 		String path = UUID.randomUUID().toString();
 		SaveCallback callback = new SaveCallback();
@@ -1832,29 +2050,29 @@ class Tab implements PictureListener {
 		try {
 			outs = mContext.openFileOutput(path, Context.MODE_PRIVATE);
 			GZIPOutputStream stream = new GZIPOutputStream(outs);
-			synchronized (callback) {
+			synchronized ( callback ) {
 				web.saveViewState(stream, callback);
 				callback.wait();
 			}
 			stream.flush();
 			stream.close();
-		} catch (Exception e) {
+		} catch ( Exception e ) {
 			Log.w(LOGTAG, "Failed to save view state", e);
-			if (outs != null) {
+			if ( outs != null ) {
 				try {
 					outs.close();
-				} catch (IOException ignore) {
+				} catch ( IOException ignore ) {
 				}
 			}
 			File file = mContext.getFileStreamPath(path);
-			if (file.exists() && !file.delete()) {
+			if ( file.exists() && !file.delete() ) {
 				file.deleteOnExit();
 			}
 			return false;
 		}
 		File savedFile = mContext.getFileStreamPath(path);
-		if (!callback.mResult) {
-			if (!savedFile.delete()) {
+		if ( !callback.mResult ) {
+			if ( !savedFile.delete() ) {
 				savedFile.deleteOnExit();
 			}
 			return false;
@@ -1865,8 +2083,9 @@ class Tab implements PictureListener {
 		return true;
 	}
 
-	public byte[] compressBitmap(Bitmap bitmap) {
-		if (bitmap == null) {
+	public byte[] compressBitmap ( Bitmap bitmap ) {
+
+		if ( bitmap == null ) {
 			return null;
 		}
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -1874,11 +2093,11 @@ class Tab implements PictureListener {
 		return stream.toByteArray();
 	}
 
-	public void loadUrl(String url, Map<String, String> headers) {
-		
+	public void loadUrl ( String url , Map< String , String> headers ) {
+
 		Log.d("Liu Test", getClass().getSimpleName() + " loadUrl(String url, Map<String, String> headers)");
-		if (mMainView != null) {
-			
+		if ( mMainView != null ) {
+
 			mPageLoadProgress = INITIAL_PROGRESS;
 			mInPageLoad = true;
 			mCurrentState = new PageState(mContext, false, url, null);
@@ -1887,11 +2106,11 @@ class Tab implements PictureListener {
 		}
 	}
 
-	protected void capture() {
+	protected void capture ( ) {
 
-		if (mMainView == null || mCapture == null)
+		if ( mMainView == null || mCapture == null )
 			return;
-		if (mMainView.getContentWidth() <= 0 || mMainView.getContentHeight() <= 0) {
+		if ( mMainView.getContentWidth() <= 0 || mMainView.getContentHeight() <= 0 ) {
 			return;
 		}
 		Canvas c = new Canvas(mCapture);
@@ -1901,7 +2120,7 @@ class Tab implements PictureListener {
 		c.translate(-left, -top);
 		float scale = mCaptureWidth / (float) mMainView.getWidth();
 		c.scale(scale, scale, left, top);
-		if (mMainView instanceof BrowserWebView) {
+		if ( mMainView instanceof BrowserWebView ) {
 			((BrowserWebView) mMainView).drawContent(c);
 		} else {
 			mMainView.draw(c);
@@ -1916,41 +2135,47 @@ class Tab implements PictureListener {
 		mHandler.removeMessages(MSG_CAPTURE);
 		persistThumbnail();
 		TabControl tc = mWebViewController.getTabControl();
-		if (tc != null) {
+		if ( tc != null ) {
 			OnThumbnailUpdatedListener updateListener = tc.getOnThumbnailUpdatedListener();
-			if (updateListener != null) {
+			if ( updateListener != null ) {
 				updateListener.onThumbnailUpdated(this);
 			}
 		}
 	}
 
 	@Override
-	public void onNewPicture(WebView view, Picture picture) {
+	public void onNewPicture ( WebView view , Picture picture ) {
+
 		postCapture();
 	}
 
-	private void postCapture() {
-		if (!mHandler.hasMessages(MSG_CAPTURE)) {
+	private void postCapture ( ) {
+
+		if ( !mHandler.hasMessages(MSG_CAPTURE) ) {
 			mHandler.sendEmptyMessageDelayed(MSG_CAPTURE, CAPTURE_DELAY);
 		}
 	}
 
-	public boolean canGoBack() {
+	public boolean canGoBack ( ) {
+
 		return mMainView != null ? mMainView.canGoBack() : false;
 	}
 
-	public boolean canGoForward() {
+	public boolean canGoForward ( ) {
+
 		return mMainView != null ? mMainView.canGoForward() : false;
 	}
 
-	public void goBack() {
-		if (mMainView != null) {
+	public void goBack ( ) {
+
+		if ( mMainView != null ) {
 			mMainView.goBack();
 		}
 	}
 
-	public void goForward() {
-		if (mMainView != null) {
+	public void goForward ( ) {
+
+		if ( mMainView != null ) {
 			mMainView.goForward();
 		}
 	}
@@ -1962,41 +2187,45 @@ class Tab implements PictureListener {
 	 * This is used to ensure that preloaded URLs that are not subsequently seen
 	 * by the user do not appear in the back stack.
 	 */
-	public void clearBackStackWhenItemAdded(Pattern urlPattern) {
+	public void clearBackStackWhenItemAdded ( Pattern urlPattern ) {
+
 		mClearHistoryUrlPattern = urlPattern;
 	}
 
-	protected void persistThumbnail() {
+	protected void persistThumbnail ( ) {
+
 		DataController.getInstance(mContext).saveThumbnail(this);
 	}
 
-	protected void deleteThumbnail() {
+	protected void deleteThumbnail ( ) {
+
 		DataController.getInstance(mContext).deleteThumbnail(this);
 	}
 
-	@SuppressLint("NewApi")
-	void updateCaptureFromBlob(byte[] blob) {
-		synchronized (Tab.this) {
-			if (mCapture == null) {
+	@SuppressLint ( "NewApi" )
+	void updateCaptureFromBlob ( byte[] blob ) {
+
+		synchronized ( Tab.this ) {
+			if ( mCapture == null ) {
 				return;
 			}
 			ByteBuffer buffer = ByteBuffer.wrap(blob);
 			try {
 				mCapture.copyPixelsFromBuffer(buffer);
-			} catch (RuntimeException rex) {
-				Log.e(LOGTAG, "Load capture has mismatched sizes; buffer: " + buffer.capacity() + " blob: " + blob.length + "capture: "
-						+ mCapture.getByteCount());
+			} catch ( RuntimeException rex ) {
+				Log.e(LOGTAG, "Load capture has mismatched sizes; buffer: " + buffer.capacity() + " blob: " + blob.length + "capture: " + mCapture.getByteCount());
 				throw rex;
 			}
 		}
 	}
 
 	@Override
-	public String toString() {
+	public String toString ( ) {
+
 		StringBuilder builder = new StringBuilder(100);
 		builder.append(mId);
 		builder.append(") has parent: ");
-		if (getParent() != null) {
+		if ( getParent() != null ) {
 			builder.append("true[");
 			builder.append(getParent().getId());
 			builder.append("]");
@@ -2005,7 +2234,7 @@ class Tab implements PictureListener {
 		}
 		builder.append(", incog: ");
 		builder.append(isPrivateBrowsingEnabled());
-		if (!isPrivateBrowsingEnabled()) {
+		if ( !isPrivateBrowsingEnabled() ) {
 			builder.append(", title: ");
 			builder.append(getTitle());
 			builder.append(", url: ");
@@ -2014,12 +2243,13 @@ class Tab implements PictureListener {
 		return builder.toString();
 	}
 
-	private void handleProceededAfterSslError(SslError error) {
-		if (error.getUrl().equals(mCurrentState.mUrl)) {
+	private void handleProceededAfterSslError ( SslError error ) {
+
+		if ( error.getUrl().equals(mCurrentState.mUrl) ) {
 			// The security state should currently be SECURITY_STATE_SECURE.
 			setSecurityState(SecurityState.SECURITY_STATE_BAD_CERTIFICATE);
 			mCurrentState.mSslCertificateError = error;
-		} else if (getSecurityState() == SecurityState.SECURITY_STATE_SECURE) {
+		} else if ( getSecurityState() == SecurityState.SECURITY_STATE_SECURE ) {
 			// The page's main resource is secure and this error is for a
 			// sub-resource.
 			setSecurityState(SecurityState.SECURITY_STATE_MIXED);

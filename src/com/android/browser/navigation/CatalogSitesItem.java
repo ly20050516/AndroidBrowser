@@ -92,8 +92,11 @@ public class CatalogSitesItem extends RelativeLayout {
 	/** 单个网址固定宽度 */
 	private static final int FIXEDWIDTH = 160;
 
+	private static final int COLUMN_COUNT_PORT = 3;
+
+	private static final int COLUMN_COUNT_LAND = 4;
 	/** 显示列数 */
-	private int columnCount = 3;
+	private int columnCount = COLUMN_COUNT_PORT;
 
 	private Context mContext;
 
@@ -205,14 +208,14 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * 适配横竖屏一行显示数据列数
 	 */
 	private void setDidScreenColumnCount() {
-		
+
 		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			
-			columnCount = 4;
-			
+
+			columnCount = COLUMN_COUNT_LAND;
+
 		} else if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-			
-			columnCount = 2;
+
+			columnCount = COLUMN_COUNT_PORT;
 		}
 
 		mGridLayout.setColumnCount(columnCount);
