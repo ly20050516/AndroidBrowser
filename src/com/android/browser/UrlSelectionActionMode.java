@@ -19,6 +19,7 @@ package com.android.browser;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.android.browser.R;
 
 public class UrlSelectionActionMode implements ActionMode.Callback {
 

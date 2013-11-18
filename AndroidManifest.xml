@@ -74,14 +74,14 @@
     </permission>
 
     <application
-        android:name="Browser"
+        android:name="com.android.browser.Browser"
         android:backupAgent=".BrowserBackupAgent"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher_browser"
         android:label="@string/application_name"
         android:taskAffinity="android.task.browser" >
         <provider
-            android:name=".provider.BrowserProvider2"
+            android:name="com.android.browser.provider.BrowserProvider2"
             android:authorities="com.android.browser;browser"
             android:multiprocess="false"
             android:readPermission="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
@@ -92,7 +92,7 @@
         </provider>
 
         <activity
-            android:name="BrowserActivity"
+            android:name="com.android.browser.BrowserActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/application_name"
@@ -202,7 +202,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="ShortcutActivity"
+            android:name="com.android.browser.ShortcutActivity"
             android:icon="@mipmap/ic_launcher_shortcut_browser_bookmark"
             android:label="@string/shortcut_bookmark"
             android:theme="@style/ShortcutTheme" >
@@ -213,7 +213,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="BrowserPreferencesPage"
+            android:name="com.android.browser.BrowserPreferencesPage"
             android:label="@string/menu_preferences"
             android:theme="@android:style/Theme.Holo.Light" >
             <intent-filter>
@@ -223,7 +223,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="BookmarkSearch"
+            android:name="com.android.browser.BookmarkSearch"
             android:excludeFromRecents="true"
             android:label="@string/bookmarks_search"
             android:stateNotNeeded="true"
@@ -239,7 +239,7 @@
                 android:resource="@xml/bookmarks_searchable" />
         </activity>
         <activity
-            android:name="AddBookmarkPage"
+            android:name="com.android.browser.AddBookmarkPage"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="Save bookmark"
             android:theme="@style/DialogWhenLarge"
@@ -252,12 +252,12 @@
                 <data android:mimeType="vnd.android.cursor.dir/bookmark" />
             </intent-filter>
         </activity>
-        <activity android:name="ComboViewActivity" >
+        <activity android:name="com.android.browser.ComboViewActivity" >
         </activity>
 
         <!-- Bookmark thumbnail homescreen widget -->
         <receiver
-            android:name=".widget.BookmarkThumbnailWidgetProvider"
+            android:name="com.android.browser.widget.BookmarkThumbnailWidgetProvider"
             android:label="@string/bookmarks" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -270,16 +270,16 @@
         </receiver>
 
         <service
-            android:name=".widget.BookmarkThumbnailWidgetService"
+            android:name="com.android.browser.widget.BookmarkThumbnailWidgetService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <receiver
-            android:name=".widget.BookmarkWidgetProxy"
+            android:name="com.android.browser.widget.BookmarkWidgetProxy"
             android:exported="false" />
 
         <activity
-            android:name=".widget.BookmarkWidgetConfigure"
+            android:name="com.android.browser.widget.BookmarkWidgetConfigure"
             android:theme="@android:style/Theme.Holo.DialogWhenLarge" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -302,7 +302,7 @@
             android:name="com.google.android.partnersetup.RLZ_ACCESS_POINT"
             android:value="@string/rlz_access_point" />
 
-        <receiver android:name=".OpenDownloadReceiver" >
+        <receiver android:name="com.android.browser.OpenDownloadReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
             </intent-filter>
@@ -310,18 +310,18 @@
 
         <!-- For custom home pages (like most visited) -->
         <provider
-            android:name=".homepages.HomeProvider"
+            android:name="com.android.browser.homepages.HomeProvider"
             android:authorities="com.android.browser.home"
             android:exported="false"
             android:readPermission="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
 
-        <receiver android:name=".AccountsChangedReceiver" >
+        <receiver android:name="com.android.browser.AccountsChangedReceiver" >
             <intent-filter>
                 <action android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".PreloadRequestReceiver"
+            android:name="com.android.browser.PreloadRequestReceiver"
             android:permission="com.android.browser.permission.PRELOAD" >
             <intent-filter>
                 <action android:name="android.intent.action.PRELOAD" />
@@ -331,7 +331,7 @@
         </receiver>
 
         <provider
-            android:name=".provider.SnapshotProvider"
+            android:name="com.android.browser.provider.SnapshotProvider"
             android:authorities="com.android.browser.snapshots"
             android:exported="false" />
         <provider

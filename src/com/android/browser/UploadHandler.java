@@ -24,7 +24,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.ValueCallback;
 import android.widget.Toast;
-
+import com.android.browser.R;
 import java.io.File;
 import java.util.Vector;
 

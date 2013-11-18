@@ -26,8 +26,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import com.android.browser.DeviceAccountLogin.AutoLoginCallback;
+import com.android.browser.R;
 
 public class AutologinBar extends LinearLayout implements OnClickListener, AutoLoginCallback {
 

@@ -30,14 +30,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
-
 import com.android.browser.UI.ComboViews;
 import com.android.browser.view.PieItem;
 import com.android.browser.view.PieMenu;
 import com.android.browser.view.PieMenu.PieView.OnLayoutListener;
 import com.android.browser.view.PieStackView;
 import com.android.browser.view.PieStackView.OnCurrentListener;
-
+import com.android.browser.R;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -27,9 +27,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
-
 import com.android.browser.util.ThreadedCursorAdapter;
 import com.android.browser.view.BookmarkContainer;
+import com.android.browser.R;
 
 public class BrowserBookmarksAdapter extends ThreadedCursorAdapter<BrowserBookmarksAdapterItem> {
 

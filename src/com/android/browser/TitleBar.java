@@ -33,6 +33,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import com.android.browser.R;
 
 /**
  * Base class for a title bar used by the browser.

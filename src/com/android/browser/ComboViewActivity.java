@@ -27,9 +27,8 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.android.browser.UI.ComboViews;
-
+import com.android.browser.R;
 import java.util.ArrayList;
 
 public class ComboViewActivity extends Activity implements CombinedBookmarksCallbacks {

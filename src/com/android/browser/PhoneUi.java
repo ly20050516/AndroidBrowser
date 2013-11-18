@@ -37,8 +37,8 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.webkit.WebView;
 import android.widget.ImageView;
-
 import com.android.browser.UrlInputView.StateListener;
+import com.android.browser.R;
 
 /**
  * Ui for regular phone screen sizes

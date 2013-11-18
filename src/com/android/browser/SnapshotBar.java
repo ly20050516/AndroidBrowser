@@ -30,9 +30,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.TextView;
-
 import com.android.browser.UI.ComboViews;
-
+import com.android.browser.R;
 import java.text.DateFormat;
 import java.util.Date;
 

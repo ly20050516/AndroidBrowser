@@ -27,8 +27,8 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-
 import com.android.browser.TabBar.TabView;
+import com.android.browser.R;
 
 /**
  * custom view for displaying tabs in the tabbed title bar

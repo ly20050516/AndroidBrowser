@@ -18,7 +18,7 @@ package com.android.browser;
 
 import com.android.browser.addbookmark.FolderSpinner;
 import com.android.browser.addbookmark.FolderSpinnerAdapter;
-
+import com.android.browser.R;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -61,7 +61,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 

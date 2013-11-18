@@ -36,6 +36,7 @@ import android.webkit.WebSettingsClassic.AutoFillProfile;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.android.browser.R;
 
 public class AutoFillSettingsFragment extends Fragment {
 

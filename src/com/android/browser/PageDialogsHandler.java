@@ -30,6 +30,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClassic;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.android.browser.R;
 
 /**
  * Displays page info

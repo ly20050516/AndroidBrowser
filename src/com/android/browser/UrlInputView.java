@@ -41,7 +41,7 @@ import com.android.browser.SuggestionsAdapter.SuggestItem;
 import com.android.browser.search.SearchEngine;
 import com.android.browser.search.SearchEngineInfo;
 import com.android.browser.search.SearchEngines;
-import com.android.internal.R;
+import com.android.browser.R;
 
 import java.util.List;
 
@@ -79,9 +79,9 @@ public class UrlInputView extends AutoCompleteTextView implements OnEditorAction
 	public UrlInputView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.PopupWindow,
-				R.attr.autoCompleteTextViewStyle, 0);
+				com.android.internal.R.attr.autoCompleteTextViewStyle, 0);
 
-		Drawable popupbg = a.getDrawable(R.styleable.PopupWindow_popupBackground);
+		Drawable popupbg = a.getDrawable(com.android.internal.R.styleable.PopupWindow_popupBackground);
 		a.recycle();
 		mPopupPadding = new Rect();
 		popupbg.getPadding(mPopupPadding);
@@ -89,7 +89,7 @@ public class UrlInputView extends AutoCompleteTextView implements OnEditorAction
 	}
 
 	public UrlInputView(Context context, AttributeSet attrs) {
-		this(context, attrs, R.attr.autoCompleteTextViewStyle);
+		this(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
 	}
 
 	public UrlInputView(Context context) {

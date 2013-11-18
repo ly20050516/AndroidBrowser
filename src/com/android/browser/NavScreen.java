@@ -35,12 +35,11 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.android.browser.NavTabScroller.OnLayoutListener;
 import com.android.browser.NavTabScroller.OnRemoveListener;
 import com.android.browser.TabControl.OnThumbnailUpdatedListener;
 import com.android.browser.UI.ComboViews;
-
+import com.android.browser.R;
 import java.util.HashMap;
 
 public class NavScreen extends RelativeLayout implements OnClickListener, OnMenuItemClickListener, OnThumbnailUpdatedListener {

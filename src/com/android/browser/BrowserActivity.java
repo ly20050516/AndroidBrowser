@@ -37,9 +37,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-
 import com.android.browser.navigation.PagerContentProvider.GreenSites;
 import com.android.browser.stub.NullController;
+import com.android.browser.R;
 import com.google.common.annotations.VisibleForTesting;
 
 public class BrowserActivity extends Activity {

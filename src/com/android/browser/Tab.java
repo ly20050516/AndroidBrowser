@@ -68,11 +68,10 @@ import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.browser.TabControl.OnThumbnailUpdatedListener;
 import com.android.browser.homepages.HomeProvider;
 import com.android.browser.provider.SnapshotProvider.Snapshots;
-
+import com.android.browser.R;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

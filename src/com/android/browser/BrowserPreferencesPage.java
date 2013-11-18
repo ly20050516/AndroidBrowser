@@ -22,10 +22,9 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 import android.view.MenuItem;
-
 import com.android.browser.preferences.BandwidthPreferencesFragment;
 import com.android.browser.preferences.DebugPreferencesFragment;
-
+import com.android.browser.R;
 import java.util.List;
 
 public class BrowserPreferencesPage extends PreferenceActivity {

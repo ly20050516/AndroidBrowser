@@ -48,14 +48,12 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.Toast;
-
 import com.android.browser.provider.BrowserProvider2;
 import com.android.browser.view.BookmarkExpandableView;
 import com.android.browser.view.BookmarkExpandableView.BookmarkContextMenuInfo;
-
+import com.android.browser.R;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 
 interface BookmarksPageCallbacks {

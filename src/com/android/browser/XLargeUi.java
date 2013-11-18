@@ -33,7 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
-
+import com.android.browser.R;
 import java.util.List;
 
 /**

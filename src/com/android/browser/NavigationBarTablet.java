@@ -31,9 +31,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
 import com.android.browser.UI.ComboViews;
 import com.android.browser.UrlInputView.StateListener;
+import com.android.browser.R;
 
 public class NavigationBarTablet extends NavigationBarBase implements StateListener {
 

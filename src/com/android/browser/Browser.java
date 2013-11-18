@@ -19,10 +19,10 @@ package com.android.browser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
 import android.app.Application;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
+import com.android.browser.R;
 
 public class Browser extends Application {
 

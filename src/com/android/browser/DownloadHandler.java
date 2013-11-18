@@ -34,6 +34,7 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
+import com.android.browser.R;
 
 /**
  * Handle download requests

@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -95,11 +94,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
 import android.widget.Toast;
-
 import com.android.browser.IntentHandler.UrlData;
 import com.android.browser.UI.ComboViews;
 import com.android.browser.provider.BrowserProvider2.Thumbnails;
 import com.android.browser.provider.SnapshotProvider.Snapshots;
+import com.android.browser.R;
 
 /**
  * Controller for browser

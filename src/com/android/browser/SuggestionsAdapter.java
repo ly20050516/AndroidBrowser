@@ -33,10 +33,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.android.browser.provider.BrowserProvider2.OmniboxSuggestions;
 import com.android.browser.search.SearchEngine;
-
+import com.android.browser.R;
 import java.util.ArrayList;
 import java.util.List;
 

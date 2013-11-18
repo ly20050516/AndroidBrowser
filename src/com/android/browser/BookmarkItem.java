@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.android.browser.R;
 
 /**
  * Custom layout for an item representing a bookmark in the browser.

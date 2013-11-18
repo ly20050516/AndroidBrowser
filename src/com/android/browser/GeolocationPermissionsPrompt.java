@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.browser.R;
 
 public class GeolocationPermissionsPrompt extends RelativeLayout {
 	private TextView mMessage;

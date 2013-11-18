@@ -17,7 +17,6 @@
 package com.android.browser;
 
 import java.util.List;
-
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -56,7 +55,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.android.browser.Tab.SecurityState;
 import com.android.browser.navigation.BaseObject;
 import com.android.browser.navigation.HomeView;
@@ -65,6 +63,7 @@ import com.android.browser.search.SearchEngine;
 import com.android.browser.search.SearchEngineInfo;
 import com.android.browser.search.SearchEngines;
 import com.android.internal.view.menu.MenuBuilder;
+import com.android.browser.R;
 
 /**
  * UI interface definitions

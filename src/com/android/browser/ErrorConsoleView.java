@@ -32,7 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TwoLineListItem;
-
+import com.android.browser.R;
 import java.util.Vector;
 
 /* package */class ErrorConsoleView extends LinearLayout {

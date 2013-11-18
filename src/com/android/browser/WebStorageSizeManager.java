@@ -17,7 +17,7 @@
 package com.android.browser;
 
 import com.android.browser.preferences.WebsiteSettingsFragment;
-
+import com.android.browser.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -27,7 +27,6 @@ import android.os.StatFs;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 import android.webkit.WebStorage;
-
 import java.io.File;
 
 /**

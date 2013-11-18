@@ -20,6 +20,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.android.browser.R;
 
 /**
  * Custom layout for an item representing a bookmark in the browser.

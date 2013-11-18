@@ -43,12 +43,11 @@ import android.webkit.WebSettingsClassic.AutoFillProfile;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewDatabase;
-
 import com.android.browser.homepages.HomeProvider;
 import com.android.browser.provider.BrowserProvider;
 import com.android.browser.search.SearchEngine;
 import com.android.browser.search.SearchEngines;
-
+import com.android.browser.R;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.LinkedList;

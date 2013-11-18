@@ -29,8 +29,8 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnDismissListener;
 import android.widget.PopupMenu.OnMenuItemClickListener;
-
 import com.android.browser.UrlInputView.StateListener;
+import com.android.browser.R;
 
 public class NavigationBarPhone extends NavigationBarBase implements StateListener, OnMenuItemClickListener, OnDismissListener {
 

@@ -40,7 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.OverScroller;
 import android.widget.TextView;
 
-import com.android.internal.R;
+import com.android.browser.R;
 
 import java.util.List;
 
@@ -166,7 +166,7 @@ public class ScrollerView extends FrameLayout {
 
 		TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.ScrollView, defStyle, 0);
 
-		setFillViewport(a.getBoolean(R.styleable.ScrollView_fillViewport, false));
+		setFillViewport(a.getBoolean(com.android.internal.R.styleable.ScrollView_fillViewport, false));
 
 		a.recycle();
 	}
