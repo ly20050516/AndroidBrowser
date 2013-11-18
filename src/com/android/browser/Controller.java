@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -94,11 +95,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
 import android.widget.Toast;
+
 import com.android.browser.IntentHandler.UrlData;
 import com.android.browser.UI.ComboViews;
+import com.android.browser.navigation.LimitVisitDialog;
+import com.android.browser.navigation.Utils;
 import com.android.browser.provider.BrowserProvider2.Thumbnails;
 import com.android.browser.provider.SnapshotProvider.Snapshots;
-import com.android.browser.R;
 
 /**
  * Controller for browser
@@ -329,9 +332,9 @@ public class Controller implements WebViewController , UiController , ActivityCo
 			openTabToHomePage();
 		}
 
-		if(! isParentAssistant(intent)){
-			
-			return ;
+		if ( !isParentAssistant(intent) ) {
+
+			return;
 		}
 		if ( currentTabId == -1 ) {
 			BackgroundHandler.execute(new PruneThumbnails(mActivity, null));
@@ -1033,7 +1036,28 @@ public class Controller implements WebViewController , UiController , ActivityCo
 	@Override
 	public boolean shouldOverrideUrlLoading ( Tab tab , WebView view , String url ) {
 
-		return mUrlHandler.shouldOverrideUrlLoading(tab, view, url);
+		if ( null == getCurrentTab() ) {
+
+			return true;
+		}
+		String curUrl = getCurrentTab().getUrl();
+		String oriUrl = getCurrentTab().getOriginalUrl();
+
+		boolean b = mUrlHandler.shouldOverrideUrlLoading(tab, view, url);
+		if ( b ) {
+
+			return true;
+		}
+
+		b = Utils.canVisited(curUrl, url) || Utils.canVisited(oriUrl, url);
+
+		if ( !b ) {
+
+			new LimitVisitDialog.Builder(mActivity).create().show();
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -1370,7 +1394,7 @@ public class Controller implements WebViewController , UiController , ActivityCo
 
 		MenuInflater inflater = mActivity.getMenuInflater();
 		inflater.inflate(R.menu.browser, menu);
-		return true;
+		return false;
 	}
 
 	@Override
@@ -1617,6 +1641,7 @@ public class Controller implements WebViewController , UiController , ActivityCo
 		menu.setGroupVisible(R.id.SNAPSHOT_MENU, !isLive);
 		menu.setGroupVisible(R.id.COMBO_MENU, false);
 
+		Log.d("Liu Test", getClass().getSimpleName() + " updateMenuState");
 		mUi.updateMenuState(tab, menu);
 	}
 
@@ -2800,7 +2825,8 @@ public class Controller implements WebViewController , UiController , ActivityCo
 		boolean noModifiers = event.hasNoModifiers();
 		// Even if MENU is already held down, we need to call to super to open
 		// the IME on long press.
-		if ( !noModifiers && isMenuOrCtrlKey(keyCode) ) {
+		if ( isMenuOrCtrlKey(keyCode) ) {
+
 			mMenuIsDown = true;
 			return false;
 		}
@@ -2927,11 +2953,10 @@ public class Controller implements WebViewController , UiController , ActivityCo
 	@Override
 	public boolean onKeyUp ( int keyCode , KeyEvent event ) {
 
-		if ( isMenuOrCtrlKey(keyCode) ) {
+		if ( isMenuOrCtrlKey(keyCode) && getCurrentTab() != null && !getCurrentTab().isHomePage() ) {
 			mMenuIsDown = false;
-			if ( KeyEvent.KEYCODE_MENU == keyCode && event.isTracking() && !event.isCanceled() ) {
-				return onMenuKey();
-			}
+
+			return onMenuKey();
 		}
 		if ( !event.hasNoModifiers() )
 			return false;
@@ -3029,9 +3054,33 @@ public class Controller implements WebViewController , UiController , ActivityCo
 		return mBlockEvents;
 	}
 
+	@Override
+	public void onMenuFindOnPage ( ) {
+		
+		findOnPage();
+	}
+
+	@Override
+	public void onMenuMSwitchD ( ) {
+
+		toggleUserAgent();
+	}
+
+	@Override
+	public void onMenuPageInfo ( ) {
+
+		showPageInfo();
+	}
+
+	@Override
+	public void onMenuPreference ( ) {
+
+		openPreferences();
+	}
+
 	public boolean isParentAssistant ( Intent intent ) {
 
-		if ( intent.getData() != null ) {
+		if ( intent != null && intent.getData() != null ) {
 
 			String enter_source = intent.getStringExtra(ENTER_SOURCE);
 			if ( enter_source != null && enter_source.equals(PARENT_ASSISTANT) ) {

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="/home/ly/workspace/AndroidBrowser/framework_intermediates.jar"/>
-	<classpathentry kind="lib" path="/home/ly/workspace/AndroidBrowser/core_intermediates.jar"/>
-	<classpathentry kind="lib" path="/home/ly/workspace/AndroidBrowser/Browser_intermediates.jar"/>
-	<classpathentry kind="lib" path="/home/ly/workspace/AndroidBrowser/android-common_intermediates.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/ly/workspace/AndroidBrowser/settings_intermedates.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/SettingsProvider"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Core"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/BrowserIntermeadiates"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/CommonIntermeadiates"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/AndroidFramework"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/framework_intermediates.jar"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/core_intermediates.jar"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/Browser_intermediates.jar"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/android-common_intermediates.jar"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/settings_intermedates.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>

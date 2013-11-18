@@ -82,7 +82,7 @@ public abstract class BaseUi implements UI {
 	public static final int HIDE_TITLEBAR_DELAY = 1500; // in ms
 
 	Activity mActivity;
-	UiController mUiController;
+	protected UiController mUiController;
 	TabControl mTabControl;
 	protected Tab mActiveTab;
 	private InputMethodManager mInputManager;
@@ -200,6 +200,8 @@ public abstract class BaseUi implements UI {
 
 	@Override
 	public boolean onMenuKey() {
+		
+		Log.d("Liu Test", getClass().getSimpleName() + " you pressed menu key");
 		return false;
 	}
 

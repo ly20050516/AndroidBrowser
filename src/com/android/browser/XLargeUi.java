@@ -31,9 +31,14 @@ import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
+
 import com.android.browser.R;
+import com.android.browser.navigation.MainMenuView;
+
 import java.util.List;
 
 /**
@@ -46,57 +51,83 @@ public class XLargeUi extends BaseUi {
 	private PaintDrawable mFaviconBackground;
 
 	private ActionBar mActionBar;
+
 	private TabBar mTabBar;
 
 	private NavigationBarTablet mNavBar;
 
 	private Handler mHandler;
 
+	private MainMenuView mMainMenuView;
+
 	/**
 	 * @param browser
 	 * @param controller
 	 */
-	public XLargeUi(Activity browser, UiController controller) {
+	public XLargeUi ( Activity browser , UiController controller ) {
+
 		super(browser, controller);
 		mHandler = new Handler();
 		mNavBar = (NavigationBarTablet) mTitleBar.getNavigationBar();
 		mTabBar = new TabBar(mActivity, mUiController, this);
 		mActionBar = mActivity.getActionBar();
+		mMainMenuView = new MainMenuView(mActivity, mContentView, new ClickEvent());
 		setupActionBar();
 		setUseQuickControls(BrowserSettings.getInstance().useQuickControls());
+
 	}
 
-	private void setupActionBar() {
+	private void setupActionBar ( ) {
+
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		mActionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		mActionBar.setCustomView(mTabBar);
 	}
 
-	public void showComboView(ComboViews startWith, Bundle extras) {
+	public void showComboView ( ComboViews startWith , Bundle extras ) {
+
 		super.showComboView(startWith, extras);
-		if (mUseQuickControls) {
+		if ( mUseQuickControls ) {
 			mActionBar.show();
 		}
 	}
 
 	@Override
-	public void setUseQuickControls(boolean useQuickControls) {
+	public boolean onMenuKey ( ) {
+
+		if ( mMainMenuView.isShowiing() ) {
+
+			mMainMenuView.dismissMainMenuView();
+
+		} else {
+
+			mMainMenuView.showMainMenuView();
+		}
+		return super.onMenuKey();
+	}
+
+	@Override
+	public void setUseQuickControls ( boolean useQuickControls ) {
+
 		super.setUseQuickControls(useQuickControls);
 		checkHideActionBar();
-		if (!useQuickControls) {
+		if ( !useQuickControls ) {
 			mActionBar.show();
 		}
 		mTabBar.setUseQuickControls(mUseQuickControls);
 		// We need to update the tabs with this change
-		for (Tab t : mTabControl.getTabs()) {
+		for ( Tab t : mTabControl.getTabs() ) {
 			t.updateShouldCaptureThumbnails();
 		}
 	}
 
-	private void checkHideActionBar() {
-		if (mUseQuickControls) {
+	private void checkHideActionBar ( ) {
+
+		if ( mUseQuickControls ) {
 			mHandler.post(new Runnable() {
-				public void run() {
+
+				public void run ( ) {
+
 					mActionBar.hide();
 				}
 			});
@@ -104,29 +135,32 @@ public class XLargeUi extends BaseUi {
 	}
 
 	@Override
-	public void onResume() {
+	public void onResume ( ) {
+
 		super.onResume();
 		mNavBar.clearCompletions();
 		checkHideActionBar();
 	}
 
 	@Override
-	public void onDestroy() {
+	public void onDestroy ( ) {
+
 		hideTitleBar();
 	}
 
-	void stopWebViewScrolling() {
+	void stopWebViewScrolling ( ) {
+
 		BrowserWebView web = (BrowserWebView) mUiController.getCurrentWebView();
-		if (web != null) {
+		if ( web != null ) {
 			WebViewClassic.fromWebView(web).stopScroll();
 		}
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		
+	public boolean onPrepareOptionsMenu ( Menu menu ) {
+
 		MenuItem bm = menu.findItem(R.id.bookmarks_menu_id);
-		if (bm != null) {
+		if ( bm != null ) {
 			bm.setVisible(false);
 		}
 		return true;
@@ -135,28 +169,29 @@ public class XLargeUi extends BaseUi {
 	// WebView callbacks
 
 	@Override
-	public void addTab(Tab tab) {
-		
+	public void addTab ( Tab tab ) {
+
 		mTabBar.onNewTab(tab);
 	}
 
-	protected void onAddTabCompleted(Tab tab) {
+	protected void onAddTabCompleted ( Tab tab ) {
+
 		checkHideActionBar();
 	}
 
 	@Override
-	public void setActiveTab(final Tab tab) {
-		
+	public void setActiveTab ( final Tab tab ) {
+
 		mTitleBar.cancelTitleBarAnimation(true);
 		mTitleBar.setSkipTitleBarAnimations(true);
 		super.setActiveTab(tab);
-		
+
 		BrowserWebView view = (BrowserWebView) tab.getWebView();
 		// TabControl.setCurrentTab has been called before this,
 		// so the tab is guaranteed to have a webview
-		if (view == null) {
+		if ( view == null ) {
 			Log.e("Liu Test", LOGTAG + " active tab with no webview detected");
-//			return;
+			// return;
 		}
 		mTabBar.onSetActiveTab(tab);
 		updateLockIconToLatest(tab);
@@ -164,14 +199,15 @@ public class XLargeUi extends BaseUi {
 	}
 
 	@Override
-	public void updateTabs(List<Tab> tabs) {
+	public void updateTabs ( List< Tab> tabs ) {
+
 		mTabBar.updateTabs(tabs);
 		checkHideActionBar();
 	}
 
 	@Override
-	public void removeTab(Tab tab) {
-		
+	public void removeTab ( Tab tab ) {
+
 		mTitleBar.cancelTitleBarAnimation(true);
 		mTitleBar.setSkipTitleBarAnimations(true);
 		super.removeTab(tab);
@@ -179,20 +215,23 @@ public class XLargeUi extends BaseUi {
 		mTitleBar.setSkipTitleBarAnimations(false);
 	}
 
-	protected void onRemoveTabCompleted(Tab tab) {
+	protected void onRemoveTabCompleted ( Tab tab ) {
+
 		checkHideActionBar();
 	}
 
-	int getContentWidth() {
-		if (mContentView != null) {
+	int getContentWidth ( ) {
+
+		if ( mContentView != null ) {
 			return mContentView.getWidth();
 		}
 		return 0;
 	}
 
 	@Override
-	public void editUrl(boolean clearInput, boolean forceIME) {
-		if (mUseQuickControls) {
+	public void editUrl ( boolean clearInput , boolean forceIME ) {
+
+		if ( mUseQuickControls ) {
 			mTitleBar.setShowProgressOnly(false);
 		}
 		super.editUrl(clearInput, forceIME);
@@ -201,20 +240,22 @@ public class XLargeUi extends BaseUi {
 	// action mode callbacks
 
 	@Override
-	public void onActionModeStarted(ActionMode mode) {
-		if (!mTitleBar.isEditingUrl()) {
+	public void onActionModeStarted ( ActionMode mode ) {
+
+		if ( !mTitleBar.isEditingUrl() ) {
 			// hide the title bar when CAB is shown
-//			hideTitleBar();
+			// hideTitleBar();
 		}
 	}
 
 	@Override
-	public void onActionModeFinished(boolean inLoad) {
+	public void onActionModeFinished ( boolean inLoad ) {
+
 		checkHideActionBar();
-		if (inLoad) {
+		if ( inLoad ) {
 			// the titlebar was removed when the CAB was shown
 			// if the page is loading, show it again
-			if (mUseQuickControls) {
+			if ( mUseQuickControls ) {
 				mTitleBar.setShowProgressOnly(true);
 			}
 			showTitleBar();
@@ -222,45 +263,50 @@ public class XLargeUi extends BaseUi {
 	}
 
 	@Override
-	protected void updateNavigationState(Tab tab) {
+	protected void updateNavigationState ( Tab tab ) {
+
 		mNavBar.updateNavigationState(tab);
 	}
 
 	@Override
-	public void setUrlTitle(Tab tab) {
+	public void setUrlTitle ( Tab tab ) {
+
 		super.setUrlTitle(tab);
 		mTabBar.onUrlAndTitle(tab, tab.getUrl(), tab.getTitle());
 	}
 
 	// Set the favicon in the title bar.
 	@Override
-	public void setFavicon(Tab tab) {
+	public void setFavicon ( Tab tab ) {
+
 		super.setFavicon(tab);
 		mTabBar.onFavicon(tab, tab.getFavicon());
 	}
 
 	@Override
-	public void onHideCustomView() {
+	public void onHideCustomView ( ) {
+
 		super.onHideCustomView();
 		checkHideActionBar();
 	}
 
 	@Override
-	public boolean dispatchKey(int code, KeyEvent event) {
-		if (mActiveTab != null) {
+	public boolean dispatchKey ( int code , KeyEvent event ) {
+
+		if ( mActiveTab != null ) {
 			WebView web = mActiveTab.getWebView();
-			if (event.getAction() == KeyEvent.ACTION_DOWN) {
-				switch (code) {
-				case KeyEvent.KEYCODE_TAB:
-				case KeyEvent.KEYCODE_DPAD_UP:
-				case KeyEvent.KEYCODE_DPAD_LEFT:
-					if ((web != null) && web.hasFocus() && !mTitleBar.hasFocus()) {
+			if ( event.getAction() == KeyEvent.ACTION_DOWN ) {
+				switch ( code ) {
+				case KeyEvent.KEYCODE_TAB :
+				case KeyEvent.KEYCODE_DPAD_UP :
+				case KeyEvent.KEYCODE_DPAD_LEFT :
+					if ( (web != null) && web.hasFocus() && !mTitleBar.hasFocus() ) {
 						editUrl(false, false);
 						return true;
 					}
 				}
 				boolean ctrl = event.hasModifiers(KeyEvent.META_CTRL_ON);
-				if (!ctrl && isTypingKey(event) && !mTitleBar.isEditingUrl()) {
+				if ( !ctrl && isTypingKey(event) && !mTitleBar.isEditingUrl() ) {
 					editUrl(true, false);
 					return mContentView.dispatchKeyEvent(event);
 				}
@@ -269,21 +315,25 @@ public class XLargeUi extends BaseUi {
 		return false;
 	}
 
-	private boolean isTypingKey(KeyEvent evt) {
+	private boolean isTypingKey ( KeyEvent evt ) {
+
 		return evt.getUnicodeChar() > 0;
 	}
 
-	TabBar getTabBar() {
+	TabBar getTabBar ( ) {
+
 		return mTabBar;
 	}
 
 	@Override
-	public boolean shouldCaptureThumbnails() {
+	public boolean shouldCaptureThumbnails ( ) {
+
 		return mUseQuickControls;
 	}
 
-	private Drawable getFaviconBackground() {
-		if (mFaviconBackground == null) {
+	private Drawable getFaviconBackground ( ) {
+
+		if ( mFaviconBackground == null ) {
 			mFaviconBackground = new PaintDrawable();
 			Resources res = mActivity.getResources();
 			mFaviconBackground.getPaint().setColor(res.getColor(R.color.tabFaviconBackground));
@@ -293,17 +343,66 @@ public class XLargeUi extends BaseUi {
 	}
 
 	@Override
-	public Drawable getFaviconDrawable(Bitmap icon) {
-		Drawable[] array = new Drawable[2];
-		array[0] = getFaviconBackground();
-		if (icon == null) {
-			array[1] = mGenericFavicon;
+	public Drawable getFaviconDrawable ( Bitmap icon ) {
+
+		Drawable[] array = new Drawable[ 2 ];
+		array[ 0 ] = getFaviconBackground();
+		if ( icon == null ) {
+			array[ 1 ] = mGenericFavicon;
 		} else {
-			array[1] = new BitmapDrawable(mActivity.getResources(), icon);
+			array[ 1 ] = new BitmapDrawable(mActivity.getResources(), icon);
 		}
 		LayerDrawable d = new LayerDrawable(array);
 		d.setLayerInset(1, 2, 2, 2, 2);
 		return d;
 	}
 
+	@Override
+	public void updateMenuState ( Tab tab , Menu menu ) {
+
+		Log.d("Liu Test", getClass().getSimpleName() + " updateMenuState");
+		final MenuItem uaSwitcher = menu.findItem(R.id.ua_desktop_menu_id);
+		if(uaSwitcher.isChecked()){
+			
+			Log.d("Liu Test", "uaSwitcher.isChecked() true");
+		}else{
+			
+			Log.d("Liu Test", "uaSwitcher.isChecked() false");
+		}
+	}
+
+	class ClickEvent implements OnClickListener {
+
+		@Override
+		public void onClick ( View v ) {
+
+			mMainMenuView.dismissMainMenuView();
+
+			switch ( v.getId() ) {
+			case R.id.menu_item_find_on_page : {
+
+				mUiController.onMenuFindOnPage();
+
+				break;
+			}
+			case R.id.menu_item_ua_switcher_desktop : {
+
+				mUiController.toggleUserAgent();
+				break;
+			}
+			case R.id.menu_item_page_info : {
+
+				mUiController.showPageInfo();
+				break;
+			}
+			case R.id.menu_item_preferences : {
+
+				mUiController.openPreferences();
+				break;
+			}
+			}
+
+		}
+
+	}
 }
