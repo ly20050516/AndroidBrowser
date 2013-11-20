@@ -373,6 +373,7 @@
     <string name="preview" msgid="6450823514561689038">"预览"</string>
     <string name="local_bookmarks" msgid="533816851415228520">"本地"</string>
     <string name="ua_switcher_desktop" msgid="220097077327558435">"请求桌面版网站"</string>
+    <string name="ua_switcher_mobbile">请求移动版网站</string>
     <string name="permission_preload_label" msgid="4856971662337877316">"预加载结果"</string>
     <string name="empty_snapshots_folder" msgid="7675378008107026013">"没有保存的网页。"</string>
     <string name="remove_snapshot" msgid="1624447424544976849">"删除已保存的网页"</string>

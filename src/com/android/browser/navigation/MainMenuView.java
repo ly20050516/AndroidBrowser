@@ -74,7 +74,7 @@ public class MainMenuView implements OnTouchListener {
 		mPopupWindow = new PopupWindow(menuView, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPopupWindow.setOutsideTouchable(true);
-		// mPopupWindow.setAnimationStyle(R.style.popwin_anim_style);
+		mPopupWindow.setAnimationStyle(R.style.PopupAnimation);
 		mPopupWindow.setFocusable(true);
 	}
 
@@ -88,7 +88,8 @@ public class MainMenuView implements OnTouchListener {
 	 */
 	public void showMainMenuView ( ) {
 
-		mPopupWindow.showAtLocation(mParentView, Gravity.BOTTOM, 0, 0);
+		mPopupWindow.showAtLocation(mParentView, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+		
 	}
 
 	/**
@@ -99,11 +100,12 @@ public class MainMenuView implements OnTouchListener {
 		mPopupWindow.dismiss();
 	}
 
-	public void setTextById(int vID,int strID){
-		
+	public void setTextById ( int vID , int strID ) {
+
 		TextView text = (TextView) menuView.findViewById(vID);
 		text.setText(strID);
 	}
+
 	@Override
 	public boolean onTouch ( View v , MotionEvent event ) {
 

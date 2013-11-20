@@ -22,6 +22,7 @@ public class Utils {
 		String host;
 		String enterHost;
 
+		Log.d("Liu Test", "url: " + url + " enterUrl: " + enterUrl);
 		if ( null == url || null == enterUrl ) {
 
 			return false;
@@ -31,7 +32,7 @@ public class Utils {
 			host = new URL(url).getHost().toLowerCase();
 			enterHost = new URL(enterUrl).getHost().toLowerCase();
 
-			Log.d("---", "host: " + host + " enterHost: " + enterHost);
+			Log.d("Liu Test", "host: " + host + " enterHost: " + enterHost + " isIpAddress " + isIpAddress(host));
 
 			if ( isIpAddress(host) || host.indexOf("eebbk") != -1 || host.indexOf("xue999") != -1 || host.indexOf("haohaoxue") != -1 || enterHost.indexOf(host) != -1
 					|| host.indexOf(enterHost) != -1 ) {

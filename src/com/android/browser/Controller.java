@@ -20,6 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1036,28 +1038,46 @@ public class Controller implements WebViewController , UiController , ActivityCo
 	@Override
 	public boolean shouldOverrideUrlLoading ( Tab tab , WebView view , String url ) {
 
-		if ( null == getCurrentTab() ) {
-
-			return true;
-		}
-		String curUrl = getCurrentTab().getUrl();
-		String oriUrl = getCurrentTab().getOriginalUrl();
+		Log.d("Liu Test", getClass().getSimpleName() + " mUrl = " + tab.getUrl());
+		Log.d("Liu Test", getClass().getSimpleName() + " mOriginalUrl = " + tab.getOriginalUrl());
 
 		boolean b = mUrlHandler.shouldOverrideUrlLoading(tab, view, url);
 		if ( b ) {
 
+			Log.d("Liu Test", getClass().getSimpleName() + " mUrlHandler.shouldOverrideUrlLoading " );
 			return true;
 		}
 
-		b = Utils.canVisited(curUrl, url) || Utils.canVisited(oriUrl, url);
+		if ( getCurrentTab() != null ) {
 
-		if ( !b ) {
+			String curUrl = getCurrentTab().getUrl();
+			String oriUrl = getCurrentTab().getOriginalUrl();
+			b = Utils.canVisited(curUrl, url) || Utils.canVisited(oriUrl, url);
 
-			new LimitVisitDialog.Builder(mActivity).create().show();
-			return true;
+			if ( b ) {
+
+				Log.d("Liu Test", getClass().getSimpleName() + " getCurrentTab() != null " );
+				return false;
+			}
 		}
+		if ( getCurrentTab() != null && getCurrentTab().getParent() != null ) {
 
-		return false;
+			String curUrl = getCurrentTab().getParent().getUrl();
+			String oriUrl = getCurrentTab().getParent().getOriginalUrl();
+			b = Utils.canVisited(curUrl, url) || Utils.canVisited(oriUrl, url);
+
+			if ( b ) {
+
+				Log.d("Liu Test", getClass().getSimpleName() + " getCurrentTab() != null && getCurrentTab().getParent() " );
+				return false;
+			}else{
+				
+				dismissSubWindow(getCurrentTab());
+			}
+		}
+		new LimitVisitDialog.Builder(mActivity).create().show();
+		return true;
+
 	}
 
 	@Override
@@ -2013,6 +2033,11 @@ public class Controller implements WebViewController , UiController , ActivityCo
 	public WebView getCurrentWebView ( ) {
 
 		return mTabControl.getCurrentWebView();
+	}
+
+	WebView getCurrentSubWindow ( ) {
+
+		return mTabControl.getCurrentSubWindow();
 	}
 
 	/*
@@ -3056,7 +3081,7 @@ public class Controller implements WebViewController , UiController , ActivityCo
 
 	@Override
 	public void onMenuFindOnPage ( ) {
-		
+
 		findOnPage();
 	}
 

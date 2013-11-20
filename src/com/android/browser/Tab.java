@@ -16,6 +16,18 @@
 
 package com.android.browser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Vector;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -66,23 +78,11 @@ import android.webkit.WebView.PictureListener;
 import android.webkit.WebViewClassic;
 import android.webkit.WebViewClient;
 import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.browser.TabControl.OnThumbnailUpdatedListener;
 import com.android.browser.homepages.HomeProvider;
 import com.android.browser.provider.SnapshotProvider.Snapshots;
-import com.android.browser.R;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Vector;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Class for maintaining Tabs with a main WebView and a subwindow.
@@ -439,6 +439,11 @@ class Tab implements PictureListener {
 		@Override
 		public boolean shouldOverrideUrlLoading ( WebView view , String url ) {
 
+			// Log.d("Liu Test", getClass().getSimpleName() + " mUrl = " +
+			// getUrl());
+			// Log.d("Liu Test", getClass().getSimpleName() + " mOriginalUrl = "
+			// + getOriginalUrl());
+			Log.d("Liu Test", getClass().getSimpleName() + "WindowClient shouldOverrideUrlLoading ");
 			if ( mInForeground ) {
 				return mWebViewController.shouldOverrideUrlLoading(Tab.this, view, url);
 			} else {
@@ -763,6 +768,7 @@ class Tab implements PictureListener {
 		@Override
 		public boolean onCreateWindow ( WebView view , final boolean dialog , final boolean userGesture , final Message resultMsg ) {
 
+			Log.d("Liu Test", getClass().getSimpleName() + "WindowClient onCreateWindow ");
 			// only allow new window or sub window for the foreground case
 			if ( !mInForeground ) {
 				return false;
@@ -1139,6 +1145,7 @@ class Tab implements PictureListener {
 		@Override
 		public boolean shouldOverrideUrlLoading ( WebView view , String url ) {
 
+			Log.d("Liu Test", "SubWindowClient shouldOverrideUrlLoading ");
 			return mClient.shouldOverrideUrlLoading(view, url);
 		}
 
@@ -1400,6 +1407,7 @@ class Tab implements PictureListener {
 			mMainView.setPictureListener(null);
 			syncCurrentState(w, null);
 		}
+
 		// set the new one
 		mMainView = w;
 		// attach the WebViewClient, WebChromeClient and DownloadListener
@@ -1467,6 +1475,7 @@ class Tab implements PictureListener {
 	 */
 	boolean createSubWindow ( ) {
 
+		Log.d("Liu Test", getClass().getSimpleName() + " createSubWindow");
 		if ( mSubView == null ) {
 			mWebViewController.createSubWindow(this);
 			mSubView.setWebViewClient(new SubWindowClient(mWebViewClient, mWebViewController));

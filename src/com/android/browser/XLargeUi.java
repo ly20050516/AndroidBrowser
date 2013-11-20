@@ -16,6 +16,8 @@
 
 package com.android.browser;
 
+import java.util.List;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -35,11 +37,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
+import android.widget.PopupMenu;
 
-import com.android.browser.R;
 import com.android.browser.navigation.MainMenuView;
-
-import java.util.List;
 
 /**
  * Ui for xlarge screen sizes
@@ -101,6 +101,10 @@ public class XLargeUi extends BaseUi {
 
 		} else {
 
+			PopupMenu popup = new PopupMenu(mActivity, mContentView);
+			Menu menu = popup.getMenu();
+			popup.getMenuInflater().inflate(R.menu.browser, menu);
+			mUiController.updateMenuState(mUiController.getCurrentTab(), menu);
 			mMainMenuView.showMainMenuView();
 		}
 		return super.onMenuKey();
@@ -365,8 +369,10 @@ public class XLargeUi extends BaseUi {
 		if(uaSwitcher.isChecked()){
 			
 			Log.d("Liu Test", "uaSwitcher.isChecked() true");
+			mMainMenuView.setTextById(R.id.textview_ua_switcher_desktop, R.string.ua_switcher_desktop);
 		}else{
 			
+			mMainMenuView.setTextById(R.id.textview_ua_switcher_desktop, R.string.ua_switcher_mobbile);
 			Log.d("Liu Test", "uaSwitcher.isChecked() false");
 		}
 	}
