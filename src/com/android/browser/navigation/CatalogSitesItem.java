@@ -1,3 +1,4 @@
+
 package com.android.browser.navigation;
 
 import java.util.ArrayList;
@@ -17,8 +18,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
-
 /**
  * 
  * 说明：网址导航ITEM显示项<br>
@@ -27,7 +26,7 @@ import android.widget.TextView;
  * @author 李修金
  * @version 1.0
  */
-@SuppressLint("NewApi")
+@SuppressLint ( "NewApi" )
 public class CatalogSitesItem extends RelativeLayout {
 
 	/**
@@ -40,8 +39,9 @@ public class CatalogSitesItem extends RelativeLayout {
 	class AllOnClickListener implements OnClickListener {
 
 		@Override
-		public void onClick(View v) {
-			if (state == State.EXPANDING) {
+		public void onClick ( View v ) {
+
+			if ( state == State.EXPANDING ) {
 				state = State.COLLAPSING;
 			} else {
 				state = State.EXPANDING;
@@ -59,8 +59,10 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * @version 1.0
 	 */
 	class MySiteItemOnSiteNavigationListener implements MySiteItem.OnSiteNavigationListener {
+
 		@Override
-		public void onSiteNavigation(View v) {
+		public void onSiteNavigation ( View v ) {
+
 			onSiteNavigationListener.onSiteNavigation(v);
 		}
 	}
@@ -74,7 +76,8 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * @version 1.0
 	 */
 	public interface OnSiteNavigationListener {
-		public void onSiteNavigation(View v);
+
+		public void onSiteNavigation ( View v );
 	}
 
 	/**
@@ -95,6 +98,7 @@ public class CatalogSitesItem extends RelativeLayout {
 	private static final int COLUMN_COUNT_PORT = 3;
 
 	private static final int COLUMN_COUNT_LAND = 4;
+
 	/** 显示列数 */
 	private int columnCount = COLUMN_COUNT_PORT;
 
@@ -110,7 +114,7 @@ public class CatalogSitesItem extends RelativeLayout {
 	private TextView mTextView;
 
 	/** 存储当前组的网站列表 */
-	private List<MySiteItem> mySiteItems = new ArrayList<MySiteItem>();
+	private List< MySiteItem> mySiteItems = new ArrayList< MySiteItem>();
 
 	/** 网址导航监听 */
 	protected OnSiteNavigationListener onSiteNavigationListener;
@@ -121,11 +125,13 @@ public class CatalogSitesItem extends RelativeLayout {
 	/** 设置标题 */
 	private String title;
 
-	public CatalogSitesItem(Context context) {
+	public CatalogSitesItem ( Context context ) {
+
 		this(context, null);
 	}
 
-	public CatalogSitesItem(Context context, AttributeSet attrs) {
+	public CatalogSitesItem ( Context context , AttributeSet attrs ) {
+
 		super(context, attrs);
 		this.mContext = context;
 
@@ -136,12 +142,14 @@ public class CatalogSitesItem extends RelativeLayout {
 		setDidScreenColumnCount();
 	}
 
-	public String getTitle() {
+	public String getTitle ( ) {
+
 		return title;
 	}
 
 	@Override
-	protected void onConfigurationChanged(Configuration newConfig) {
+	protected void onConfigurationChanged ( Configuration newConfig ) {
+
 		super.onConfigurationChanged(newConfig);
 
 		setDidScreenResetContentView();
@@ -153,9 +161,10 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * 移除一个网站
 	 */
 	@Override
-	public synchronized void removeView(View view) {
-		for (MySiteItem mSiteItem : mySiteItems) {
-			if (mSiteItem.getTag().equals(view.getTag())) {
+	public synchronized void removeView ( View view ) {
+
+		for ( MySiteItem mSiteItem : mySiteItems ) {
+			if ( mSiteItem.getTag().equals(view.getTag()) ) {
 				mySiteItems.remove(mSiteItem);
 				mGridLayout.removeView(mSiteItem);
 				mGridLayout.requestLayout();
@@ -172,19 +181,20 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * @param key
 	 * @param value
 	 */
-	public void setContentView(String key, List<BaseObject> value) {
+	public void setContentView ( String key , List< BaseObject> value ) {
+
 		mTextView.setText("[" + key + "]");
 		setTitle(key);
 
 		MySiteItem mSiteItem;
-		for (BaseObject baseObject : value) {
+		for ( BaseObject baseObject : value ) {
 			mSiteItem = new MySiteItem(mContext);
 			mSiteItem.setText(baseObject.getName());
 			mSiteItem.setTag(baseObject);
 			mSiteItem.setOnSiteNavigationListener(new MySiteItemOnSiteNavigationListener());
 			mySiteItems.add(mSiteItem);
 
-			if (state == State.COLLAPSING && mGridLayout.getChildCount() >= columnCount) {
+			if ( state == State.COLLAPSING && mGridLayout.getChildCount() >= columnCount ) {
 				mImageView.setVisibility(View.VISIBLE);
 				continue;
 			}
@@ -192,11 +202,11 @@ public class CatalogSitesItem extends RelativeLayout {
 			mGridLayout.addView(mSiteItem, FIXEDWIDTH, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		}
 
-		if (mGridLayout.getChildCount() < columnCount) {
+		if ( mGridLayout.getChildCount() < columnCount ) {
 			mGridLayout.setColumnCount(mGridLayout.getChildCount());
 		}
 
-		if (state == State.EXPANDING) {
+		if ( state == State.EXPANDING ) {
 			mImageView.setImageResource(R.drawable.arrow_down_pressed);
 		} else {
 			mImageView.setImageResource(R.drawable.arrow_rights);
@@ -207,13 +217,13 @@ public class CatalogSitesItem extends RelativeLayout {
 	/**
 	 * 适配横竖屏一行显示数据列数
 	 */
-	private void setDidScreenColumnCount() {
+	private void setDidScreenColumnCount ( ) {
 
-		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+		if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
 
 			columnCount = COLUMN_COUNT_LAND;
 
-		} else if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+		} else if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ) {
 
 			columnCount = COLUMN_COUNT_PORT;
 		}
@@ -224,16 +234,18 @@ public class CatalogSitesItem extends RelativeLayout {
 	/**
 	 * 适配横竖屏重置ContentView
 	 */
-	private void setDidScreenResetContentView() {
-		int total = mySiteItems.size();
-		if (total == 0) {
+	private void setDidScreenResetContentView ( ) {
+
+		if ( null == mySiteItems || mySiteItems.size() == 0 ) {
+
 			return;
 		}
+		int total = mySiteItems.size();
 
 		mGridLayout.removeAllViews();
 		setDidScreenColumnCount();
-		for (int j = 0, c = 0, r = 0; j < total; j++, c++) {
-			if (c == columnCount) {
+		for ( int j = 0 , c = 0 , r = 0 ; j < total ; j++ , c++ ) {
+			if ( c == columnCount ) {
 				c = 0;
 				r++;
 			}
@@ -246,7 +258,7 @@ public class CatalogSitesItem extends RelativeLayout {
 			mGridLayout.addView(mySiteItems.get(j), param);
 		}
 
-		if (mGridLayout.getChildCount() < columnCount) {
+		if ( mGridLayout.getChildCount() < columnCount ) {
 			mGridLayout.setColumnCount(mGridLayout.getChildCount());
 			mImageView.setVisibility(View.INVISIBLE);
 		} else {
@@ -255,7 +267,7 @@ public class CatalogSitesItem extends RelativeLayout {
 
 		mGridLayout.requestLayout();
 
-		if (state == State.COLLAPSING) {
+		if ( state == State.COLLAPSING ) {
 			setShowState();
 		}
 	}
@@ -265,28 +277,30 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * 
 	 * @param onSiteNavigationListener
 	 */
-	public void setOnSiteNavigation(OnSiteNavigationListener onSiteNavigationListener) {
+	public void setOnSiteNavigation ( OnSiteNavigationListener onSiteNavigationListener ) {
+
 		this.onSiteNavigationListener = onSiteNavigationListener;
 	}
 
 	/**
 	 * 设置显示状态
 	 */
-	private void setShowState() {
-		switch (state) {
-		case State.COLLAPSING:
+	private void setShowState ( ) {
+
+		switch ( state ) {
+		case State.COLLAPSING :
 			mImageView.setImageResource(R.drawable.arrow_rights);
-			if (mGridLayout.getChildCount() > columnCount) {
+			if ( mGridLayout.getChildCount() > columnCount ) {
 				mGridLayout.removeViewsInLayout(columnCount, mGridLayout.getChildCount() - columnCount);
 			}
 			break;
 
-		case State.EXPANDING:
+		case State.EXPANDING :
 			mImageView.setImageResource(R.drawable.arrow_down_pressed);
 			int i = 0;
-			for (MySiteItem mSiteItem : mySiteItems) {
+			for ( MySiteItem mSiteItem : mySiteItems ) {
 				i++;
-				if (i > columnCount) {
+				if ( i > columnCount ) {
 					mGridLayout.addView(mSiteItem, FIXEDWIDTH, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 				}
 			}
@@ -300,11 +314,13 @@ public class CatalogSitesItem extends RelativeLayout {
 	 * 
 	 * @param state
 	 */
-	public void setState(int state) {
+	public void setState ( int state ) {
+
 		this.state = state;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle ( String title ) {
+
 		this.title = title;
 	}
 }

@@ -1,3 +1,4 @@
+
 package com.android.browser.navigation;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 /**
  * 
  * 说明：我的导航显示VIEW<br>
@@ -34,7 +34,7 @@ import android.widget.Toast;
  * @author 李修金
  * @version 1.0
  */
-@SuppressLint("NewApi")
+@SuppressLint ( "NewApi" )
 public class MySitesView extends LinearLayout {
 
 	/**
@@ -48,7 +48,7 @@ public class MySitesView extends LinearLayout {
 	class MySiteItemOnSiteNavigationListener implements MySiteItem.OnSiteNavigationListener {
 
 		@Override
-		public void onSiteNavigation(View v) {
+		public void onSiteNavigation ( View v ) {
 
 			onSiteNavigationListener.onSiteNavigation(v);
 		}
@@ -66,7 +66,7 @@ public class MySitesView extends LinearLayout {
 	class MySiteItemOnSiteRemoveListener implements MySiteItem.OnSiteRemoveListener {
 
 		@Override
-		public void onSiteRemove(View v) {
+		public void onSiteRemove ( View v ) {
 
 			onSiteRemoveListener.onSiteRemove(v);
 		}
@@ -81,7 +81,8 @@ public class MySitesView extends LinearLayout {
 	 * @version 1.0
 	 */
 	public interface OnSiteNavigationListener {
-		public void onSiteNavigation(View v);
+
+		public void onSiteNavigation ( View v );
 	}
 
 	/**
@@ -93,21 +94,25 @@ public class MySitesView extends LinearLayout {
 	 * @version 1.0
 	 */
 	public interface OnSiteRemoveListener {
-		public void onSiteRemove(View v);
+
+		public void onSiteRemove ( View v );
 	}
 
 	/**
 	 * 定义类型
 	 */
 	public class SitesType {
+
 		/**
 		 * 经常访问
 		 */
 		public final static int FREQUENTSITES = 0;
+
 		/**
 		 * 我的网站
 		 */
 		public final static int MYSITES = 1;
+
 		/**
 		 * 新网推荐
 		 */
@@ -120,13 +125,14 @@ public class MySitesView extends LinearLayout {
 	private static final int COLUMN_COUNT_PORT = 4;
 
 	private static final int COLUMN_COUNT_LAND = 5;
+
 	/** 显示列数 */
 	private int columnCount = COLUMN_COUNT_PORT;
 
 	/** 我要推荐 */
 
 	private Button mButton;
-	
+
 	private ImageView mNoNewSites;
 
 	private Context mContext;
@@ -139,7 +145,7 @@ public class MySitesView extends LinearLayout {
 	private LinearLayout mLinearLayout;
 
 	/** 临时存储网址ITEM */
-	private List<MySiteItem> mMySiteItems = new ArrayList<MySiteItem>();
+	private List< MySiteItem> mMySiteItems = new ArrayList< MySiteItem>();
 
 	/** 模式 */
 	private int mode;
@@ -149,6 +155,7 @@ public class MySitesView extends LinearLayout {
 	// private View mView;
 
 	private View thisView;
+
 	/** 网址导航监听器 */
 	protected OnSiteNavigationListener onSiteNavigationListener;
 
@@ -158,12 +165,14 @@ public class MySitesView extends LinearLayout {
 	/** 类型 */
 	private int type;
 
-	public MySitesView(Context context) {
+	public MySitesView ( Context context ) {
+
 		this(context, null);
-		
+
 	}
 
-	public MySitesView(Context context, AttributeSet attrs) {
+	public MySitesView ( Context context , AttributeSet attrs ) {
+
 		super(context, attrs);
 		this.mContext = context;
 		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MySiteItem);
@@ -176,7 +185,7 @@ public class MySitesView extends LinearLayout {
 		mNoNewSites = (ImageView) findViewById(R.id.mysitesview_no_newsites);
 		// mView = findViewById(R.id.mysitesview_splitline);
 		mGridLayout = (GridLayout) findViewById(R.id.mysitesview_gridlayout);
-		if (type != SitesType.FREQUENTSITES) {
+		if ( type != SitesType.FREQUENTSITES ) {
 
 			FrameLayout.LayoutParams mLayoutParams = (FrameLayout.LayoutParams) mGridLayout.getLayoutParams();
 			mLayoutParams.leftMargin = 20;
@@ -194,7 +203,7 @@ public class MySitesView extends LinearLayout {
 	 * @param baseObject
 	 * 
 	 */
-	public void addView(BaseObject baseObject) {
+	public void addView ( BaseObject baseObject ) {
 
 		addView(false, baseObject);
 	}
@@ -205,11 +214,11 @@ public class MySitesView extends LinearLayout {
 	 * @param hasLogo
 	 * @param baseObject
 	 */
-	public void addView(boolean hasLogo, BaseObject baseObject) {
+	public void addView ( boolean hasLogo , BaseObject baseObject ) {
 
 		createSiteItem(hasLogo, baseObject);
 
-		if (hasLogo && mImageLoader != null) {
+		if ( hasLogo && mImageLoader != null ) {
 
 			mImageLoader.doTask();
 		}
@@ -222,17 +231,20 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param baseObjects
 	 */
-	public void addViews(boolean hasLogo, List<BaseObject> baseObjects) {
+	public void addViews ( boolean hasLogo , List< BaseObject> baseObjects ) {
 
-		if (baseObjects == null) {
+		if ( null == baseObjects || 0 == baseObjects.size() ) {
+
 			return;
 		}
 
-		for (BaseObject baseObject : baseObjects) {
+		for ( BaseObject baseObject : baseObjects ) {
+
 			createSiteItem(hasLogo, baseObject);
 		}
 
-		if (hasLogo && mImageLoader != null) {
+		if ( hasLogo && mImageLoader != null ) {
+
 			mImageLoader.doTask();
 		}
 	}
@@ -243,24 +255,24 @@ public class MySitesView extends LinearLayout {
 	 * @param hasLogo
 	 * @param baseObject
 	 */
-	private void createSiteItem(boolean hasLogo, BaseObject baseObject) {
+	private void createSiteItem ( boolean hasLogo , BaseObject baseObject ) {
 
 		MySiteItem mSiteItem;
 		GridLayout.LayoutParams param = new GridLayout.LayoutParams();
 		param.width = FIXEDWIDTH;
 		param.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-		if (hasLogo && mImageLoader != null) {
+		if ( hasLogo && mImageLoader != null ) {
 			mSiteItem = new MySiteItem(mContext, null, MySiteItem.LOGO_STYLE);
 			mSiteItem.setTextBackgroundResource(baseObject.getResId());
 			mSiteItem.setType(Type.LOGO);
-			if (baseObject.getResId() == R.drawable.logo_default) {
+			if ( baseObject.getResId() == R.drawable.logo_default ) {
 				mSiteItem.setText(baseObject.getName());
-				if (!TextUtils.isEmpty(baseObject.getLogo())) {
+				if ( !TextUtils.isEmpty(baseObject.getLogo()) ) {
 					mImageLoader.addTask(baseObject, mSiteItem);
 				}
 			}
 
-			if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
 				param.rightMargin = 35;
 			} else {
 				param.rightMargin = 23;
@@ -280,14 +292,14 @@ public class MySitesView extends LinearLayout {
 		mMySiteItems.add(mSiteItem);
 		mGridLayout.addView(mSiteItem, param);
 
-		if (mGridLayout.getChildCount() != 0) {
+		if ( mGridLayout.getChildCount() != 0 ) {
 
 			addThisViewOnclickListener(false);
 		}
 
 	}
 
-	private void gotoParentAssistant() {
+	private void gotoParentAssistant ( ) {
 
 		// 响应到家长管理
 		ComponentName componentName = null;
@@ -302,7 +314,7 @@ public class MySitesView extends LinearLayout {
 		try {
 
 			getContext().startActivity(intent);
-		} catch (Exception e) {
+		} catch ( Exception e ) {
 
 			Toast.makeText(mContext, mContext.getText(R.string.update_parent_assistant), Toast.LENGTH_SHORT).show();
 		}
@@ -313,14 +325,14 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param isAdd
 	 */
-	private void addThisViewOnclickListener(boolean isAdd) {
+	private void addThisViewOnclickListener ( boolean isAdd ) {
 
-		if (type != SitesType.NEWSITES) {
+		if ( type != SitesType.NEWSITES ) {
 
 			return;
 		}
 		mButton.setVisibility(View.VISIBLE);
-		if (isAdd) {
+		if ( isAdd ) {
 
 			Log.d("Liu Test", getClass().getSimpleName() + " addThisViewOnclickListener isAdd = " + isAdd);
 
@@ -338,7 +350,7 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @return mode
 	 */
-	public int getMode() {
+	public int getMode ( ) {
 
 		return mode;
 	}
@@ -348,7 +360,8 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @return String
 	 */
-	public String getTitle() {
+	public String getTitle ( ) {
+
 		return (String) mTextView.getText();
 	}
 
@@ -357,7 +370,8 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @return type
 	 */
-	public int getType() {
+	public int getType ( ) {
+
 		return type;
 	}
 
@@ -368,10 +382,11 @@ public class MySitesView extends LinearLayout {
 	 * @return boolean
 	 * 
 	 */
-	public boolean isExist(BaseObject baseObject) {
-		for (int i = 0; i < mGridLayout.getChildCount(); i++) {
+	public boolean isExist ( BaseObject baseObject ) {
+
+		for ( int i = 0 ; i < mGridLayout.getChildCount() ; i++ ) {
 			MySiteItem siteItem = (MySiteItem) mGridLayout.getChildAt(i);
-			if (((BaseObject) siteItem.getTag()).getUrl().equals(baseObject.getUrl())) {
+			if ( ((BaseObject) siteItem.getTag()).getUrl().equals(baseObject.getUrl()) ) {
 				return true;
 			}
 		}
@@ -379,7 +394,7 @@ public class MySitesView extends LinearLayout {
 	}
 
 	@Override
-	protected void onConfigurationChanged(Configuration newConfig) {
+	protected void onConfigurationChanged ( Configuration newConfig ) {
 
 		super.onConfigurationChanged(newConfig);
 
@@ -392,14 +407,15 @@ public class MySitesView extends LinearLayout {
 	 * 移除一个网站
 	 */
 	@Override
-	public void removeView(View view) {
+	public void removeView ( View view ) {
+
 		mMySiteItems.remove(view);
 		mGridLayout.removeView(view);
 		mGridLayout.requestLayout();
 		mGridLayout.invalidate();
 		setDidScreenResetContentView();
 
-		if (0 == mGridLayout.getChildCount()) {
+		if ( 0 == mGridLayout.getChildCount() ) {
 
 			addThisViewOnclickListener(true);
 		}
@@ -409,20 +425,30 @@ public class MySitesView extends LinearLayout {
 	 * 移除多个网站
 	 */
 	@Override
-	public void removeViewsInLayout(int start, int count) {
+	public void removeViewsInLayout ( int start , int count ) {
 
-		if (mMySiteItems.size() < start + count) {
+		if ( null == mMySiteItems || 0 == mMySiteItems.size() ) {
+
+			return;
+		}
+		if ( mMySiteItems.size() < start + count ) {
 
 			count = mMySiteItems.size() - start;
 		}
-		for (int i = 0; i < count; i++) {
+
+		if ( count < 0 ) {
+
+			return;
+		}
+		for ( int i = 0 ; i < count ; i++ ) {
+
 			mMySiteItems.remove(mMySiteItems.size() - 1);
 		}
 		mGridLayout.removeViewsInLayout(start, count);
 		mGridLayout.requestLayout();
 		mGridLayout.invalidate();
 
-		if (0 == mGridLayout.getChildCount()) {
+		if ( 0 == mGridLayout.getChildCount() ) {
 
 			addThisViewOnclickListener(true);
 		}
@@ -433,7 +459,7 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param visible
 	 */
-	public void setButtonVisible(int visible) {
+	public void setButtonVisible ( int visible ) {
 
 		mButton.setVisibility(visible);
 	}
@@ -445,7 +471,7 @@ public class MySitesView extends LinearLayout {
 	 * @param list
 	 * 
 	 */
-	public void setConentView(boolean hasLogo, List<BaseObject> list) {
+	public void setConentView ( boolean hasLogo , List< BaseObject> list ) {
 
 		setConentView(hasLogo, list, null);
 	}
@@ -458,7 +484,7 @@ public class MySitesView extends LinearLayout {
 	 * @param mImageLoader
 	 * 
 	 */
-	public void setConentView(boolean hasLogo, List<BaseObject> list, ImageLoader mImageLoader) {
+	public void setConentView ( boolean hasLogo , List< BaseObject> list , ImageLoader mImageLoader ) {
 
 		this.mImageLoader = mImageLoader;
 
@@ -466,7 +492,7 @@ public class MySitesView extends LinearLayout {
 		mGridLayout.removeAllViews();
 		mGridLayout.requestLayout();
 
-		if (0 == mGridLayout.getChildCount()) {
+		if ( 0 == mGridLayout.getChildCount() ) {
 
 			addThisViewOnclickListener(true);
 		}
@@ -477,47 +503,59 @@ public class MySitesView extends LinearLayout {
 	/**
 	 * 适配横竖屏一行显示数据列数
 	 */
-	private void setDidScreenColumnCount() {
+	private void setDidScreenColumnCount ( ) {
 
-		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+		if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
+
 			columnCount = COLUMN_COUNT_LAND;
-		} else if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+		} else if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ) {
+
 			columnCount = COLUMN_COUNT_PORT;
 		}
 		mGridLayout.setColumnCount(columnCount);
 	}
 
-	private void setDidScreenResetContentView() {
+	private void setDidScreenResetContentView ( ) {
 
-		int total = mMySiteItems.size();
-		if (total == 0) {
+		if ( null == mMySiteItems || 0 == mMySiteItems.size() ) {
+
 			return;
 		}
 
+		int total = mMySiteItems.size();
+		Log.d("Liu Test", " mGridLayout.childcount = " + mGridLayout.getChildCount());
 		mGridLayout.removeAllViews();
 		setDidScreenColumnCount();
-		for (int j = 0, c = 0, r = 0; j < total; j++, c++) {
-			if (c == columnCount) {
+		for ( int j = 0 , c = 0 , r = 0 ; j < total ; j++ , c++ ) {
+
+			if ( c == columnCount ) {
 				c = 0;
 				r++;
 			}
 			GridLayout.LayoutParams param = new GridLayout.LayoutParams();
 			param.width = FIXEDWIDTH;
 			param.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-			if (type == SitesType.FREQUENTSITES) {
-				if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			if ( type == SitesType.FREQUENTSITES ) {
+
+				if ( mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
+
 					param.rightMargin = 35;
 				} else {
+
 					param.rightMargin = 23;
 				}
+
 			} else {
+
 				param.setMargins(0, 10, 15, 10);
 				param.width = FIXEDWIDTH - 5;
 			}
+
 			param.columnSpec = GridLayout.spec(c);
 			param.rowSpec = GridLayout.spec(r);
 			mGridLayout.addView(mMySiteItems.get(j), param);
 		}
+
 		mGridLayout.requestLayout();
 	}
 
@@ -526,7 +564,7 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param resid
 	 */
-	public void setLayoutBackgroundResource(int resid) {
+	public void setLayoutBackgroundResource ( int resid ) {
 
 		mLinearLayout.setBackgroundResource(resid);
 	}
@@ -536,11 +574,11 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param mode
 	 */
-	public void setMode(int mode) {
+	public void setMode ( int mode ) {
 
 		this.mode = mode;
 
-		for (int i = 0; i < mGridLayout.getChildCount(); i++) {
+		for ( int i = 0 ; i < mGridLayout.getChildCount() ; i++ ) {
 			MySiteItem siteItem = (MySiteItem) mGridLayout.getChildAt(i);
 			siteItem.setMode(mode);
 		}
@@ -549,12 +587,12 @@ public class MySitesView extends LinearLayout {
 	/**
 	 * 我要推荐
 	 */
-	private void setOnClickListener() {
+	private void setOnClickListener ( ) {
 
 		mButton.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
+			public void onClick ( View v ) {
 
 				gotoParentAssistant();
 			}
@@ -563,7 +601,7 @@ public class MySitesView extends LinearLayout {
 		mNoNewSites.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
+			public void onClick ( View v ) {
 
 				gotoParentAssistant();
 			}
@@ -576,7 +614,7 @@ public class MySitesView extends LinearLayout {
 	 * @param onSiteNavigationListener
 	 * 
 	 */
-	public void setOnSiteNavigationListener(OnSiteNavigationListener onSiteNavigationListener) {
+	public void setOnSiteNavigationListener ( OnSiteNavigationListener onSiteNavigationListener ) {
 
 		this.onSiteNavigationListener = onSiteNavigationListener;
 	}
@@ -587,7 +625,7 @@ public class MySitesView extends LinearLayout {
 	 * @param onSiteRemoveListener
 	 * 
 	 */
-	public void setOnSiteRemoveListener(OnSiteRemoveListener onSiteRemoveListener) {
+	public void setOnSiteRemoveListener ( OnSiteRemoveListener onSiteRemoveListener ) {
 
 		this.onSiteRemoveListener = onSiteRemoveListener;
 	}
@@ -598,7 +636,7 @@ public class MySitesView extends LinearLayout {
 	 * @param resid
 	 * 
 	 */
-	public void setSplitlineBackgroundResource(int resid) {
+	public void setSplitlineBackgroundResource ( int resid ) {
 
 		// mView.setBackgroundResource(resid);
 	}
@@ -609,7 +647,7 @@ public class MySitesView extends LinearLayout {
 	 * @param color
 	 * 
 	 */
-	public void setTextColor(int color) {
+	public void setTextColor ( int color ) {
 
 		mTextView.setTextColor(color);
 	}
@@ -619,7 +657,7 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param text
 	 */
-	public void setTitle(String text) {
+	public void setTitle ( String text ) {
 
 		mTextView.setText(text);
 	}
@@ -629,7 +667,7 @@ public class MySitesView extends LinearLayout {
 	 * 
 	 * @param type
 	 */
-	public void setType(int type) {
+	public void setType ( int type ) {
 
 		this.type = type;
 	}

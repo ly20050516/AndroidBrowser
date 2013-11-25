@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="/home/ly/workspace/Browser/framework_intermediates.jar"/>
+	<classpathentry kind="lib" path="/home/ly/workspace/Browser/framework_intermediates.jar" sourcepath="/home/ly/Install/adt/sdk/sources/android-17"/>
 	<classpathentry kind="lib" path="/home/ly/workspace/Browser/core_intermediates.jar"/>
 	<classpathentry kind="lib" path="/home/ly/workspace/Browser/Browser_intermediates.jar"/>
 	<classpathentry kind="lib" path="/home/ly/workspace/Browser/android-common_intermediates.jar"/>

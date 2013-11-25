@@ -59,6 +59,8 @@ public class DataModelManager {
 
 		super();
 		//
+		mAllSites = new ArrayList< BaseObject>();
+		mSiteNavigationObjects = new LinkedHashMap< String , List< BaseObject>>();
 		this.mContext = context;
 		this.mContentResolver = context.getContentResolver();
 	}
@@ -228,7 +230,7 @@ public class DataModelManager {
 
 		List< BaseObject> mList = getVisitDescSort();
 
-		if ( mList.size() > maxFrequentsites ) {
+		if ( mList != null && mList.size() > maxFrequentsites ) {
 			return mList.get(maxFrequentsites);
 		}
 		return null;
@@ -244,7 +246,7 @@ public class DataModelManager {
 
 		List< BaseObject> mList = getVisitDescSort();
 
-		if ( mList.size() > maxFrequentsites + couunt ) {
+		if ( mList != null && mList.size() > maxFrequentsites + couunt ) {
 
 			return mList.subList(maxFrequentsites, maxFrequentsites + couunt);
 		}
