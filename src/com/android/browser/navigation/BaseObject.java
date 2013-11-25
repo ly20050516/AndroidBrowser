@@ -34,7 +34,7 @@ public class BaseObject implements Serializable {
 	/**
 	 * 标记中、小学
 	 */
-	private int grade;
+	private int suitablecrowd;
 
 	/**
 	 * 标记是否为我的网站 我的网站标记为1 否则为0
@@ -69,7 +69,7 @@ public class BaseObject implements Serializable {
 	/**
 	 * 更新日期
 	 */
-	private String update;
+	private String uploadDate;
 
 	/**
 	 * 网站地址
@@ -89,8 +89,8 @@ public class BaseObject implements Serializable {
 		return catalogsn;
 	}
 
-	public int getGrade() {
-		return grade;
+	public int getSuitableCrowd() {
+		return suitablecrowd;
 	}
 
 	public int getIsme() {
@@ -113,8 +113,8 @@ public class BaseObject implements Serializable {
 		return resId;
 	}
 
-	public String getUpdate() {
-		return update;
+	public String getUploadDate() {
+		return uploadDate;
 	}
 
 	public String getUrl() {
@@ -137,8 +137,8 @@ public class BaseObject implements Serializable {
 		this.catalogsn = catalogsn;
 	}
 
-	public void setGrade(int grade) {
-		this.grade = grade;
+	public void setSuitableCrowd(int suitablecrowd) {
+		this.suitablecrowd = suitablecrowd;
 	}
 
 	public void setIsme(int isme) {
@@ -165,8 +165,8 @@ public class BaseObject implements Serializable {
 		this.resId = resId;
 	}
 
-	public void setUpdate(String update) {
-		this.update = update;
+	public void setUploadDate(String uploadDate) {
+		this.uploadDate = uploadDate;
 	}
 
 	public void setUrl(String url) {

@@ -398,6 +398,7 @@ public abstract class BaseUi implements UI {
 			} else {
 
 				wrapper.addView(mHomeView);
+				mHomeView.resume();
 			}
 		}
 		parent = (ViewGroup) container.getParent();

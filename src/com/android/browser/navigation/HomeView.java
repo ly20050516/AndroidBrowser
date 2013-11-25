@@ -11,13 +11,11 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Browser;
 import android.provider.BrowserContract;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -33,9 +31,9 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.browser.R;
+import com.android.browser.navigation.DataModelManager.DataModeManagerListener;
 import com.android.browser.navigation.MySiteItem.Mode;
 import com.android.browser.navigation.MySitesView.SitesType;
-import com.android.browser.navigation.PagerContentProvider.GreenSites;
 
 /**
  * 
@@ -45,7 +43,7 @@ import com.android.browser.navigation.PagerContentProvider.GreenSites;
  * @author 李修金
  * @version 1.0
  */
-public class HomeView extends RelativeLayout {
+public class HomeView extends RelativeLayout implements DataModeManagerListener {
 
 	/**
 	 * 
@@ -105,15 +103,22 @@ public class HomeView extends RelativeLayout {
 	 * 说明：异步加载类<br>
 	 * 公司名称 ：步步高教育电子<br>
 	 * 
-	 * @author 李修金
-	 * @version 1.0
+	 * @author
+	 * @version
 	 */
 	class AsynLoader extends AsyncTask< Void , Void , Boolean> {
+
+		private int mode = 0;
+
+		public AsynLoader ( int mode ) {
+
+			this.mode = mode;
+		}
 
 		@Override
 		protected Boolean doInBackground ( Void ... params ) {
 
-			mDataManager.loadAllSites();
+			mDataManager.loadAllSitesFromDatabase();
 
 			return true;
 		}
@@ -123,8 +128,13 @@ public class HomeView extends RelativeLayout {
 
 			super.onPostExecute(result);
 
+			if ( 0 == mode ) {
+
+				loadCatalogSites();
+			}
 			loadFrequentSites();
 			loadNewSites();
+			loadMySites();
 		}
 
 	}
@@ -156,7 +166,6 @@ public class HomeView extends RelativeLayout {
 			case LoaderMessage.LOADFREQUENTSITES :
 
 				mView.mFrequentSitesSitesItem.setConentView(true, (List< BaseObject>) msg.obj, mView.mImageLoader);
-				mView.loadCatalogSites();
 				break;
 
 			case LoaderMessage.LOADMYSITES :
@@ -167,24 +176,15 @@ public class HomeView extends RelativeLayout {
 			case LoaderMessage.LOADNEWSITES :
 
 				mView.mNewSitesSitesItem.setConentView(false, (List< BaseObject>) msg.obj);
-				mView.setNewSitesItemBackground((List< BaseObject>) msg.obj);
 
 				break;
 
 			case LoaderMessage.LOADCATALOGSITES :
 
 				mView.mSiteNavigationScrollView.setContentView(((LinkedHashMap< String , List< BaseObject>>) msg.obj));
-
-				// if (JUtil.isNetworkAvailable(mView.mContext)) {
-				// mView.loadUpdater();
-				// }
 				break;
 
 			case LoaderMessage.LOADNETWORK :
-
-				// 有网络数据更新
-				// mView.mDataManager.insertSites((List<BaseObject>)
-				// msg.obj);
 
 				break;
 			}
@@ -405,41 +405,6 @@ public class HomeView extends RelativeLayout {
 		public void onSiteNavigation ( View v );
 	}
 
-	class PagerObserver extends ContentObserver {
-
-		public PagerObserver ( Handler handler ) {
-
-			super(handler);
-		}
-
-		@Override
-		public void onChange ( boolean selfChange ) {
-
-			super.onChange(selfChange);
-
-			Log.i("Liu Test", getClass().getSimpleName() + " onChange " + selfChange);
-
-			new AsynLoader().execute();
-
-		}
-	}
-
-	class MysitesObserver extends ContentObserver{
-
-		public MysitesObserver ( Handler handler ) {
-
-			super(handler);
-		}
-		
-		@Override
-		public void onChange ( boolean selfChange ) {
-		
-			super.onChange(selfChange);
-			
-			Log.i("Liu Test", getClass().getSimpleName() + " onChange " + selfChange);
-			loadMySites();
-		}
-	}
 	private static final String LOG_TAG = "HomeView";
 
 	/** 我的导航 */
@@ -454,7 +419,7 @@ public class HomeView extends RelativeLayout {
 
 	private int currentPage = 0;
 
-	boolean hasCustomAdd = false;
+	private boolean isFirst = true;
 
 	/** 经常访问站点最大值,设置默认值8 */
 	private int maxFrequentsites = MAX_FREQUENTSITES_PORT;
@@ -517,18 +482,14 @@ public class HomeView extends RelativeLayout {
 		mSitesNavigationButton.setOnClickListener(new AllOnClickListener());
 		mPointImageButton.setOnClickListener(new AllOnClickListener());
 		mDataManager = new DataModelManager(context);
-		
-		new AsynLoader().execute();
-		loadMySites();
-		
+		mDataManager.registerListener(this);
+		mDataManager.loadAllSites();
 		mImageLoader = new ImageLoader(context);
 		mListViews = new ArrayList< View>();
 		mListViews.add(setMyNavigationPage());
 		mListViews.add(setSitesNavigationPage());
 		mViewPager.setAdapter(new ViewPagerAdapter(mListViews));
 		mViewPager.setOnPageChangeListener(new MyPageChangeListener());
-		mContext.getContentResolver().registerContentObserver(GreenSites.GREENSITE_URI, true, new PagerObserver(new Handler()));
-		mContext.getContentResolver().registerContentObserver(Browser.BOOKMARKS_URI, true, new MysitesObserver(new Handler()));
 	}
 
 	/**
@@ -640,48 +601,17 @@ public class HomeView extends RelativeLayout {
 		}.start();
 	}
 
-	/**
-	 * { unused }
-	 * 
-	 * 加载网络
-	 */
-	private void loadUpdater ( ) {
-
-		// new Thread() {
-		// @Override
-		// public void run() {
-		// Message msg = mLoaderHandler.obtainMessage();
-		//
-		// msg.obj = new
-		// JUpload(mContext).downloader(mDataManager.getMaxDate());
-		//
-		// msg.what = LoaderMessage.LOADNETWORK;
-		//
-		// mLoaderHandler.sendMessage(msg);
-		// }
-		// }.start();
-	}
-
 	@Override
 	protected void onConfigurationChanged ( Configuration newConfig ) {
 
 		super.onConfigurationChanged(newConfig);
 		if ( newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ) {
 
-			if ( hasCustomAdd == false ) {
-
-				// mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_land_init);
-			}
-
 			if ( maxFrequentsites == MAX_FREQUENTSITES_PORT ) {
 				mFrequentSitesSitesItem.addViews(true, mDataManager.getNextCountFrequentSite(2, maxFrequentsites));
 				maxFrequentsites = MAX_FREQUENTSITES_LAND;
 			}
 		} else if ( newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ) {
-
-			if ( hasCustomAdd == false ) {
-				// mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_init);
-			}
 
 			if ( maxFrequentsites == MAX_FREQUENTSITES_LAND ) {
 				mFrequentSitesSitesItem.removeViewsInLayout(maxFrequentsites - 2, 2);
@@ -711,6 +641,11 @@ public class HomeView extends RelativeLayout {
 
 	public void resume ( ) {
 
+		if ( !isFirst ) {
+			Log.d("Liu Test", getClass().getSimpleName() + " resume");
+			new AsynLoader(1).execute();
+		}
+		isFirst = false;
 	}
 
 	/**
@@ -832,45 +767,8 @@ public class HomeView extends RelativeLayout {
 		mNewSitesSitesItem.setType(SitesType.NEWSITES);
 		mNewSitesSitesItem.setSplitlineBackgroundResource(R.drawable.splitline);
 
-		// if ( mContext.getResources().getConfiguration().orientation ==
-		// Configuration.ORIENTATION_LANDSCAPE ) {
-		//
-		// //
-		// mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_land_init);
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid);
-		// } else {
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_init);
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid);
-		// }
-
 		mNewSitesSitesItem.setOnSiteNavigationListener(new MySitesViewOnSiteNavigationListener());
 		mNewSitesSitesItem.setOnSiteRemoveListener(new MySitesViewOnSiteRemoveListener());
-	}
-
-	/**
-	 * 设置背景
-	 * 
-	 * @param mList
-	 */
-	private void setNewSitesItemBackground ( List< BaseObject> mList ) {
-
-		// if ( mList != null && mList.size() > 0 ) {
-		//
-		// hasCustomAdd = true;
-		// mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid);
-		// mNewSitesSitesItem.setOnClickListener(null);
-		// } else {
-		//
-		// if ( mContext.getResources().getConfiguration().orientation ==
-		// Configuration.ORIENTATION_LANDSCAPE ) {
-		// //
-		// mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_land_init);
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid);
-		// } else {
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid_init);
-		// // mNewSitesSitesItem.setBackgroundResource(R.drawable.bg_grid);
-		// }
-		// }
 	}
 
 	/**
@@ -891,5 +789,11 @@ public class HomeView extends RelativeLayout {
 		mSiteNavigationScrollView = new AllSitesView(mContext);
 		mSiteNavigationScrollView.setOnSiteNavigation(new MySitesViewOnSiteNavigationListener());
 		return mSiteNavigationScrollView;
+	}
+
+	@Override
+	public void loadFinished ( ) {
+
+		new AsynLoader(0).execute();
 	}
 }

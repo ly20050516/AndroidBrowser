@@ -338,55 +338,6 @@ public class BrowserActivity extends Activity {
 		return mController.dispatchGenericMotionEvent(ev) || super.dispatchGenericMotionEvent(ev);
 	}
 
-	protected void wrtieDataToSites ( ) {
-
-		ContentResolver cr = getContentResolver();
-		String AUTHORITY = "com.eebbk.junior.greenbrowser";
-		Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
-		Uri GREENSITE_URI = Uri.withAppendedPath(AUTHORITY_URI, "greensites");
-
-		Cursor cursor = null;
-		try {
-			cursor = cr.query(GREENSITE_URI, null, null, null, null);
-
-			int catalogCol = cursor.getColumnIndex(GreenSites.CATALOG);
-			int titleCol = cursor.getColumnIndex(GreenSites.TITLE);
-			int urlCol = cursor.getColumnIndex(GreenSites.URL);
-			int logoCol = cursor.getColumnIndex(GreenSites.LOGO);
-			int visitsCol = cursor.getColumnIndex(GreenSites.VISITS);
-			int ismeCol = cursor.getColumnIndex(GreenSites.ISME);
-			int presetCol = cursor.getColumnIndex(GreenSites.ISPRESET);
-			int catalogSN = cursor.getColumnIndex(GreenSites.CATALOGSN);
-
-			int count = 0;
-			while ( cursor.moveToNext() ) {
-
-				Log.d("Liu Test", "count = " + count++);
-				ContentValues cv = new ContentValues();
-				String c = cursor.getString(catalogCol);
-				String t = cursor.getString(titleCol);
-				String u = cursor.getString(urlCol);
-				String l = cursor.getString(logoCol);
-				int v = cursor.getInt(visitsCol);
-				int i = cursor.getInt(ismeCol);
-				int p = cursor.getInt(presetCol);
-				int cs = cursor.getInt(catalogSN);
-
-				cv.put(GreenSites.CATALOGSN, cs);
-				cv.put(GreenSites.CATALOG, c);
-				cv.put(GreenSites.TITLE, t);
-				cv.put(GreenSites.URL, u);
-				cv.put(GreenSites.LOGO, l);
-				cv.put(GreenSites.VISITS, v);
-				cv.put(GreenSites.ISME, i);
-				cv.put(GreenSites.ISPRESET, p);
-				cv.put(GreenSites.FLAG, 1);
-
-				cr.insert(GreenSites.GREENSITE_URI, cv);
-			}
-		} catch ( Exception e ) {
-
-		}
-		cursor.close();
-	}
+	
+	
 }

@@ -7,18 +7,20 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.android.browser.R;
-import com.android.browser.navigation.PagerContentProvider.GreenSites;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.Browser;
 import android.provider.Browser.BookmarkColumns;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.browser.R;
+import com.android.browser.navigation.PagerContentProvider.GreenSites;
+import com.android.browser.navigation.PagerContentProvider.UpdatePeriod;
 
 /**
  * 
@@ -35,6 +37,10 @@ public class DataModelManager {
 	static final String LOG_TAG = DataModelManager.class.getSimpleName();
 
 	static final String LOGO_URL = "http://tfile.eebbk.net/h600s/greenInternet/";
+
+	static final int update_period = 2 * 24 * 60 * 60 * 1000;
+
+	private DataModeManagerListener listener;
 
 	/** 所有站点 */
 	private List< BaseObject> mAllSites;
@@ -55,6 +61,11 @@ public class DataModelManager {
 		//
 		this.mContext = context;
 		this.mContentResolver = context.getContentResolver();
+	}
+
+	public void registerListener ( DataModeManagerListener l ) {
+
+		listener = l;
 	}
 
 	/**
@@ -150,16 +161,6 @@ public class DataModelManager {
 	}
 
 	/**
-	 * { unused }
-	 * 
-	 * @return
-	 */
-	public String getMaxDate ( ) {
-
-		return null;
-	}
-
-	/**
 	 * 得到我的站点
 	 * 
 	 * @return List<BaseObject>
@@ -190,7 +191,7 @@ public class DataModelManager {
 				object.set_ID(id);
 
 				if ( url != null ) {
-				
+
 					mMySitesObjects.add(object);
 				}
 			}
@@ -282,28 +283,54 @@ public class DataModelManager {
 	}
 
 	/**
-	 * { unused }
-	 * 
-	 * 新增站点
-	 * 
-	 * @param newBaseObjects
-	 */
-	public void insertSite ( BaseObject newObject ) {
-
-		ContentValues values = new ContentValues();
-		values.put(GreenSites.TITLE, newObject.getName());
-		values.put(GreenSites.URL, newObject.getUrl());
-		mContentResolver.insert(GREENSITE_URI, values);
-
-		updateInsertEntry(newObject);
-	}
-
-	/**
 	 * 加载所有站点
 	 */
-	public synchronized void loadAllSites ( ) {
+	public void loadAllSites ( ) {
 
-		long start = System.currentTimeMillis();
+		new AsyncTask< Object , Object , Object>() {
+
+			@Override
+			protected Object doInBackground ( Object ... arg0 ) {
+
+				String select = "flag=?";
+				String[] selectArgs = { String.valueOf(com.android.browser.Browser.SJ_FLAG) };
+				Cursor c = mContentResolver.query(UpdatePeriod.UPDATEPERIOD_URI, null, select, selectArgs, null);
+				c.moveToFirst();
+				long last_time = c.getLong(c.getColumnIndex(UpdatePeriod.TIME));
+				c.close();
+				long curt_time = System.currentTimeMillis();
+
+				if ( curt_time - last_time >= update_period ) {
+
+					return accquireWebSite();
+
+				}
+				return null;
+			}
+
+			@SuppressWarnings ( "unchecked" )
+			protected void onPostExecute ( Object result ) {
+
+				List< BaseObject> listb = (List< BaseObject>) result;
+				if ( listb != null && listb.size() != 0 ) {
+
+					updatePeriodTime(System.currentTimeMillis());
+					accquireAllSites();
+					deleteAllSites();
+					wrtieDataToSites(listb);
+					updateAllSites();
+				}
+
+				if ( listener != null ) {
+
+					listener.loadFinished();
+				}
+			};
+		}.execute();
+
+	}
+
+	public void loadAllSitesFromDatabase ( ) {
 
 		mSiteNavigationObjects = new LinkedHashMap< String , List< BaseObject>>();
 		List< BaseObject> mBaseObjects;
@@ -343,10 +370,6 @@ public class DataModelManager {
 
 				mAllSites.add(baseObject);
 
-				// if (baseObject.getIsme() == 1) {
-				// mMySitesObjects.add(baseObject);
-				// }
-
 				catalogString = baseObject.getCatalog();
 				if ( mSiteNavigationObjects.containsKey(catalogString) ) {
 					mBaseObjects = mSiteNavigationObjects.get(catalogString);
@@ -363,9 +386,6 @@ public class DataModelManager {
 			if ( cursor != null )
 				cursor.close();
 		}
-
-		long duration = System.currentTimeMillis() - start;
-		Log.i(LOG_TAG, "loadAllSites操作耗时：" + duration);
 	}
 
 	/**
@@ -421,37 +441,6 @@ public class DataModelManager {
 	}
 
 	/**
-	 * { unused }
-	 * 
-	 * 
-	 * @param newObject
-	 */
-	private void updateInsertEntry ( BaseObject newObject ) {
-
-		if ( mAllSites != null && mAllSites.size() > 0 ) {
-
-			mAllSites.add(newObject);
-		}
-
-		if ( mSiteNavigationObjects != null && mSiteNavigationObjects.size() > 0 ) {
-
-			List< BaseObject> mBaseObjects;
-			String catalogString = newObject.getCatalog();
-
-			if ( mSiteNavigationObjects.containsKey(catalogString) ) {
-
-				mBaseObjects = mSiteNavigationObjects.get(catalogString);
-				mBaseObjects.add(newObject);
-			} else {
-
-				mBaseObjects = new ArrayList< BaseObject>();
-				mBaseObjects.add(newObject);
-				mSiteNavigationObjects.put(catalogString, mBaseObjects);
-			}
-		}
-	}
-
-	/**
 	 * 更新访问次数、我的网站
 	 * 
 	 * @param baseObject
@@ -465,11 +454,108 @@ public class DataModelManager {
 
 				ContentValues values = new ContentValues();
 				values.put(GreenSites.VISITS, baseObject.getVisits());
-				values.put(GreenSites.ISME, baseObject.getIsme());
 				String select = GreenSites.URL + "=? and " + GreenSites.FLAG + "=?";
 				String[] selectArg = { baseObject.getUrl(), String.valueOf(com.android.browser.Browser.SJ_FLAG) };
 				mContentResolver.update(GREENSITE_URI, values, select, selectArg);
 			}
 		}).start();
+	}
+
+	public List< BaseObject> accquireWebSite ( ) {
+
+		long start = System.currentTimeMillis();
+		Connect connect = new Connect();
+		List< BaseObject> b = (List< BaseObject>) connect.connect(0, String.valueOf(com.android.browser.Browser.SJ_FLAG));
+		if ( b != null ) {
+
+			for ( int i = 0 ; i < b.size() ; i++ ) {
+
+				Log.d("Liu Test", " URL = " + b.get(i).getName());
+			}
+		}
+		long duration = System.currentTimeMillis() - start;
+		Log.i(LOG_TAG, "loadAllSites操作耗时：" + duration);
+
+		return b;
+	}
+
+	private void updatePeriodTime ( long t ) {
+
+		ContentValues cv = new ContentValues();
+		cv.put(UpdatePeriod.TIME, t);
+		String select = "flag=?";
+		String[] selectArgs = { String.valueOf(com.android.browser.Browser.SJ_FLAG) };
+		mContentResolver.update(UpdatePeriod.UPDATEPERIOD_URI, cv, select, selectArgs);
+
+	}
+
+	private void accquireAllSites ( ) {
+
+		mAllSites = new ArrayList< BaseObject>();
+		BaseObject baseObject;
+		Cursor cursor = null;
+		try {
+			String[] project = { GreenSites.URL, GreenSites.VISITS };
+			String select = "flag=? and preset=0";
+			String[] selectArgs = { String.valueOf(com.android.browser.Browser.SJ_FLAG) };
+			cursor = mContentResolver.query(GREENSITE_URI, project, select, selectArgs, null);
+
+			int urlCol = cursor.getColumnIndex(GreenSites.URL);
+
+			int visitsCol = cursor.getColumnIndex(GreenSites.VISITS);
+
+			while ( cursor != null && cursor.moveToNext() ) {
+
+				baseObject = new BaseObject();
+				baseObject.setUrl(cursor.getString(urlCol));
+				baseObject.setVisits(cursor.getInt(visitsCol));
+				mAllSites.add(baseObject);
+
+			}
+			cursor.close();
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+
+	private void deleteAllSites ( ) {
+
+		String select = "flag=? and preset=0";
+		String[] selectArgs = { String.valueOf(com.android.browser.Browser.SJ_FLAG) };
+		mContentResolver.delete(GreenSites.GREENSITE_URI, select, selectArgs);
+	}
+
+	private void wrtieDataToSites ( List< BaseObject> b ) {
+
+		for ( int i = 0 ; i < b.size() ; i++ ) {
+
+			BaseObject bo = b.get(i);
+			ContentValues cv = new ContentValues();
+
+			cv.put(GreenSites.CATALOGSN, bo.getCatalogsn());
+			cv.put(GreenSites.CATALOG, bo.getCatalog());
+			cv.put(GreenSites.TITLE, bo.getName());
+			cv.put(GreenSites.URL, bo.getUrl());
+			cv.put(GreenSites.LOGO, bo.getLogo());
+			cv.put(GreenSites.VISITS, bo.getVisits());
+			cv.put(GreenSites.ISME, 0);
+			cv.put(GreenSites.ISPRESET, 0);
+			cv.put(GreenSites.FLAG, bo.getSuitableCrowd());
+
+			mContentResolver.insert(GreenSites.GREENSITE_URI, cv);
+		}
+	}
+
+	private void updateAllSites ( ) {
+
+		for ( int i = 0 ; i < mAllSites.size() ; i++ ) {
+
+			updateSite(mAllSites.get(i));
+		}
+	}
+
+	public interface DataModeManagerListener {
+
+		public void loadFinished ( );
 	}
 }

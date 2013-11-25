@@ -1,12 +1,6 @@
 
 package com.android.browser.navigation;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
-import com.android.browser.R;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -19,8 +13,9 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.browser.R;
 
 public class PagerContentProvider extends ContentProvider {
 
@@ -30,8 +25,7 @@ public class PagerContentProvider extends ContentProvider {
 
 		static final int DATABASE_VERSION = 2; // 变更时增1
 
-		private Context mContext;
-
+		
 		public DatabaseHelper ( Context context ) {
 
 			this(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -41,62 +35,49 @@ public class PagerContentProvider extends ContentProvider {
 
 			super(context, name, factory, version);
 
-			mContext = context;
-			initDatabase(R.raw.greenbrowser);
+			
 
 			Log.d("Liu Test", getClass().getSimpleName() + "  DatabaseHelper(Context context, String name, CursorFactory factory, int version)");
 
 		}
 
-		/**
-		 * 初始化数据
-		 * 
-		 * @param rawid
-		 */
-		private void initDatabase ( int rawid ) {
+		private void initUpdatePeriod ( SQLiteDatabase db ) {
 
-			Log.d("Liu Test", getClass().getSimpleName() + " initDatabase(int rawid)");
-			File dbfile = mContext.getDatabasePath(DATABASE_NAME);
-			if ( dbfile.exists() ) {
+			String sql1 = "CREATE TABLE greensites(_id INTEGER PRIMARY KEY AUTOINCREMENT, catalog TEXT DEFAULT '自定义', title TEXT NOT NULL, url TEXT NOT NULL, logo TEXT,catalogsn INTEGER DEFAULT 0, visits INTEGER DEFAULT 0, isme INTEGER DEFAULT 0, isnew INTEGER DEFAULT 0,preset INTEGER DEFAULT 0, addtime TIMESTAMP DEFAULT(datetime('now','localtime')), flag INTEGER DEFAULT 0)";
+			String sql2 = "CREATE UNIQUE INDEX [url_index] on greensites ([url],[flag])";
 
-				return;
-			}
+			db.execSQL(sql1);
+			db.execSQL(sql2);
+			db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_UPDATE_PERIOD + "(_id INTEGER PRIMARY KEY AUTOINCREMENT,time INTEGER DEFAULT 0,flag INTEGER NOT NULL UNIQUE)");
+			db.execSQL("CREATE TABLE IF NOT EXISTS "
+					+ TABLE_HISTORYSITES
+					+ "(_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,flag INT NOT NULL, url TEXT NOT NULL UNIQUE, visittime TIMESTAMP DEFAULT(datetime('now','localtime'))) ");
 
-			InputStream is = null;
-			FileOutputStream fos = null;
-			try {
-				dbfile.getParentFile().mkdirs();
-				is = mContext.getResources().openRawResource(rawid);
-				fos = new FileOutputStream(dbfile);
-				byte[] buffer = new byte[ 8192 ];
-				int count = 0;
-				while ( (count = is.read(buffer)) > 0 ) {
-					fos.write(buffer, 0, count);
-				}
+			ContentValues cv = new ContentValues();
+			cv.put(UpdatePeriod.FLAG, 0);
+			cv.put(UpdatePeriod.TIME, 0);
+			db.insert(TABLE_UPDATE_PERIOD, null, cv);
 
-				fos.close();
-				is.close();
-			} catch ( Exception e ) {
-				e.printStackTrace();
-			}
+			cv = new ContentValues();
+			cv.put(UpdatePeriod.FLAG, 1);
+			cv.put(UpdatePeriod.TIME, 0);
+			db.insert(TABLE_UPDATE_PERIOD, null, cv);
 		}
 
 		@Override
 		public void onCreate ( SQLiteDatabase db ) {
 
-			db.execSQL("CREATE TABLE IF NOT EXISTS "
-					+ TABLE_HISTORYSITES
-					+ "(_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,flag INT NOT NULL, url TEXT NOT NULL UNIQUE, visittime TIMESTAMP DEFAULT(datetime('now','localtime'))) ");
+			Log.d("Liu Test", getClass().getSimpleName() + "  onCreate");
+			initUpdatePeriod(db);
 		}
 
 		@Override
 		public void onUpgrade ( SQLiteDatabase db , int oldVersion , int newVersion ) {
 
 			db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORYSITES);
+			db.execSQL("DROP TABLE IF EXISTS " + TABLE_UPDATE_PERIOD);
 
-			db.execSQL("CREATE TABLE IF NOT EXISTS "
-					+ TABLE_HISTORYSITES
-					+ "(_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,flag INT NOT NULL, url TEXT NOT NULL UNIQUE, visittime TIMESTAMP DEFAULT(datetime('now','localtime'))) ");
+			initUpdatePeriod(db);
 		}
 	}
 
@@ -165,10 +146,18 @@ public class PagerContentProvider extends ContentProvider {
 
 		/** 访问时间 */
 		public static final String VISITDATE = "visittime";
-		
+
 		public static final String FLAG = "flag";
 
-		// + " WHERE date(visittime,'Localtime')=Date('now','Localtime') ";
+	}
+
+	public static interface UpdatePeriod extends BaseColumns {
+
+		public static final Uri UPDATEPERIOD_URI = Uri.withAppendedPath(AUTHORITY_URI, UriPath.UPDATE_PERIOD);
+
+		public static final String FLAG = "flag";
+
+		public static final String TIME = "time";
 	}
 
 	static interface UriCode {
@@ -179,6 +168,8 @@ public class PagerContentProvider extends ContentProvider {
 
 		public static final int HISTORYSITES = 100;
 
+		public static final int UPDATE_PERIOD = 101;
+
 	}
 
 	public static interface UriPath {
@@ -188,6 +179,8 @@ public class PagerContentProvider extends ContentProvider {
 		public static final String GREENSITES_CUSTOM = "greensites/custom";
 
 		public static final String HISTORYSITES = "historysites";
+
+		public static final String UPDATE_PERIOD = "historysites";
 	}
 
 	static final String AUTHORITY = "com.android.browser.green";
@@ -208,12 +201,20 @@ public class PagerContentProvider extends ContentProvider {
 
 	static final String TABLE_HISTORYSITES_CONTENT_TYPE = "vnd.android.cursor.dir/vnd.android.browser.green.historysites";
 
+	static final String TABLE_UPDATE_PERIOD = "updateperiod";
+
+	static final String TABLE_UPDATE_PERIOD_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.android.browser.green.updateperoid";
+
+	static final String TABLE_UPDATE_PERIOD_CONTENT_TYPE = "vnd.android.cursor.dir/vnd.android.browser.green.updateperoid";
+
 	static {
 
 		sMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sMatcher.addURI(AUTHORITY, UriPath.GREENSITES, UriCode.GREENSITES);
 		sMatcher.addURI(AUTHORITY, UriPath.GREENSITES_CUSTOM, UriCode.GREENSITES_CUSTOM);
 		sMatcher.addURI(AUTHORITY, UriPath.HISTORYSITES, UriCode.HISTORYSITES);
+		sMatcher.addURI(AUTHORITY, UriPath.UPDATE_PERIOD, UriCode.UPDATE_PERIOD);
+
 	}
 
 	DatabaseHelper mOpenHelper;
@@ -233,7 +234,9 @@ public class PagerContentProvider extends ContentProvider {
 		case UriCode.HISTORYSITES :
 			count = mOpenHelper.getWritableDatabase().delete(TABLE_HISTORYSITES, whereClause, whereArgs);
 			break;
-
+		case UriCode.UPDATE_PERIOD :
+			count = mOpenHelper.getWritableDatabase().delete(TABLE_UPDATE_PERIOD, whereClause, whereArgs);
+			break;
 		default :
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -260,7 +263,8 @@ public class PagerContentProvider extends ContentProvider {
 		case UriCode.HISTORYSITES :
 
 			return TABLE_HISTORYSITES_CONTENT_TYPE;
-
+		case UriCode.UPDATE_PERIOD :
+			return TABLE_UPDATE_PERIOD_CONTENT_ITEM_TYPE;
 		default :
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -269,6 +273,8 @@ public class PagerContentProvider extends ContentProvider {
 	@Override
 	public Uri insert ( Uri uri , ContentValues values ) {
 
+		String tables = null;
+		Uri insert_uri = null;
 		switch ( sMatcher.match(uri) ) {
 
 		case UriCode.GREENSITES :
@@ -287,33 +293,37 @@ public class PagerContentProvider extends ContentProvider {
 				values.put(GreenSites.ISPRESET, 1);
 			}
 
-			long rowId = mOpenHelper.getWritableDatabase().insert(TABLE_GREENSITES, null, values);
-			if ( rowId > 0 ) {
+			tables = TABLE_GREENSITES;
+			insert_uri = GreenSites.GREENSITE_URI;
 
-				Uri rowUri = ContentUris.withAppendedId(GreenSites.GREENSITE_URI, rowId);
-				getContext().getContentResolver().notifyChange(rowUri, null);
-				return rowUri;
-			}
-
-			throw new SQLException("Failed to insert row into " + uri);
+			break;
 
 		case UriCode.HISTORYSITES :
 
-			rowId = mOpenHelper.getWritableDatabase().insert(TABLE_HISTORYSITES, null, values);
+			tables = TABLE_HISTORYSITES;
+			insert_uri = HistorySites.HISTORYSITES_URI;
 
-			if ( rowId > 0 ) {
+			break;
+		case UriCode.UPDATE_PERIOD : {
 
-				Uri rowUri = ContentUris.withAppendedId(HistorySites.HISTORYSITES_URI, rowId);
-				getContext().getContentResolver().notifyChange(rowUri, null);
-				return rowUri;
-
-			}
-
-			throw new SQLException("Failed to insert row into " + uri);
+			tables = TABLE_UPDATE_PERIOD;
+			insert_uri = UpdatePeriod.UPDATEPERIOD_URI;
+			break;
+		}
 
 		default :
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
+
+		long rowId = mOpenHelper.getWritableDatabase().insert(tables, null, values);
+		if ( rowId > 0 ) {
+
+			Uri rowUri = ContentUris.withAppendedId(insert_uri, rowId);
+			getContext().getContentResolver().notifyChange(rowUri, null);
+			return rowUri;
+		}
+
+		throw new SQLException("Failed to insert row into " + uri);
 	}
 
 	@Override
@@ -350,7 +360,12 @@ public class PagerContentProvider extends ContentProvider {
 			orderBy = HistorySites.ORDER_BY_SELECT_HISTORY;
 
 			break;
+		case UriCode.UPDATE_PERIOD :
 
+			table = TABLE_UPDATE_PERIOD;
+			orderBy = null;
+
+			break;
 		default :
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -368,21 +383,23 @@ public class PagerContentProvider extends ContentProvider {
 	public int update ( Uri uri , ContentValues values , String whereClause , String[] whereArgs ) {
 
 		int count = 0;
-
+		String table = "";
 		switch ( sMatcher.match(uri) ) {
 		case UriCode.GREENSITES :
 		case UriCode.GREENSITES_CUSTOM :
-			count = mOpenHelper.getWritableDatabase().update(TABLE_GREENSITES, values, whereClause, whereArgs);
+			table = TABLE_GREENSITES;
 			break;
-
 		case UriCode.HISTORYSITES :
-			count = mOpenHelper.getWritableDatabase().update(TABLE_HISTORYSITES, values, whereClause, whereArgs);
+			table = TABLE_HISTORYSITES;
 			break;
-
+		case UriCode.UPDATE_PERIOD :
+			table = TABLE_UPDATE_PERIOD;
+			break;
 		default :
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
+		count = mOpenHelper.getWritableDatabase().update(table, values, whereClause, whereArgs);
 		if ( count > 0 ) {
 
 			getContext().getContentResolver().notifyChange(uri, null);

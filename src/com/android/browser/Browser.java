@@ -19,10 +19,14 @@ package com.android.browser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+
 import android.app.Application;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
-import com.android.browser.R;
 
 public class Browser extends Application {
 
@@ -36,6 +40,16 @@ public class Browser extends Application {
 
 	public static int SJ_FLAG = 0;
 
+	public static String BBKSN = "";
+
+	public static String DEVICE_OS_VERSION = "";
+
+	public static String DEVICE_MODEL = "";
+
+	public static String VERSION_NAME = "";
+
+	public static Context appContext;
+
 	@Override
 	public void onCreate ( ) {
 
@@ -44,11 +58,17 @@ public class Browser extends Application {
 		if ( LOGV_ENABLED )
 			Log.v(LOGTAG, "Browser.onCreate: this=" + this);
 
+		appContext = this;
 		accqurieSJFlag();
 		// create CookieSyncManager with current Context
 		CookieSyncManager.createInstance(this);
 		BrowserSettings.initialize(getApplicationContext());
 		Preloader.initialize(getApplicationContext());
+		acquireMachineID();
+		acquireDeviceOsVersion();
+		acquireDeviceModel();
+		acquireAppVersionName();
+
 	}
 
 	public void accqurieSJFlag ( ) {
@@ -78,5 +98,34 @@ public class Browser extends Application {
 
 		}
 
+	}
+
+	public void acquireMachineID ( ) {
+
+	}
+
+	public void acquireDeviceOsVersion ( ) {
+
+		DEVICE_OS_VERSION = android.os.Build.VERSION.INCREMENTAL.replace('.', '0');
+
+	}
+
+	public void acquireDeviceModel ( ) {
+
+		DEVICE_MODEL = android.os.Build.MODEL;
+	}
+
+	public void acquireAppVersionName ( ) {
+
+		PackageManager pm = appContext.getPackageManager();
+
+		try {
+
+			PackageInfo pkgInfo = pm.getPackageInfo(appContext.getPackageName(), 0);
+			VERSION_NAME = pkgInfo.versionName;
+		} catch ( NameNotFoundException e ) {
+			e.printStackTrace();
+
+		}
 	}
 }

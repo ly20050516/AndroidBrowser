@@ -87,6 +87,7 @@ import com.android.browser.provider.SnapshotProvider.Snapshots;
 /**
  * Class for maintaining Tabs with a main WebView and a subwindow.
  */
+@SuppressWarnings ( "deprecation" )
 class Tab implements PictureListener {
 
 	// Log Tag
